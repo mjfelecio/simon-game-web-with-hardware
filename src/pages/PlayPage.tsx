@@ -1,6 +1,7 @@
 import SimonButton, {
   type ButtonType,
 } from "@/features/play/components/SimonButton";
+import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import { useCallback, useState } from "react";
 
 const BUTTONS: ButtonType[] = ["red", "green", "blue", "yellow"];
@@ -83,7 +84,8 @@ const PlayPage = () => {
   }
 
   return (
-    <div className="bg-amber-200 flex flex-col flex-1 gap-8 min-h-screen items-center justify-center">
+    <PageWrapper>
+    <div className="gap-8">
       <h1 className="font-bold text-5xl capitalize">Status: {status}</h1>
       <h1 className="font-bold text-5xl">Level: {level}</h1>
 
@@ -116,6 +118,7 @@ const PlayPage = () => {
         </button>
       </div>
     </div>
+    </PageWrapper>
   );
 };
 
