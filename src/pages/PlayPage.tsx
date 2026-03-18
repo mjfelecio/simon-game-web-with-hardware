@@ -1,6 +1,4 @@
-import SimonButton, {
-  type ButtonType,
-} from "@/features/play/components/SimonButton";
+import SimonButton, { type ButtonType } from "@/features/play/components/SimonButton";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import { useCallback, useState } from "react";
 
@@ -12,11 +10,11 @@ function delay(ms: number) {
 
 type GameStatus =
   | "not-started"
-  | "showing-sequence"
+  | "sequence"
   | "playing"
-  | "check-input"
   | "won"
-  | "lose";
+  | "lose"
+  | "paused";
 
 const PlayPage = () => {
   const [sequence, setSequence] = useState<ButtonType[]>([]);
@@ -24,36 +22,38 @@ const PlayPage = () => {
   const [level, setLevel] = useState(0);
   const [status, setStatus] = useState<GameStatus>("not-started");
   const [activeSequence, setActiveSequence] = useState<ButtonType | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isPlaying = status === "playing";
 
   const playSequence = useCallback(async (seq: ButtonType[]) => {
-    setStatus("showing-sequence");
+    setStatus("sequence");
     await delay(500);
-    for (let i = 0; i < seq.length; i++) {
-      setActiveSequence(seq[i]);
+
+    for (const color of seq) {
+      setActiveSequence(color);
       await delay(500);
       setActiveSequence(null);
       await delay(500);
     }
+
     setInputs([]);
     setStatus("playing");
   }, []);
 
-  function startGame() {
-    const firstColor = BUTTONS[Math.floor(Math.random() * 4)];
+  const startGame = () => {
+    const firstColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
     const newSeq = [firstColor];
     setSequence(newSeq);
     setLevel(1);
     playSequence(newSeq);
-  }
+  };
 
-  function handleInput(newInput: ButtonType) {
-    if (status !== "playing") return;
+  const handleInput = (newInput: ButtonType) => {
+    if (!isPlaying) return;
 
-    const nextInputIndex = inputs.length;
-
-    if (newInput !== sequence[nextInputIndex]) {
+    const nextIndex = inputs.length;
+    if (newInput !== sequence[nextIndex]) {
       setStatus("lose");
       return;
     }
@@ -64,60 +64,117 @@ const PlayPage = () => {
     if (updatedInputs.length === sequence.length) {
       handleWin();
     }
-  }
-  async function handleWin() {
+  };
+
+  const handleWin = async () => {
     setStatus("won");
     await delay(800);
-    const nextColor = BUTTONS[Math.floor(Math.random() * 4)];
+
+    const nextColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
     const newSeq = [...sequence, nextColor];
 
     setSequence(newSeq);
     setLevel((prev) => prev + 1);
     playSequence(newSeq);
-  }
+  };
 
-  function retry() {
+  const openMenu = () => {
+    setIsMenuOpen(true);
+    setStatus((prev) => (prev === "playing" || prev === "sequence" ? "paused" : prev));
+  };
+
+  const resumeGame = () => {
+    setIsMenuOpen(false);
+    setStatus((prev) => (prev === "paused" ? "playing" : prev));
+  };
+
+  const retry = () => {
     setSequence([]);
     setInputs([]);
     setLevel(0);
     setStatus("not-started");
-  }
+    setIsMenuOpen(false);
+  };
+
+  const saveAndQuit = () => {
+    // TODO: Implement actual save logic (e.g., save progress to localStorage)
+    retry();
+  };
+
+  const isButtonDisabled = status !== "playing";
 
   return (
-    <PageWrapper>
-    <div className="gap-8">
-      <h1 className="font-bold text-5xl capitalize">Status: {status}</h1>
-      <h1 className="font-bold text-5xl">Level: {level}</h1>
+    <PageWrapper className="relative">
+      {/* Back/Arrow Pause Button - Perfect circle with fixed dimensions */}
+      <button
+        onClick={openMenu}
+        className="fixed top-4 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/50 bg-white/10 text-2xl text-white backdrop-blur-sm transition hover:bg-white/20"
+      >
+        ←
+      </button>
 
-      <div className="flex flex-row gap-4">
+      {/* Glass-style Modal Pause Menu - Wireframe size */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-white/30 bg-white/10 p-10 shadow-2xl backdrop-blur-xl transition-all">
+            <h2 className="mb-8 text-center text-4xl font-bold text-white drop-shadow-md">
+              Paused
+            </h2>
+            <div className="flex flex-col gap-5">
+              <button
+                onClick={retry}
+                className="w-full rounded-full border border-gray-300 bg-transparent px-8 py-4 font-header text-4xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black"
+              >
+                Retry
+              </button>
+              <button
+                onClick={resumeGame}
+                className="w-full rounded-full border border-gray-300 bg-transparent px-8 py-4 font-header text-4xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black"
+              >
+                Resume
+              </button>
+              <button
+                onClick={saveAndQuit}
+                className="w-full rounded-full border border-gray-300 bg-transparent px-8 py-4 font-header text-4xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black"
+              >
+                Save & Quit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <h1 className="font-bold text-4xl capitalize text-white">Status: {status}</h1>
+      <h1 className="font-bold text-4xl text-white">Level: {level}</h1>
+
+      <div className="grid grid-cols-2 gap-4 mt-8">
         {BUTTONS.map((t) => (
           <SimonButton
             key={t}
             type={t}
-            isDisabled={!isPlaying}
+            isDisabled={isButtonDisabled}
             isActive={activeSequence === t}
             onClick={handleInput}
           />
         ))}
       </div>
 
-      <div className="flex flex-row gap-4">
+      <div className="flex gap-4 mt-8">
         <button
           disabled={status !== "not-started"}
           onClick={startGame}
-          className="bg-blue-400 py-2 px-4 font-bold border-blue-500 border-2 rounded-xl disabled:opacity-50"
+          className="rounded-full border border-gray-300 bg-transparent px-8 py-3 font-header text-2xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-40"
         >
           Start Game
         </button>
 
         <button
           onClick={retry}
-          className="bg-red-400 py-2 px-4 font-bold border-red-500 border-2 rounded-xl"
+          className="rounded-full border border-red-400 px-8 py-3 font-header text-2xl font-bold uppercase tracking-widest text-red-400 transition-all duration-300 hover:bg-red-400 hover:text-white"
         >
           Reset
         </button>
       </div>
-    </div>
     </PageWrapper>
   );
 };
