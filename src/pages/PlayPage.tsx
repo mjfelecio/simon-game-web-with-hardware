@@ -1,4 +1,7 @@
-import SimonButton, { type ButtonType } from "@/features/play/components/SimonButton";
+import SimonButton, {
+  type ButtonType,
+} from "@/features/play/components/SimonButton";
+import Button from "@/globals/components/layouts/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import { useCallback, useState } from "react";
 
@@ -80,7 +83,9 @@ const PlayPage = () => {
 
   const openMenu = () => {
     setIsMenuOpen(true);
-    setStatus((prev) => (prev === "playing" || prev === "sequence" ? "paused" : prev));
+    setStatus((prev) =>
+      prev === "playing" || prev === "sequence" ? "paused" : prev,
+    );
   };
 
   const resumeGame = () => {
@@ -118,30 +123,17 @@ const PlayPage = () => {
               Paused
             </h2>
             <div className="flex flex-col gap-5">
-              <button
-                onClick={retry}
-                className="w-full rounded-full border border-gray-300 bg-transparent px-8 py-4 font-header text-4xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black"
-              >
-                Retry
-              </button>
-              <button
-                onClick={resumeGame}
-                className="w-full rounded-full border border-gray-300 bg-transparent px-8 py-4 font-header text-4xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black"
-              >
-                Resume
-              </button>
-              <button
-                onClick={saveAndQuit}
-                className="w-full rounded-full border border-gray-300 bg-transparent px-8 py-4 font-header text-4xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black"
-              >
-                Save & Quit
-              </button>
+              <Button text="Retry" onClick={retry} />
+              <Button text="Resume" onClick={resumeGame} />
+              <Button text="Save & Quit" onClick={saveAndQuit} />
             </div>
           </div>
         </div>
       )}
 
-      <h1 className="font-bold text-4xl capitalize text-white">Status: {status}</h1>
+      <h1 className="font-bold text-4xl capitalize text-white">
+        Status: {status}
+      </h1>
       <h1 className="font-bold text-4xl text-white">Level: {level}</h1>
 
       <div className="grid grid-cols-2 gap-4 mt-8">
@@ -157,20 +149,20 @@ const PlayPage = () => {
       </div>
 
       <div className="flex gap-4 mt-8">
-        <button
-          disabled={status !== "not-started"}
+        <Button
+          text="Start Game"
           onClick={startGame}
-          className="rounded-full border border-gray-300 bg-transparent px-8 py-3 font-header text-2xl font-bold uppercase tracking-widest text-white shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-40"
-        >
-          Start Game
-        </button>
-
-        <button
+          disabled={status !== "not-started"}
+          size="sm"
+          fullWidth={false}
+        />
+        <Button
+          text="Reset"
+          variant="danger"
+          size="sm"
+          fullWidth={false}
           onClick={retry}
-          className="rounded-full border border-red-400 px-8 py-3 font-header text-2xl font-bold uppercase tracking-widest text-red-400 transition-all duration-300 hover:bg-red-400 hover:text-white"
-        >
-          Reset
-        </button>
+        />
       </div>
     </PageWrapper>
   );
