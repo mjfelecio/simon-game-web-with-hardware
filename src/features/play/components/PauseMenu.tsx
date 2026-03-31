@@ -1,5 +1,5 @@
 import BaseModal from "@/globals/components/layouts/BaseModal";
-import Button from "@/globals/components/layouts/Button";
+import Button from "@/globals/components/Button";
 import { Link } from "react-router";
 import { cn } from "@/globals/libs/styleUtils";
 

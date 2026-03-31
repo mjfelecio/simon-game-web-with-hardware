@@ -4,7 +4,7 @@ import SimonButton from "@/features/play/components/SimonButton";
 import { BUTTONS, STATUS_CONFIG } from "@/features/play/constants";
 import useArduinoInput from "@/features/play/hooks/useArduinoInput";
 import useSimonGame from "@/features/play/hooks/useSimonGame";
-import Button from "@/globals/components/layouts/Button";
+import Button from "@/globals/components/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import { useState } from "react";
 import { useNavigate } from "react-router";

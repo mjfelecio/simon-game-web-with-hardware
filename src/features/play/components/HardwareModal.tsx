@@ -1,5 +1,5 @@
 import BaseModal from "@/globals/components/layouts/BaseModal";
-import Button from "@/globals/components/layouts/Button";
+import Button from "@/globals/components/Button";
 import { cn } from "@/globals/libs/styleUtils";
 
 type Props = {
@@ -106,7 +106,7 @@ const HardwareModal = ({ isOpen, onClose, isConnected, onConnect }: Props) => {
             <Button
               text="Initialize Serial Interface"
               variant="secondary"
-              className="w-full h-14 text-sm font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full h-14 text-lg font-bold uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98]"
               onClick={onConnect}
             />
           ) : (

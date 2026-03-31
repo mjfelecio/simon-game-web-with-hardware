@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/globals/libs/db";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
-import Button from "@/globals/components/layouts/Button";
+import Button from "@/globals/components/Button";
 import { useNavigate } from "react-router";
 import { cn } from "@/globals/libs/styleUtils";
 import StatCard from "@/globals/components/StatCard";
