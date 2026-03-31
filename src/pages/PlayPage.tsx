@@ -115,16 +115,16 @@ const PlayPage = () => {
         onConnect={connect}
       />
 
-      {isMenuOpen && (
-        <PauseMenu
-          onRetry={() => {
-            game.reset();
-            setIsMenuOpen(false);
-          }}
-          onResume={resumeGame}
-          onQuit={saveAndQuit}
-        />
-      )}
+      <PauseMenu
+        isOpen={isMenuOpen}
+        isConnected={isConnected}
+        onRetry={() => {
+          game.reset();
+          setIsMenuOpen(false);
+        }}
+        onResume={resumeGame}
+        onQuit={saveAndQuit}
+      />
     </PageWrapper>
   );
 };
