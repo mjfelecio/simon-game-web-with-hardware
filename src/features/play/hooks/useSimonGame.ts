@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import type { GameState, SimonButtonType } from "@/globals/types/simon";
 import { delay } from "@/globals/utils";
 import { db } from "@/globals/libs/db";
+import { BUTTON_FREQUENCIES, playLoseDissonance, playTone, playWinMelody } from "@/globals/utils/audio";
 
 const BUTTONS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
 
@@ -20,6 +21,7 @@ export default function useSimonGame() {
 
     for (const color of seq) {
       setActiveSequence(color);
+      playTone(BUTTON_FREQUENCIES[color]);
       await delay(200);
       setActiveSequence(null);
       await delay(200);
@@ -37,20 +39,29 @@ export default function useSimonGame() {
     playSequence(newSeq);
   };
 
-  const handleWin = useCallback(async (currentSeq: SimonButtonType[]) => {
-    setState("won");
-    await delay(800);
+  const handleWin = useCallback(
+    async (currentSeq: SimonButtonType[]) => {
+      setState("won");
+      
+      await delay(400);
+      playWinMelody()
 
-    const nextColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
-    const newSeq = [...currentSeq, nextColor];
+      await delay(1000);
 
-    setSequence(newSeq);
-    setLevel((prev) => prev + 1);
-    playSequence(newSeq);
-  }, [playSequence]);
+
+      const nextColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
+      const newSeq = [...currentSeq, nextColor];
+
+      setSequence(newSeq);
+      setLevel((prev) => prev + 1);
+      playSequence(newSeq);
+    },
+    [playSequence],
+  );
 
   const handleLose = useCallback(async () => {
     setState("lose");
+    playLoseDissonance();
 
     // Store score
     try {
@@ -66,25 +77,30 @@ export default function useSimonGame() {
     }
   }, [level]);
 
-  const handleInput = useCallback((newInput: SimonButtonType) => {
-    if (state !== "playing") return;
+  const handleInput = useCallback(
+    (newInput: SimonButtonType) => {
+      if (state !== "playing") return;
 
-    setActiveSequence(newInput);
-    setTimeout(() => setActiveSequence(null), 200);
+      setActiveSequence(newInput);
+      playTone(BUTTON_FREQUENCIES[newInput]);
 
-    const nextIndex = inputs.length;
-    if (newInput !== sequence[nextIndex]) {
-      handleLose();
-      return;
-    }
+      setTimeout(() => setActiveSequence(null), 200);
 
-    const updatedInputs = [...inputs, newInput];
-    setInputs(updatedInputs);
+      const nextIndex = inputs.length;
+      if (newInput !== sequence[nextIndex]) {
+        handleLose();
+        return;
+      }
 
-    if (updatedInputs.length === sequence.length) {
-      handleWin(sequence);
-    }
-  }, [handleLose, handleWin, inputs, sequence, state]);
+      const updatedInputs = [...inputs, newInput];
+      setInputs(updatedInputs);
+
+      if (updatedInputs.length === sequence.length) {
+        handleWin(sequence);
+      }
+    },
+    [handleLose, handleWin, inputs, sequence, state],
+  );
 
   const reset = () => {
     setSequence([]);
