@@ -24,7 +24,7 @@ const TitlePage = () => {
           <div className="h-1.5 w-full bg-linear-to-r from-simon-red via-simon-yellow to-simon-green mt-6 shadow-[0_4px_10px_rgba(0,0,0,0.5)]" />
         </header>
 
-        <nav className="flex flex-col gap-6 w-full max-w-64">
+        <nav className="flex flex-col gap-4 w-full max-w-64">
           <Link
             to="/play"
             className="btn-pixel-bevel bg-[#8de16f] text-[#1a5d2c] py-4 text-2xl font-bold uppercase tracking-widest font-header"
@@ -37,6 +37,13 @@ const TitlePage = () => {
             className="text-slate-500 hover:text-white py-2 text-sm font-bold uppercase tracking-[0.3em] transition-colors text-center"
           >
             How to Play
+          </a>
+
+          <a
+            href="/leaderboard"
+            className="text-slate-500 hover:text-white py-2 text-sm font-bold uppercase tracking-[0.3em] transition-colors text-center"
+          >
+            Leaderboards
           </a>
         </nav>
       </div>

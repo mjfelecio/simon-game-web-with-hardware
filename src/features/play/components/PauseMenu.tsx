@@ -1,4 +1,5 @@
 import Button from "@/globals/components/layouts/Button";
+import { Link } from "react-router";
 
 type PauseMenuProps = {
   onRetry: () => void;
@@ -15,6 +16,9 @@ const PauseMenu = ({ onRetry, onResume, onQuit }: PauseMenuProps) => (
       <div className="flex flex-col gap-5">
         <Button text="Retry" onClick={onRetry} />
         <Button text="Resume" onClick={onResume} />
+        <Link to={"/leaderboard"}>
+          <Button text="Leaderboard" />
+        </Link>
         <Button text="Save & Quit" onClick={onQuit} />
       </div>
     </div>
