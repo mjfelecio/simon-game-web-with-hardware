@@ -1,7 +1,11 @@
+import ManualModal from "@/features/title/components/ManualModal";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
+import { useState } from "react";
 import { Link } from "react-router";
 
 const TitlePage = () => {
+  const [isManualOpen, setIsManualOpen] = useState(false);
+
   return (
     <PageWrapper className="relative flex items-center justify-center overflow-hidden">
       <div className="relative z-10 flex flex-col items-center text-center w-full max-w-2xl px-6">
@@ -42,12 +46,13 @@ const TitlePage = () => {
             >
               Rankings
             </Link>
-            <a
-              href="#how-to"
-              className="rounded-xl border border-white/10 bg-white/5 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 transition-all hover:bg-white/10 hover:text-white text-center"
+
+            <button
+              onClick={() => setIsManualOpen(true)}
+              className="rounded-xl border border-white/10 bg-white/5 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 transition-all hover:bg-white/10 hover:text-white text-center cursor-pointer"
             >
               Manual
-            </a>
+            </button>
           </div>
         </nav>
 
@@ -64,6 +69,11 @@ const TitlePage = () => {
             <span>justine</span>
           </div>
         </footer>
+
+        <ManualModal
+          isOpen={isManualOpen}
+          onClose={() => setIsManualOpen(false)}
+        />
       </div>
     </PageWrapper>
   );
