@@ -1,14 +1,4 @@
-// import { useState } from "react";
-// import type { SimonButtonType } from "@/features/play/types/simon";
-
 import type { SimonButtonType } from "@/globals/types/simon";
-
-// type Props = {
-//   type: SimonButtonType;
-//   isActive: boolean;
-//   isDisabled: boolean;
-//   onClick: (type: SimonButtonType) => void;
-// };
 
 const BUTTON_COLOR: Record<SimonButtonType, string> = {
   red: "bg-red-500",
@@ -24,51 +14,9 @@ const GLOW_COLOR: Record<SimonButtonType, string> = {
   yellow: "shadow-[0_0_30px_rgba(250,204,21,0.8)]",
 };
 
-// const SimonButton = ({ type, isActive, isDisabled, onClick }: Props) => {
-//   const [isPressed, setIsPressed] = useState(false);
-
-//   const handleClick = () => {
-//     if (isDisabled) return;
-
-//     setIsPressed(true);
-//     onClick(type);
-
-//     setTimeout(() => setIsPressed(false), 200);
-//   };
-
-//   const active = isActive || isPressed;
-
-//   return (
-//     <button
-//       type="button"
-//       disabled={isDisabled}
-//       onClick={handleClick}
-//       className={`
-//         ${BUTTON_COLOR[type]}
-
-//         ${active 
-//           ? `brightness-125 scale-105 ring-4 ring-white ${GLOW_COLOR[type]}`
-//           : "opacity-60"}
-
-//         size-40
-//         rounded-2xl
-
-//         transition-all duration-150 ease-in-out
-
-//         not-disabled:active:scale-95
-//         not-disabled:active:brightness-110
-
-//         disabled:cursor-not-allowed
-//         cursor-pointer
-//       `}
-//     />
-//   );
-// };
-
-
 type Props = {
   type: SimonButtonType;
-  isActive: boolean; // This now covers both CPU sequence and User input
+  isActive: boolean;
   isDisabled: boolean;
   onClick: (type: SimonButtonType) => void;
 };
@@ -81,15 +29,16 @@ const SimonButton = ({ type, isActive, isDisabled, onClick }: Props) => {
       onClick={() => !isDisabled && onClick(type)}
       className={`
         ${BUTTON_COLOR[type]}
-        ${isActive 
-          ? `brightness-125 scale-105 ring-4 ring-white ${GLOW_COLOR[type]}`
-          : "opacity-60"}
-        
+        ${
+          isActive
+            ? `brightness-125 scale-105 ring-4 ring-white ${GLOW_COLOR[type]}`
+            : "opacity-60"
+        }
         size-40
         rounded-2xl
         transition-all duration-150 ease-in-out
         
-        active:scale-95
+        not-disabled:active:scale-95
         disabled:cursor-not-allowed
         cursor-pointer
       `}
