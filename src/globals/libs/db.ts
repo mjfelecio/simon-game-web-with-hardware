@@ -1,8 +1,8 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Scores } from '@/globals/types/simon';
+import type { Score } from '@/globals/types/simon';
 
 export class SimonDatabase extends Dexie {
-  scores!: EntityTable<Scores, 'id'>;
+  scores!: EntityTable<Score, 'id'>;
 
   constructor() {
     super("SimonGameDB");

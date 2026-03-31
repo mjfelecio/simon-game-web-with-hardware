@@ -1,4 +1,4 @@
-export type Scores = {
+export type Score = {
 	id?: number;
 	playerName: string;
 	score: number;
@@ -8,3 +8,13 @@ export type Scores = {
 }
 
 export type GameMode = 'classic';
+
+export type GameState =
+  | "not-started"
+  | "sequence"
+  | "playing"
+  | "won"
+  | "lose"
+  | "paused";
+
+export type SimonButtonType = "red" | "green" | "blue" | "yellow";

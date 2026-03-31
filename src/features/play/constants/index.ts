@@ -1,4 +1,4 @@
-import type { GameState, SimonButtonType } from "@/features/play/types/simon";
+import type { GameState, SimonButtonType } from "@/globals/types/simon";
 
 export const BUTTONS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
 

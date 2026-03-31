@@ -1,6 +1,5 @@
-import type { SimonButtonType } from "@/features/play/types/simon";
 import { useCallback, useState } from "react";
-import type { GameState } from "@/features/play/types/simon";
+import type { GameState, SimonButtonType } from "@/globals/types/simon";
 import { delay } from "@/globals/utils";
 import { db } from "@/globals/libs/db";
 
