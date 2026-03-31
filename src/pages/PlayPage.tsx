@@ -3,9 +3,19 @@ import SimonButton, {
 } from "@/features/play/components/SimonButton";
 import Button from "@/globals/components/layouts/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
+import { cn } from "@/globals/libs/styleUtils";
 import { useCallback, useState } from "react";
 
 const BUTTONS: ButtonType[] = ["red", "green", "blue", "yellow"];
+
+const STATUS_CONFIG: Record<GameStatus, { label: string; color: string }> = {
+  "not-started": { label: "Ready?", color: "text-slate-200" },
+  sequence: { label: "Watch!", color: "text-yellow-400" },
+  playing: { label: "Your Turn", color: "text-green-400" },
+  won: { label: "Nice!", color: "text-blue-400" },
+  lose: { label: "Game Over", color: "text-red-500" },
+  paused: { label: "Paused", color: "text-gray-400" },
+};
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,13 +41,13 @@ const PlayPage = () => {
 
   const playSequence = useCallback(async (seq: ButtonType[]) => {
     setStatus("sequence");
-    await delay(500);
+    await delay(200);
 
     for (const color of seq) {
       setActiveSequence(color);
-      await delay(500);
+      await delay(200);
       setActiveSequence(null);
-      await delay(500);
+      await delay(200);
     }
 
     setInputs([]);
@@ -106,6 +116,7 @@ const PlayPage = () => {
   };
 
   const isButtonDisabled = status !== "playing";
+  const currentStatus = STATUS_CONFIG[status];
 
   return (
     <PageWrapper className="relative">
@@ -131,12 +142,40 @@ const PlayPage = () => {
         </div>
       )}
 
-      <h1 className="font-bold text-4xl capitalize text-white">
-        Status: {status}
-      </h1>
-      <h1 className="font-bold text-4xl text-white">Level: {level}</h1>
+      <div className="mb-10 flex flex-col items-center gap-2">
+        {/* Level Badge */}
+        <div className="rounded-full bg-white/10 px-4 py-1 border border-white/20">
+          <span className="text-sm font-bold tracking-widest text-white/70 uppercase">
+            Level {level}
+          </span>
+        </div>
 
-      <div className="grid grid-cols-2 gap-4 mt-8">
+        <h2
+          className={cn(
+            "text-6xl font-black tracking-wide uppercase transition-all duration-300",
+            currentStatus.color,
+          )}
+        >
+          {currentStatus.label}
+        </h2>
+
+        {/* Progress Indicator */}
+        <div className="mt-4 flex gap-1.5">
+          {sequence.map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "h-1.5 w-8 rounded-full transition-all duration-500",
+                i < inputs.length
+                  ? "bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                  : "bg-white/10",
+              )}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         {BUTTONS.map((t) => (
           <SimonButton
             key={t}

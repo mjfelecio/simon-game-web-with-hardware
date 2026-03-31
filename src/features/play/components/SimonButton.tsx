@@ -54,8 +54,8 @@ const SimonButton = ({ type, isActive, isDisabled, onClick }: Props) => {
 
         transition-all duration-150 ease-in-out
 
-        active:scale-95
-        active:brightness-110
+        not-disabled:active:scale-95
+        not-disabled:active:brightness-110
 
         disabled:cursor-not-allowed
         cursor-pointer
