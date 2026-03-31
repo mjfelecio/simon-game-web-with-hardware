@@ -18,6 +18,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "^7.13.0",
+    "simple-web-serial": "^1.4.1",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.18"
   },

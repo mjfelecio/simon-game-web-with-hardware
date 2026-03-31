@@ -10,7 +10,9 @@ export default function useSimonGame() {
   const [inputs, setInputs] = useState<SimonButtonType[]>([]);
   const [level, setLevel] = useState(0);
   const [state, setState] = useState<GameState>("not-started");
-  const [activeSequence, setActiveSequence] = useState<SimonButtonType | null>(null);
+  const [activeSequence, setActiveSequence] = useState<SimonButtonType | null>(
+    null,
+  );
 
   const playSequence = useCallback(async (seq: SimonButtonType[]) => {
     setState("sequence");
@@ -35,7 +37,7 @@ export default function useSimonGame() {
     playSequence(newSeq);
   };
 
-  const handleWin = async (currentSeq: SimonButtonType[]) => {
+  const handleWin = useCallback(async (currentSeq: SimonButtonType[]) => {
     setState("won");
     await delay(800);
 
@@ -45,27 +47,34 @@ export default function useSimonGame() {
     setSequence(newSeq);
     setLevel((prev) => prev + 1);
     playSequence(newSeq);
-  };
+  }, [playSequence]);
 
-  const handleInput = async (newInput: SimonButtonType) => {
+  const handleLose = useCallback(async () => {
+    setState("lose");
+
+    // Store score
+    try {
+      await db.scores.add({
+        score: level, // In classic mode, level is score
+        level,
+        mode: "classic",
+        playerName: "mjfelecio",
+        achievedAt: Date.now(),
+      });
+    } catch (e) {
+      console.error("Failed to store score: " + e);
+    }
+  }, [level]);
+
+  const handleInput = useCallback((newInput: SimonButtonType) => {
     if (state !== "playing") return;
+
+    setActiveSequence(newInput);
+    setTimeout(() => setActiveSequence(null), 200);
 
     const nextIndex = inputs.length;
     if (newInput !== sequence[nextIndex]) {
-      setState('lose');
-
-			// Store score
-			try {
-				await db.scores.add({
-					score: level, // In classic mode, level is score
-					level,
-					mode: "classic",
-					playerName: "mjfelecio",
-					achievedAt: Date.now(),
-				});
-			} catch (e) {
-				console.error("Failed to store score: " + e);
-			}
+      handleLose();
       return;
     }
 
@@ -75,8 +84,7 @@ export default function useSimonGame() {
     if (updatedInputs.length === sequence.length) {
       handleWin(sequence);
     }
-  };
-
+  }, [handleLose, handleWin, inputs, sequence, state]);
 
   const reset = () => {
     setSequence([]);

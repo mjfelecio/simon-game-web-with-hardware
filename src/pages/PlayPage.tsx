@@ -2,6 +2,7 @@ import GameHeader from "@/features/play/components/GameHeader";
 import PauseMenu from "@/features/play/components/PauseMenu";
 import SimonButton from "@/features/play/components/SimonButton";
 import { BUTTONS, STATUS_CONFIG } from "@/features/play/constants";
+import useArduinoInput from "@/features/play/hooks/useArduinoInput";
 import useSimonGame from "@/features/play/hooks/useSimonGame";
 import Button from "@/globals/components/layouts/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router";
 
 const PlayPage = () => {
   const game = useSimonGame();
+  const { connect, isConnected } = useArduinoInput(game.handleInput);
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -42,6 +44,16 @@ const PlayPage = () => {
       >
         ←
       </button>
+
+      {/* Connection Status Indicator */}
+      <div className="fixed top-4 right-4 flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 border border-white/10 backdrop-blur-md">
+        <div
+          className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500"}`}
+        />
+        <span className="text-[10px] font-bold uppercase tracking-tighter text-white/50">
+          {isConnected ? "Controller Active" : "No Controller"}
+        </span>
+      </div>
 
       {isMenuOpen && (
         <PauseMenu
@@ -81,6 +93,16 @@ const PlayPage = () => {
           size="sm"
           fullWidth={false}
         />
+        {/* Connection Toggle */}
+        {!isConnected && (
+          <Button
+            text="Connect Arduino"
+            variant="secondary"
+            size="sm"
+            fullWidth={false}
+            onClick={connect}
+          />
+        )}
         <Button
           text="Reset"
           variant="danger"
