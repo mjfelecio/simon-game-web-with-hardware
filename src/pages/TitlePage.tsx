@@ -30,7 +30,7 @@ const TitlePage = () => {
 
         <nav className="flex flex-col items-center gap-6 w-full max-w-xs">
           <Link
-            to="/play"
+            to="/mode"
             className="group relative w-full overflow-hidden rounded-2xl bg-emerald-500 px-8 py-5 transition-all hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(16,185,129,0.3)]"
           >
             <span className="relative z-10 text-2xl font-black uppercase tracking-widest text-emerald-950 font-header">
