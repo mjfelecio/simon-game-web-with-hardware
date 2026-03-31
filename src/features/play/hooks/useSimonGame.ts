@@ -2,6 +2,7 @@ import type { SimonButtonType } from "@/features/play/types/simon";
 import { useCallback, useState } from "react";
 import type { GameState } from "@/features/play/types/simon";
 import { delay } from "@/globals/utils";
+import { db } from "@/globals/libs/db";
 
 const BUTTONS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
 
@@ -47,12 +48,25 @@ export default function useSimonGame() {
     playSequence(newSeq);
   };
 
-  const handleInput = (newInput: SimonButtonType) => {
+  const handleInput = async (newInput: SimonButtonType) => {
     if (state !== "playing") return;
 
     const nextIndex = inputs.length;
     if (newInput !== sequence[nextIndex]) {
-      setState("lose");
+      setState('lose');
+
+			// Store score
+			try {
+				await db.scores.add({
+					score: level, // In classic mode, level is score
+					level,
+					mode: "classic",
+					playerName: "mjfelecio",
+					achievedAt: Date.now(),
+				});
+			} catch (e) {
+				console.error("Failed to store score: " + e);
+			}
       return;
     }
 
@@ -63,6 +77,7 @@ export default function useSimonGame() {
       handleWin(sequence);
     }
   };
+
 
   const reset = () => {
     setSequence([]);

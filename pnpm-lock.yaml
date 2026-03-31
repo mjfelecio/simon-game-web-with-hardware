@@ -20,6 +20,12 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      dexie:
+        specifier: ^4.4.1
+        version: 4.4.1
+      dexie-react-hooks:
+        specifier: ^4.4.0
+        version: 4.4.0(dexie@4.4.1)(react@19.2.4)
       react:
         specifier: ^19.2.0
         version: 19.2.4
@@ -624,6 +630,15 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  dexie-react-hooks@4.4.0:
+    resolution: {integrity: sha512-ObLXBS5+4BJU8vtSvBx6b9fY6zZYgniAtwxzjCHsUQadgbqYN6935X2/1TWw4Rf2N1aZV1io5/ziox4vKuxABA==}
+    peerDependencies:
+      dexie: '>=4.2.0-alpha.1 <5.0.0'
+      react: '>=16'
+
+  dexie@4.4.1:
+    resolution: {integrity: sha512-4Xec5+yrS+TgyFAnMrneFOt/QG8sD3FxlkUVpfypui3SriRN80UN0SZBWmkNAY7ulfKgk0ilvv7M6pBURprdgA==}
 
   electron-to-chromium@1.5.286:
     resolution: {integrity: sha512-9tfDXhJ4RKFNerfjdCcZfufu49vg620741MNs26a9+bhLThdB+plgMeou98CAaHu/WATj2iHOOHTp1hWtABj2A==}
@@ -1788,6 +1803,13 @@ snapshots:
   deep-is@0.1.4: {}
 
   detect-libc@2.1.2: {}
+
+  dexie-react-hooks@4.4.0(dexie@4.4.1)(react@19.2.4):
+    dependencies:
+      dexie: 4.4.1
+      react: 19.2.4
+
+  dexie@4.4.1: {}
 
   electron-to-chromium@1.5.286: {}
 
