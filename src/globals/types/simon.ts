@@ -7,7 +7,7 @@ export type Score = {
 	achievedAt: number;
 }
 
-export type GameMode = 'classic';
+export type GameMode = 'classic' | 'blitz' | 'zen';
 
 export type GameState =
   | "not-started"
