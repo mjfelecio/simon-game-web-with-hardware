@@ -1,12 +1,25 @@
 import { useCallback, useState } from "react";
-import type { GameState, SimonButtonType } from "@/globals/types/simon";
+import type {
+  GameMode,
+  GameState,
+  SimonButtonType,
+} from "@/globals/types/simon";
 import { delay } from "@/globals/utils";
 import { db } from "@/globals/libs/db";
-import { BUTTON_FREQUENCIES, playLoseDissonance, playTone, playWinMelody } from "@/globals/utils/audio";
+import {
+  BUTTON_FREQUENCIES,
+  playLoseDissonance,
+  playTone,
+  playWinMelody,
+} from "@/globals/utils/audio";
+import { useSearchParams } from "react-router";
 
 const BUTTONS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
 
 export default function useSimonGame() {
+  const searchParams = useSearchParams();
+  const mode = (searchParams[0].get("mode") ?? "classic") as GameMode;
+
   const [sequence, setSequence] = useState<SimonButtonType[]>([]);
   const [inputs, setInputs] = useState<SimonButtonType[]>([]);
   const [level, setLevel] = useState(0);
@@ -15,21 +28,29 @@ export default function useSimonGame() {
     null,
   );
 
-  const playSequence = useCallback(async (seq: SimonButtonType[]) => {
-    setState("sequence");
-    await delay(200);
-
-    for (const color of seq) {
-      setActiveSequence(color);
-      playTone(BUTTON_FREQUENCIES[color]);
+  const playSequence = useCallback(
+    async (seq: SimonButtonType[]) => {
+      setState("sequence");
       await delay(200);
-      setActiveSequence(null);
-      await delay(200);
-    }
 
-    setInputs([]);
-    setState("playing");
-  }, []);
+      for (const color of seq) {
+        if (mode === "echo") {
+          playTone(BUTTON_FREQUENCIES[color]);
+          await delay(400);
+        } else {
+          setActiveSequence(color);
+          playTone(BUTTON_FREQUENCIES[color]);
+          await delay(200);
+          setActiveSequence(null);
+          await delay(200);
+        }
+      }
+
+      setInputs([]);
+      setState("playing");
+    },
+    [mode],
+  );
 
   const startGame = () => {
     const firstColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
@@ -42,12 +63,11 @@ export default function useSimonGame() {
   const handleWin = useCallback(
     async (currentSeq: SimonButtonType[]) => {
       setState("won");
-      
+
       await delay(400);
-      playWinMelody()
+      playWinMelody();
 
       await delay(1000);
-
 
       const nextColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
       const newSeq = [...currentSeq, nextColor];
@@ -110,6 +130,7 @@ export default function useSimonGame() {
   };
 
   return {
+    mode,
     sequence,
     inputs,
     level,

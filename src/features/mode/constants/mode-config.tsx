@@ -1,5 +1,5 @@
 import type { GameMode } from "@/globals/types/simon";
-import { Zap, Layers, Activity } from "lucide-react";
+import { Zap, Layers, Activity, Volume2 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 type ModeConfig = {
@@ -22,13 +22,22 @@ export const MODES: ModeConfig[] = [
     available: true,
   },
   {
+    id: "echo",
+    title: "Echo Protocol",
+    description:
+      "Visual interfaces offline. Reconstruct the sequence using localized audio pings only.",
+    icon: <Volume2 className="w-6 h-6" />,
+    color: "amber",
+    available: true,
+  },
+  {
     id: "blitz",
     title: "Blitz Mode",
     description:
       "High-speed sequences with shorter decay times. Requires rapid reflex.",
     icon: <Zap className="w-6 h-6" />,
     color: "blue",
-    available: true,
+    available: false,
   },
   {
     id: "zen",
@@ -37,6 +46,6 @@ export const MODES: ModeConfig[] = [
       "Endless sequence without level caps. How far can your mind go?",
     icon: <Layers className="w-6 h-6" />,
     color: "purple",
-    available: true,
+    available: false,
   },
 ];

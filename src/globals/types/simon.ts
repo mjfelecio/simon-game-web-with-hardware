@@ -1,13 +1,13 @@
 export type Score = {
-	id?: number;
-	playerName: string;
-	score: number;
-	level: number;
-	mode: GameMode;
-	achievedAt: number;
-}
+  id?: number;
+  playerName: string;
+  score: number;
+  level: number;
+  mode: GameMode;
+  achievedAt: number;
+};
 
-export type GameMode = 'classic' | 'blitz' | 'zen';
+export type GameMode = "classic" | "echo" | "blitz" | "zen";
 
 export type GameState =
   | "not-started"
