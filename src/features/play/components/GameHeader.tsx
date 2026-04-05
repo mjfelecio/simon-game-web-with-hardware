@@ -8,14 +8,14 @@ type GameHeaderProps = {
 };
 
 const GameHeader = ({ level, currentStatus, sequenceLength, inputsLength }: GameHeaderProps) => (
-  <div className="mb-10 flex flex-col items-center gap-2">
+  <div className="flex flex-col items-center gap-2">
     <div className="rounded-full bg-white/10 px-4 py-1 border border-white/20">
       <span className="text-sm font-bold tracking-widest text-white/70 uppercase">
         Level {level}
       </span>
     </div>
 
-    <h2 className={cn("text-6xl font-black tracking-wide uppercase transition-all duration-300", currentStatus.color)}>
+    <h2 className={cn("text-5xl md:text-6xl text-center font-black tracking-wide uppercase transition-all duration-300", currentStatus.color)}>
       {currentStatus.label}
     </h2>
 

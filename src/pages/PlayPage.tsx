@@ -42,7 +42,7 @@ const PlayPage = () => {
   return (
     <PageWrapper className="relative flex flex-col items-center justify-center pb-20">
       {/* Top Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-6">
+      <nav className="w-full z-50 flex items-center justify-between gap-4 p-6 xl:fixed top-0 left-0 right-0">
         <button
           onClick={openMenu}
           className="group flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/40 backdrop-blur-md transition-all hover:border-white/30 hover:text-white"
@@ -81,7 +81,7 @@ const PlayPage = () => {
       </nav>
 
       {/* Game Console Frame */}
-      <div className="relative w-full max-w-md mt-12 flex flex-col gap-10">
+      <div className="relative w-full max-w-md mt-12 flex flex-col items-center gap-10">
         {/* Header Area */}
         <div className="px-2">
           <GameHeader
@@ -92,14 +92,14 @@ const PlayPage = () => {
           />
         </div>
 
-        <div className="relative rounded-[2.5rem] bg-slate-900/40 p-6 border border-white/5 shadow-inner backdrop-blur-sm">
+        <div className="relative rounded-[2.5rem] w-fit bg-slate-900/40 p-6 border border-white/5 shadow-inner backdrop-blur-sm">
           {/* Decorative Corner Screws */}
           <div className="absolute top-4 left-4 h-1.5 w-1.5 rounded-full bg-white/10 shadow-inner" />
           <div className="absolute top-4 right-4 h-1.5 w-1.5 rounded-full bg-white/10 shadow-inner" />
           <div className="absolute bottom-4 left-4 h-1.5 w-1.5 rounded-full bg-white/10 shadow-inner" />
           <div className="absolute bottom-4 right-4 h-1.5 w-1.5 rounded-full bg-white/10 shadow-inner" />
 
-          <div className="grid grid-cols-2 aspect-square place-items-center gap-2">
+          <div className="grid grid-cols-2 aspect-square place-items-center gap-4">
             {BUTTONS.map((t) => (
               <SimonButton
                 key={t}
