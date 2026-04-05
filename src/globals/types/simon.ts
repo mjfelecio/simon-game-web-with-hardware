@@ -7,7 +7,7 @@ export type Score = {
   achievedAt: number;
 };
 
-export type GameMode = "classic" | "echo" | "blitz" | "zen";
+export type GameMode = "classic" | "echo" | "static" | "blitz" | "zen";
 
 export type GameState =
   | "not-started"

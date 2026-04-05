@@ -1,8 +1,8 @@
 import type { GameMode } from "@/globals/types/simon";
-import { Zap, Layers, Activity, Volume2 } from "lucide-react";
+import { Zap, Layers, Activity, Volume2, Binary } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
-type ModeConfig = {
+export type ModeConfig = {
   id: GameMode,
   title: string,
   description: string,
@@ -28,6 +28,15 @@ export const MODES: ModeConfig[] = [
       "Visual interfaces offline. Reconstruct the sequence using localized audio pings only.",
     icon: <Volume2 className="w-6 h-6" />,
     color: "amber",
+    available: true,
+  },
+  {
+    id: "static",
+    title: "Static Transmission",
+    description:
+      "Select a specific data length. Complete the full string to verify system integrity.",
+    icon: <Binary className="w-6 h-6" />,
+    color: "cyan",
     available: true,
   },
   {
