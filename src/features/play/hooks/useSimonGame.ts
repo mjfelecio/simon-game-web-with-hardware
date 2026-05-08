@@ -21,7 +21,7 @@ export default function useSimonGame() {
 
       for (const color of seq) {
         if (!config.isEcho) setActiveButton(color);
-        await audio.playColor(color, config.isEcho ? 400 : 200);
+        await audio.playColor(color, config.isEcho);
         setActiveButton(null);
         await delay(200);
       }
@@ -37,7 +37,7 @@ export default function useSimonGame() {
       if (core.status !== "playing") return;
 
       setActiveButton(input);
-      audio.playColor(input);
+      audio.playColor(input, config.isEcho);
       setTimeout(() => setActiveButton(null), 200);
 
       const nextIndex = core.inputs.length;
@@ -45,6 +45,7 @@ export default function useSimonGame() {
       // Check for Loss
       if (input !== core.sequence[nextIndex]) {
         core.setStatus("lose");
+        delay(1000);
         audio.playLoseDissonance();
         await db.scores.add({
           playerName: "KirbySmashYeet",
