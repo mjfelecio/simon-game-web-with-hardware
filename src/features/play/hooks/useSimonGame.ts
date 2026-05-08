@@ -20,8 +20,9 @@ export default function useSimonGame() {
       await delay(200);
 
       for (const color of seq) {
-        if (!config.isEcho) setActiveButton(color);
-        await audio.playColor(color, config.isEcho);
+        // Don't light up the button when its echo mode
+        if (config.mode !== "echo") setActiveButton(color);
+        await audio.playColor(color, config.mode);
         setActiveButton(null);
         await delay(200);
       }
@@ -29,7 +30,7 @@ export default function useSimonGame() {
       core.setInputs([]);
       core.setStatus("playing");
     },
-    [config.isEcho, audio, core],
+    [config.mode, audio, core],
   );
 
   const handleInput = useCallback(
@@ -37,7 +38,7 @@ export default function useSimonGame() {
       if (core.status !== "playing") return;
 
       setActiveButton(input);
-      audio.playColor(input, config.isEcho);
+      audio.playColor(input, config.mode);
       setTimeout(() => setActiveButton(null), 200);
 
       const nextIndex = core.inputs.length;

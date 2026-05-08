@@ -6,15 +6,15 @@ import {
   playWinMelody,
   playLoseDissonance,
 } from "@/globals/utils/audio";
-import type { SimonButtonType } from "@/globals/types/simon";
+import type { GameMode, SimonButtonType } from "@/globals/types/simon";
 import { delay } from "@/globals/utils";
 
 export default function useSimonAudio() {
   const playColor = useCallback(
-    async (color: SimonButtonType, isEcho: boolean = false) => {
+    async (color: SimonButtonType, mode: GameMode) => {
       const freq = BUTTON_FREQUENCIES[color];
 
-      if (isEcho) {
+      if (mode === "echo") {
         // Echo Mode: Softer "Sine" wave with a long tail for clarity
         playTone(freq, { type: "sine", duration: 0.6 });
         await delay(600); // Wait for the full sound in Echo mode
