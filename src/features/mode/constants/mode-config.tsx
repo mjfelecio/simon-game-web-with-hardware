@@ -1,5 +1,5 @@
 import type { GameMode } from "@/globals/types/simon";
-import { Zap, Layers, Activity, Volume2, Binary } from "lucide-react";
+import { Zap, Layers, Activity, Volume2, Binary, Cpu } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 export type ModeConfig = {
@@ -56,5 +56,14 @@ export const MODES: ModeConfig[] = [
     icon: <Layers className="w-6 h-6" />,
     color: "purple",
     available: false,
+  },
+  {
+    id: "fragment",
+    title: "Fragment Protocol",
+    description:
+      "Legacy data omitted. Only the newest signal fragment is transmitted. You must maintain the full stack internally.",
+    icon: <Cpu className="w-6 h-6" />,
+    color: "rose",
+    available: true,
   },
 ];

@@ -19,7 +19,11 @@ export default function useSimonGame() {
       core.setStatus("sequence");
       await delay(200);
 
-      for (const color of seq) {
+      // Only play the newly appended sequence if in fragment gamemode
+      const seqToPlay =
+        config.mode === "fragment" ? [seq[seq.length - 1]] : seq;
+
+      for (const color of seqToPlay) {
         // Don't light up the button when its echo mode
         if (config.mode !== "echo") setActiveButton(color);
         await audio.playColor(color, config.mode);
