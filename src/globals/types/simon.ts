@@ -13,7 +13,8 @@ export type GameMode =
   | "static"
   | "blitz"
   | "fragment"
-  | "entropy";
+  | "entropy"
+  | "ghost";
 
 export type GameState =
   | "not-started"

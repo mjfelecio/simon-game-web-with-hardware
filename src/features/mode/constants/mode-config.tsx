@@ -1,5 +1,5 @@
 import type { GameMode } from "@/globals/types/simon";
-import { Zap, Activity, Volume2, Binary, Cpu, Shuffle } from "lucide-react";
+import { Zap, Activity, Volume2, Binary, Cpu, Shuffle, EyeOff } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 export type ModeConfig = {
@@ -46,6 +46,14 @@ export const MODES: ModeConfig[] = [
       "High-speed sequences with shorter decay times. Requires rapid reflex.",
     icon: <Zap className="w-6 h-6" />,
     color: "blue",
+    available: true,
+  },
+  {
+    id: "ghost",
+    title: "Ghost Protocol",
+    description: "Visual identifiers redacted. Rely on spatial memory.",
+    icon: <EyeOff className="w-6 h-6" />,
+    color: "slate",
     available: true,
   },
   {

@@ -1,14 +1,21 @@
 import SimonButton from "@/features/play/components/SimonButton";
-import type { SimonButtonType } from "@/globals/types/simon";
+import type { GameMode, SimonButtonType } from "@/globals/types/simon";
 
 type Props = {
   buttons: SimonButtonType[];
+  mode: GameMode;
   activeButton: SimonButtonType | null;
   isButtonDisabled: boolean;
   onInput: (color: SimonButtonType) => void;
 };
 
-const GameConsole = ({ buttons, activeButton, isButtonDisabled, onInput }: Props) => {
+const GameConsole = ({
+  buttons,
+  mode,
+  activeButton,
+  isButtonDisabled,
+  onInput,
+}: Props) => {
   return (
     <div className="relative rounded-[2.5rem] w-fit bg-slate-900/40 p-6 border border-white/5 shadow-inner backdrop-blur-sm">
       {/* Decorative Corner Screws */}
@@ -24,6 +31,7 @@ const GameConsole = ({ buttons, activeButton, isButtonDisabled, onInput }: Props
             type={t}
             isDisabled={isButtonDisabled}
             isActive={activeButton === t}
+            isGhosted={mode === "ghost"}
             onClick={onInput}
           />
         ))}

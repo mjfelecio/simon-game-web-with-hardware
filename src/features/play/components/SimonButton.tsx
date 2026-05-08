@@ -19,10 +19,17 @@ type Props = {
   type: SimonButtonType;
   isActive: boolean;
   isDisabled: boolean;
+  isGhosted: boolean;
   onClick: (type: SimonButtonType) => void;
 };
 
-const SimonButton = ({ type, isActive, isDisabled, onClick }: Props) => {
+const SimonButton = ({
+  type,
+  isActive,
+  isDisabled,
+  isGhosted,
+  onClick,
+}: Props) => {
   return (
     <button
       type="button"
@@ -34,10 +41,17 @@ const SimonButton = ({ type, isActive, isDisabled, onClick }: Props) => {
       className={cn(
         "relative aspect-square rounded-4xl transition-all duration-150 ease-in-out cursor-pointer",
         "border-b-8 border-black/20 shadow-xl ",
-        BUTTON_COLOR[type],
+
+        // Base Color: If ghosted and not currently playing back, hide the color
+        isGhosted && !isActive ? "bg-slate-600" : BUTTON_COLOR[type],
+
         isActive
           ? `brightness-125 scale-105 ring-4 ring-white z-10 ${GLOW_COLOR[type]}`
-          : "opacity-40 grayscale-[0.2]",
+          : cn("opacity-40"),
+
+        // If ghosted, we go full grayscale to hide the identity
+        isGhosted ? "grayscale-100 brightness-50" : "grayscale-[0.2]",
+
         "disabled:cursor-not-allowed",
         "not-disabled:active:scale-95 not-disabled:active:border-b-0 not-disabled:active:translate-y-1",
       )}

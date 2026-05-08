@@ -66,6 +66,7 @@ const PlayPage = () => {
 
         <GameConsole
           buttons={game.currentButtons}
+          mode={game.mode}
           activeButton={game.activeButton}
           isButtonDisabled={game.status !== "playing"}
           onInput={game.handleInput}
