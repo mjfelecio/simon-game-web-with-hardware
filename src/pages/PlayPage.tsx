@@ -106,7 +106,7 @@ const PlayPage = () => {
                 key={t}
                 type={t}
                 isDisabled={isButtonDisabled}
-                isActive={game.activeSequence === t}
+                isActive={game.activeButton === t}
                 onClick={game.handleInput}
               />
             ))}

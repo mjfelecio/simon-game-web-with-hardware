@@ -1,169 +1,97 @@
 import { useCallback, useState } from "react";
-import type {
-  GameMode,
-  GameState,
-  SimonButtonType,
-} from "@/globals/types/simon";
-import { delay } from "@/globals/utils";
 import { db } from "@/globals/libs/db";
-import {
-  BUTTON_FREQUENCIES,
-  playLoseDissonance,
-  playTone,
-  playWinMelody,
-} from "@/globals/utils/audio";
-import { useSearchParams } from "react-router";
-
-const BUTTONS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
+import { delay } from "@/globals/utils";
+import useGameMode from "./useGameMode";
+import useSimonCore from "./useSimonCore";
+import useSimonAudio from "./useSimonAudio";
+import type { SimonButtonType } from "@/globals/types/simon";
 
 export default function useSimonGame() {
-  const [searchParams] = useSearchParams();
-  const mode = (searchParams.get("mode") ?? "classic") as GameMode;
-  const goal = Number(searchParams.get("goal"));
-
-  const [sequence, setSequence] = useState<SimonButtonType[]>([]);
-  const [inputs, setInputs] = useState<SimonButtonType[]>([]);
-  const [level, setLevel] = useState(0);
-  const [state, setState] = useState<GameState>("not-started");
-  const [activeSequence, setActiveSequence] = useState<SimonButtonType | null>(
+  const config = useGameMode();
+  const core = useSimonCore();
+  const audio = useSimonAudio();
+  const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
 
   const playSequence = useCallback(
     async (seq: SimonButtonType[]) => {
-      setState("sequence");
+      core.setStatus("sequence");
       await delay(200);
 
       for (const color of seq) {
-        if (mode === "echo") {
-          playTone(BUTTON_FREQUENCIES[color]);
-          await delay(400);
-        } else {
-          setActiveSequence(color);
-          playTone(BUTTON_FREQUENCIES[color]);
-          await delay(200);
-          setActiveSequence(null);
-          await delay(200);
-        }
+        if (!config.isEcho) setActiveButton(color);
+        await audio.playColor(color, config.isEcho ? 400 : 200);
+        setActiveButton(null);
+        await delay(200);
       }
 
-      setInputs([]);
-      setState("playing");
+      core.setInputs([]);
+      core.setStatus("playing");
     },
-    [mode],
+    [config.isEcho, audio, core],
+  );
+
+  const handleInput = useCallback(
+    async (input: SimonButtonType) => {
+      if (core.status !== "playing") return;
+
+      setActiveButton(input);
+      audio.playColor(input);
+      setTimeout(() => setActiveButton(null), 200);
+
+      const nextIndex = core.inputs.length;
+
+      // Check for Loss
+      if (input !== core.sequence[nextIndex]) {
+        core.setStatus("lose");
+        audio.playLoseDissonance();
+        await db.scores.add({
+          playerName: "KirbySmashYeet",
+          score: core.level,
+          level: core.level,
+          mode: config.mode,
+          achievedAt: Date.now(),
+        });
+        return;
+      }
+
+      const newInputs = [...core.inputs, input];
+      core.setInputs(newInputs);
+
+      // Check for Round Win / Victory
+      if (newInputs.length === core.sequence.length) {
+        if (config.checkVictory(core.sequence.length)) {
+          core.setStatus("victory");
+        } else {
+          core.setStatus("won");
+          await delay(400);
+          audio.playWinMelody();
+          await delay(1000);
+
+          const nextSeq = core.generateNextSequence(core.sequence);
+          core.setSequence(nextSeq);
+          core.setLevel((prev) => prev + 1);
+          playSequence(nextSeq);
+        }
+      }
+    },
+    [core, config, audio, playSequence],
   );
 
   const startGame = () => {
-    const firstColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
-    const newSeq = [firstColor];
-    setSequence(newSeq);
-    setLevel(1);
-    playSequence(newSeq);
-  };
-
-  const checkVictoryCondition = useCallback(
-    (currentSeq: SimonButtonType[]) => {
-      switch (mode) {
-        case "static":
-          if (currentSeq.length === goal) return true;
-          break;
-
-        default:
-          break;
-      }
-    },
-    [mode, goal],
-  );
-
-  const handleWin = useCallback(
-    async (currentSeq: SimonButtonType[]) => {
-      const hasAchievedVictory = checkVictoryCondition(currentSeq);
-      if (hasAchievedVictory) {
-        setState("victory");
-        alert("YOu actuall won wtf");
-        // TODO: Victory logic when
-        return;
-      } else {
-        setState("won");
-
-        await delay(400);
-
-        playWinMelody();
-
-        await delay(1000);
-      }
-
-      // Proceed to next sequence
-      const nextColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
-      const newSeq = [...currentSeq, nextColor];
-
-      setSequence(newSeq);
-      setLevel((prev) => prev + 1);
-      playSequence(newSeq);
-    },
-    [playSequence, checkVictoryCondition],
-  );
-
-  const handleLose = useCallback(async () => {
-    setState("lose");
-    playLoseDissonance();
-
-    // Store score
-    try {
-      await db.scores.add({
-        score: level, // In classic mode, level is score
-        level,
-        mode: "classic",
-        playerName: "mjfelecio",
-        achievedAt: Date.now(),
-      });
-    } catch (e) {
-      console.error("Failed to store score: " + e);
-    }
-  }, [level]);
-
-  const handleInput = useCallback(
-    (newInput: SimonButtonType) => {
-      if (state !== "playing") return;
-
-      setActiveSequence(newInput);
-      playTone(BUTTON_FREQUENCIES[newInput]);
-
-      setTimeout(() => setActiveSequence(null), 200);
-
-      const nextIndex = inputs.length;
-      if (newInput !== sequence[nextIndex]) {
-        handleLose();
-        return;
-      }
-
-      const updatedInputs = [...inputs, newInput];
-      setInputs(updatedInputs);
-
-      if (updatedInputs.length === sequence.length) {
-        handleWin(sequence);
-      }
-    },
-    [handleLose, handleWin, inputs, sequence, state],
-  );
-
-  const reset = () => {
-    setSequence([]);
-    setInputs([]);
-    setLevel(0);
-    setState("not-started");
+    const startSeq = core.generateNextSequence([]);
+    core.setSequence(startSeq);
+    core.setLevel(1);
+    playSequence(startSeq);
   };
 
   return {
-    mode,
-    sequence,
-    inputs,
-    level,
-    status: state,
-    setStatus: setState,
-    activeSequence,
+    ...core,
+    activeButton,
     startGame,
     handleInput,
-    reset,
+    reset: core.resetGame,
+    mode: config.mode,
   };
 }
