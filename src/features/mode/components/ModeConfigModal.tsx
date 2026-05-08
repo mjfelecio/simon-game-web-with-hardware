@@ -8,17 +8,17 @@ type Props = {
   mode: ModeConfig | null;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (settings: { targetLength?: number }) => void;
+  onConfirm: (settings: { goal?: number }) => void;
 };
 
 const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
-  const [targetLength, setTargetLength] = useState(10);
+  const [goal, setGoal] = useState(10);
 
   if (!mode) return null;
 
   const handleStart = () => {
     onConfirm({
-      targetLength: mode.id === "static" ? targetLength : undefined,
+      goal: mode.id === "static" ? goal : undefined,
     });
   };
 
@@ -53,10 +53,10 @@ const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
               {[5, 10, 15, 20].map((val) => (
                 <button
                   key={val}
-                  onClick={() => setTargetLength(val)}
+                  onClick={() => setGoal(val)}
                   className={cn(
                     "py-3 rounded-lg border font-bold transition-all",
-                    targetLength === val
+                    goal === val
                       ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
                       : "border-white/5 bg-white/5 text-slate-400 hover:border-white/20",
                   )}

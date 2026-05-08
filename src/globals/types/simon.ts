@@ -15,6 +15,7 @@ export type GameState =
   | "playing"
   | "won"
   | "lose"
-  | "paused";
+  | "paused"
+	| "victory";
 
 export type SimonButtonType = "red" | "green" | "blue" | "yellow";

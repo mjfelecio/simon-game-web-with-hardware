@@ -17,8 +17,9 @@ import { useSearchParams } from "react-router";
 const BUTTONS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
 
 export default function useSimonGame() {
-  const searchParams = useSearchParams();
-  const mode = (searchParams[0].get("mode") ?? "classic") as GameMode;
+  const [searchParams] = useSearchParams();
+  const mode = (searchParams.get("mode") ?? "classic") as GameMode;
+  const goal = Number(searchParams.get("goal"));
 
   const [sequence, setSequence] = useState<SimonButtonType[]>([]);
   const [inputs, setInputs] = useState<SimonButtonType[]>([]);
@@ -60,15 +61,39 @@ export default function useSimonGame() {
     playSequence(newSeq);
   };
 
+  const checkVictoryCondition = useCallback(
+    (currentSeq: SimonButtonType[]) => {
+      switch (mode) {
+        case "static":
+          if (currentSeq.length === goal) return true;
+          break;
+
+        default:
+          break;
+      }
+    },
+    [mode, goal],
+  );
+
   const handleWin = useCallback(
     async (currentSeq: SimonButtonType[]) => {
-      setState("won");
+      const hasAchievedVictory = checkVictoryCondition(currentSeq);
+      if (hasAchievedVictory) {
+        setState("victory");
+        alert("YOu actuall won wtf");
+        // TODO: Victory logic when
+        return;
+      } else {
+        setState("won");
 
-      await delay(400);
-      playWinMelody();
+        await delay(400);
 
-      await delay(1000);
+        playWinMelody();
 
+        await delay(1000);
+      }
+
+      // Proceed to next sequence
       const nextColor = BUTTONS[Math.floor(Math.random() * BUTTONS.length)];
       const newSeq = [...currentSeq, nextColor];
 
@@ -76,7 +101,7 @@ export default function useSimonGame() {
       setLevel((prev) => prev + 1);
       playSequence(newSeq);
     },
-    [playSequence],
+    [playSequence, checkVictoryCondition],
   );
 
   const handleLose = useCallback(async () => {
