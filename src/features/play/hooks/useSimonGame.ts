@@ -24,7 +24,7 @@ export default function useSimonGame() {
         if (config.mode !== "echo") setActiveButton(color);
         await audio.playColor(color, config.mode);
         setActiveButton(null);
-        await delay(200);
+        await delay(config.mode === "blitz" ? 100 : 200);
       }
 
       core.setInputs([]);
@@ -39,7 +39,10 @@ export default function useSimonGame() {
 
       setActiveButton(input);
       audio.playColor(input, config.mode);
-      setTimeout(() => setActiveButton(null), 200);
+      setTimeout(
+        () => setActiveButton(null),
+        config.mode === "blitz" ? 100 : 200,
+      );
 
       const nextIndex = core.inputs.length;
 

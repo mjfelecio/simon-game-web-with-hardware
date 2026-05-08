@@ -18,6 +18,9 @@ export default function useSimonAudio() {
         // Echo Mode: Softer "Sine" wave with a long tail for clarity
         playTone(freq, { type: "sine", duration: 0.6 });
         await delay(600); // Wait for the full sound in Echo mode
+      } else if (mode === "blitz") {
+        playTone(freq, { type: "square", duration: 0.2 });
+        await delay(100);
       } else {
         // Normal Mode: Punchy "Square" wave for that retro arcade feel
         playTone(freq, { type: "square", duration: 0.2 });

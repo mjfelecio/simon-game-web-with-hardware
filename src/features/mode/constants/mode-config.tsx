@@ -46,7 +46,7 @@ export const MODES: ModeConfig[] = [
       "High-speed sequences with shorter decay times. Requires rapid reflex.",
     icon: <Zap className="w-6 h-6" />,
     color: "blue",
-    available: false,
+    available: true,
   },
   {
     id: "zen",
