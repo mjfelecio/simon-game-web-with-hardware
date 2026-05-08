@@ -13,7 +13,7 @@ import HardwareModal from "@/features/play/components/HardwareModal";
 
 const PlayPage = () => {
   const game = useSimonGame();
-  const { connect, isConnected } = useArduinoInput(game.handleInput);
+  const { connect, status: connectionStatus } = useArduinoInput(game.handleInput);
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHardwareModalOpen, setIsHardwareModalOpen] = useState(false);
@@ -38,6 +38,7 @@ const PlayPage = () => {
 
   const currentStatus = STATUS_CONFIG[game.status];
   const isButtonDisabled = game.status !== "playing";
+  const isConnected = connectionStatus === "connected";
 
   return (
     <PageWrapper className="relative flex flex-col items-center justify-center pb-20">
@@ -135,7 +136,7 @@ const PlayPage = () => {
       <HardwareModal
         isOpen={isHardwareModalOpen}
         onClose={() => setIsHardwareModalOpen(false)}
-        isConnected={isConnected}
+        status={connectionStatus}
         onConnect={connect}
       />
 
