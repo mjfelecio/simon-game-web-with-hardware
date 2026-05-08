@@ -19,10 +19,10 @@ const ModeSelectionPage = () => {
     }
   };
 
-  const handleConfirmConfig = (settings: { targetLength?: number }) => {
+  const handleConfirmConfig = (settings: { goal?: number }) => {
     const query = new URLSearchParams({
       mode: selectedMode?.id || "classic",
-      ...(settings.targetLength && { goal: settings.targetLength.toString() }),
+      ...(settings.goal && { goal: settings.goal.toString() }),
     }).toString();
 
     navigate(`/play?${query}`);
