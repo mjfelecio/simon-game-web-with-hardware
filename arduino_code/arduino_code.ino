@@ -17,12 +17,16 @@ void setup() {
   pinMode(BUTTON_GREEN, INPUT_PULLUP);
   pinMode(BUTTON_BLUE, INPUT_PULLUP);
   pinMode(BUTTON_YELLOW, INPUT_PULLUP);
+
+  // Handshake listener for knowing when the connection is ready
+  WebSerial.on("connection-syn", onConnectSyn);
 }
 
 void loop() {
+  // SimpleWebSerial needs to check for incoming messages in the loop
+  WebSerial.check();
+
   if ((millis() - lastDebounceTime) > debounceDelay) {
-    
-    // (DigitalRead returns LOW when pressed with PULLUP)
     if (digitalRead(BUTTON_RED) == LOW) {
       sendInput("red");
     }
@@ -41,4 +45,8 @@ void loop() {
 void sendInput(String color) {
   WebSerial.send("simon-input", color);
   lastDebounceTime = millis();
+}
+
+void onConnectSyn(String data) {
+  WebSerial.send("connection-ack", "ready");
 }

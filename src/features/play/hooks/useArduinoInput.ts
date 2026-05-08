@@ -3,44 +3,61 @@ import { useEffect, useRef, useState } from "react";
 import { setupSerialConnection } from "simple-web-serial";
 
 export default function useArduinoInput(
-  onInput?: (color: SimonButtonType) => void,
+	onInput?: (color: SimonButtonType) => void,
 ) {
-  const [isConnected, setIsConnected] = useState(false);
+	const [isConnected, setIsConnected] = useState(false);
+	const onInputRef = useRef(onInput);
 
-	// Ensures that the callback isn't stale
-  const onInputRef = useRef(onInput);
-  useEffect(() => {
-    onInputRef.current = onInput;
-  }, [onInput]);
+	const connectionRef = useRef<ReturnType<typeof setupSerialConnection> | null>(
+		null,
+	);
 
-  const connect = async () => {
-    try {
-      const connection = setupSerialConnection({
-        baudRate: 9600,
-      });
+	useEffect(() => {
+		onInputRef.current = onInput;
+	}, [onInput]);
 
-      connection.on("simon-input", (data) => {
-        if (!data) return;
-        if (typeof data !== "string") return;
+	const connect = async () => {
+		try {
+			const connection = setupSerialConnection({
+				baudRate: 9600,
+				requestAccessOnPageLoad: true,
+				logIncomingSerialData: true,
+			});
+			connectionRef.current = connection;
 
-        const validInputs: SimonButtonType[] = [
-          "red",
-          "green",
-          "blue",
-          "yellow",
-        ];
-        const color = data.trim() as SimonButtonType;
+			// Listen for the "ack" from Arduino to confirm true connection
+			connection.on("connection-ack", () => {
+				console.log("Hardware Handshake Successful");
+				setIsConnected(true);
+			});
 
-        if (validInputs.includes(color)) {
-          onInputRef.current?.(color);
-        }
-      });
+			// Existing button input logic
+			connection.on("simon-input", (data) => {
+				if (!data || typeof data !== "string") return;
 
-      setIsConnected(true);
-    } catch (err) {
-      console.error("Arduino Connection Failed:", err);
-    }
-  };
+				const validInputs: SimonButtonType[] = [
+					"red",
+					"green",
+					"blue",
+					"yellow",
+				];
+				const color = data.trim() as SimonButtonType;
 
-  return { connect, isConnected };
+				if (validInputs.includes(color)) {
+					onInputRef.current?.(color);
+				}
+			});
+
+			// Send the initial "syn" to the Arduino
+			// We wrap this in a small delay to ensure the board is ready after the serial port opens
+			setTimeout(() => {
+				connection.send("connection-syn", "init");
+			}, 1500);
+		} catch (err) {
+			console.error("Arduino Connection Failed:", err);
+			setIsConnected(false);
+		}
+	};
+
+	return { connect, isConnected };
 }
