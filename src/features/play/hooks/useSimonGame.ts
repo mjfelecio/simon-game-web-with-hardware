@@ -81,6 +81,10 @@ export default function useSimonGame() {
           const nextSeq = core.generateNextSequence(core.sequence);
           core.setSequence(nextSeq);
           core.setLevel((prev) => prev + 1);
+
+          // Shuffle buttons if in entropy mode
+          if (config.mode === "entropy") core.shuffleButtons();
+
           playSequence(nextSeq);
         }
       }

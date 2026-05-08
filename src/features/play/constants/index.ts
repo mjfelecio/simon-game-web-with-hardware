@@ -1,6 +1,4 @@
-import type { GameState, SimonButtonType } from "@/globals/types/simon";
-
-export const BUTTONS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
+import type { GameState } from "@/globals/types/simon";
 
 export const STATUS_CONFIG: Record<GameState, { label: string; color: string }> = {
   "not-started": { label: "Ready?", color: "text-slate-200" },
