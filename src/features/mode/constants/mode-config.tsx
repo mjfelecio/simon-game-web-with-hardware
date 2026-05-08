@@ -1,5 +1,5 @@
 import type { GameMode } from "@/globals/types/simon";
-import { Zap, Layers, Activity, Volume2, Binary, Cpu, Shuffle } from "lucide-react";
+import { Zap, Activity, Volume2, Binary, Cpu, Shuffle } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 export type ModeConfig = {
@@ -47,15 +47,6 @@ export const MODES: ModeConfig[] = [
     icon: <Zap className="w-6 h-6" />,
     color: "blue",
     available: true,
-  },
-  {
-    id: "zen",
-    title: "Zen Focus",
-    description:
-      "Endless sequence without level caps. How far can your mind go?",
-    icon: <Layers className="w-6 h-6" />,
-    color: "purple",
-    available: false,
   },
   {
     id: "fragment",

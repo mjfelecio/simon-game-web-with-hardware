@@ -7,7 +7,13 @@ export type Score = {
   achievedAt: number;
 };
 
-export type GameMode = "classic" | "echo" | "static" | "blitz" | "zen" | "fragment" | "entropy";
+export type GameMode =
+  | "classic"
+  | "echo"
+  | "static"
+  | "blitz"
+  | "fragment"
+  | "entropy";
 
 export type GameState =
   | "not-started"
@@ -16,6 +22,6 @@ export type GameState =
   | "won"
   | "lose"
   | "paused"
-	| "victory";
+  | "victory";
 
 export type SimonButtonType = "red" | "green" | "blue" | "yellow";
