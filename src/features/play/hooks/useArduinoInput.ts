@@ -29,6 +29,7 @@ export default function useArduinoInput(
       const connection = setupSerialConnection({
         baudRate: 9600,
         logIncomingSerialData: true,
+        requestAccessOnPageLoad: true,
       });
       connectionRef.current = connection;
 
@@ -58,7 +59,7 @@ export default function useArduinoInput(
         connection.send("connection-syn", "init");
 
         // Start the Timeout Watchdog (5 seconds to receive ACK)
-				// If still not responding, we throw error n shit
+        // If still not responding, we throw error n shit
         timeoutIdRef.current = setTimeout(() => {
           if (status !== "connected") {
             console.error("Handshake Timeout: No response from Arduino");
