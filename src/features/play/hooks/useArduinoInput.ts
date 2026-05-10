@@ -18,7 +18,7 @@ const HEARTBEAT_TIMEOUT_MS = 7000;
  * Shared serial connection instance.
  */
 const connection = setupSerialConnection({
-  baudRate: 9600,
+  baudRate: 57600,
 });
 
 /**

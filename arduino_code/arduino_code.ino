@@ -26,7 +26,7 @@ volatile bool shouldSendConnectionAck = false;
  * Initializes serial communication and button pins.
  */
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(57600);
 
   pinMode(BUTTON_RED, INPUT_PULLUP);
   pinMode(BUTTON_GREEN, INPUT_PULLUP);
