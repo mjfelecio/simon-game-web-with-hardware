@@ -2,14 +2,29 @@
 
 SimpleWebSerial WebSerial;
 
+/**
+ * Button input pins.
+ */
 const byte BUTTON_RED = 2;
 const byte BUTTON_GREEN = 3;
 const byte BUTTON_BLUE = 4;
 const byte BUTTON_YELLOW = 5;
 
+/**
+ * Debounce settings.
+ */
+const unsigned long DEBOUNCE_DELAY_MS = 250;
 unsigned long lastDebounceTime = 0;
-const byte debounceDelay = 250; // Milliseconds between allowed presses
 
+/**
+ * Set when a handshake request is received.
+ * The ACK is sent from loop() after WebSerial finishes processing.
+ */
+volatile bool shouldSendConnectionAck = false;
+
+/**
+ * Initializes serial communication and button pins.
+ */
 void setup() {
   Serial.begin(9600);
 
@@ -18,35 +33,55 @@ void setup() {
   pinMode(BUTTON_BLUE, INPUT_PULLUP);
   pinMode(BUTTON_YELLOW, INPUT_PULLUP);
 
-  // Handshake listener for knowing when the connection is ready
-  WebSerial.on("connection-syn", onConnectSyn);
+  // Register handshake listener.
+  WebSerial.on("connection-syn", onConnectionSyn);
 }
 
+/**
+ * Main program loop.
+ */
 void loop() {
-  // SimpleWebSerial needs to check for incoming messages in the loop
+  // Process incoming Web Serial messages.
   WebSerial.check();
 
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    if (digitalRead(BUTTON_RED) == LOW) {
-      sendInput("red");
-    }
-    else if (digitalRead(BUTTON_GREEN) == LOW) {
-      sendInput("green");
-    }
-    else if (digitalRead(BUTTON_BLUE) == LOW) {
-      sendInput("blue");
-    }
-    else if (digitalRead(BUTTON_YELLOW) == LOW) {
-      sendInput("yellow");
-    }
+  // Send ACK after incoming packet processing completes.
+  if (shouldSendConnectionAck) {
+    WebSerial.send("connection-ack", "ready");
+    shouldSendConnectionAck = false;
+  }
+
+  // Check buttons with software debounce.
+  if (millis() - lastDebounceTime < DEBOUNCE_DELAY_MS) {
+    return;
+  }
+
+  if (digitalRead(BUTTON_RED) == LOW) {
+    sendInput("red");
+  } else if (digitalRead(BUTTON_GREEN) == LOW) {
+    sendInput("green");
+  } else if (digitalRead(BUTTON_BLUE) == LOW) {
+    sendInput("blue");
+  } else if (digitalRead(BUTTON_YELLOW) == LOW) {
+    sendInput("yellow");
   }
 }
 
-void sendInput(String color) {
+/**
+ * Sends a Simon button color to the frontend.
+ *
+ * @param color The button color.
+ */
+void sendInput(const char* color) {
   WebSerial.send("simon-input", color);
   lastDebounceTime = millis();
 }
 
-void onConnectSyn(String data) {
-  WebSerial.send("connection-ack", "ready");
+/**
+ * Called when the frontend sends "connection-syn".
+ *
+ * Do not send the ACK directly from this callback.
+ * Instead, set a flag and send it from loop().
+ */
+void onConnectionSyn() {
+  shouldSendConnectionAck = true;
 }
