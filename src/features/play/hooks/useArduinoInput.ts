@@ -11,6 +11,9 @@ const ACK_TIMEOUT_MS = 5000;
 const HANDSHAKE_RETRY_DELAY_MS = 1500;
 const MAX_HANDSHAKE_ATTEMPTS = 3;
 
+const HEARTBEAT_INTERVAL_MS = 3000;
+const HEARTBEAT_TIMEOUT_MS = 7000;
+
 /**
  * Shared serial connection instance.
  */
@@ -48,6 +51,8 @@ export default function useArduinoInput(
   const onInputRef = useRef(onInput);
   const ackTimeoutRef = useRef<number | null>(null);
   const handshakeAttemptRef = useRef(0);
+  const heartbeatIntervalRef = useRef<number | null>(null);
+  const heartbeatTimeoutRef = useRef<number | null>(null);
 
   /**
    * Keep refs synchronized with latest values.
@@ -70,6 +75,42 @@ export default function useArduinoInput(
     }
   };
 
+  const clearHeartbeatInterval = () => {
+    if (heartbeatIntervalRef.current !== null) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+  };
+
+  const clearHeartbeatTimeout = () => {
+    if (heartbeatTimeoutRef.current !== null) {
+      clearTimeout(heartbeatTimeoutRef.current);
+      heartbeatTimeoutRef.current = null;
+    }
+  };
+
+  const resetHeartbeatTimeout = () => {
+    clearHeartbeatTimeout();
+
+    heartbeatTimeoutRef.current = window.setTimeout(() => {
+      console.error("Heartbeat timeout: Arduino disconnected.");
+
+      clearHeartbeatInterval();
+      setStatus("error");
+    }, HEARTBEAT_TIMEOUT_MS);
+  };
+
+  const startHeartbeat = () => {
+    clearHeartbeatInterval();
+    resetHeartbeatTimeout();
+
+    heartbeatIntervalRef.current = window.setInterval(() => {
+      if (statusRef.current !== "connected") return;
+
+      connection.sendEvent("connection-syn");
+    }, HEARTBEAT_INTERVAL_MS);
+  };
+
   /**
    * Sends a handshake request to the Arduino.
    */
@@ -80,7 +121,7 @@ export default function useArduinoInput(
       `Sending handshake attempt ${handshakeAttemptRef.current}/${MAX_HANDSHAKE_ATTEMPTS}`,
     );
 
-    connection.send("connection-syn", "init");
+    connection.sendEvent("connection-syn");
 
     clearAckTimeout();
 
@@ -105,12 +146,19 @@ export default function useArduinoInput(
      * Fired when the Arduino acknowledges the handshake.
      */
     connection.on("connection-ack", () => {
-      console.log("Arduino handshake successful.");
+      console.log("Arduino acknowledged connection.");
 
       clearAckTimeout();
       handshakeAttemptRef.current = 0;
 
-      setStatus("connected");
+      const wasConnected = statusRef.current === "connected";
+
+      if (!wasConnected) {
+        setStatus("connected");
+        startHeartbeat();
+      }
+
+      resetHeartbeatTimeout();
     });
 
     /**
@@ -132,6 +180,8 @@ export default function useArduinoInput(
      */
     return () => {
       clearAckTimeout();
+      clearHeartbeatInterval();
+      clearHeartbeatTimeout();
     };
   }, []);
 
@@ -145,6 +195,9 @@ export default function useArduinoInput(
     setStatus("loading");
     handshakeAttemptRef.current = 0;
     clearAckTimeout();
+    clearHeartbeatInterval();
+    clearHeartbeatTimeout();
+    handshakeAttemptRef.current = 0;
 
     try {
       if (!connection.ready()) {
