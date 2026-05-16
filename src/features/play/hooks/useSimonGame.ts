@@ -1,10 +1,11 @@
 import { useCallback, useState } from "react";
-import { db } from "@/globals/libs/db";
 import { delay } from "@/globals/utils";
 import useGameMode from "./useGameMode";
 import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { SimonButtonType } from "@/globals/types/simon";
+import { submitScore } from "@/globals/utils/scores";
+import { getStoredUser } from "@/globals/utils/auth";
 
 export default function useSimonGame() {
   const config = useGameMode();
@@ -53,15 +54,47 @@ export default function useSimonGame() {
       // Check for Loss
       if (input !== core.sequence[nextIndex]) {
         core.setStatus("lose");
-        delay(1000);
+        await delay(1000);
         audio.playLoseDissonance();
-        await db.scores.add({
-          playerName: "KirbySmashYeet",
-          score: core.level,
-          level: core.level,
-          mode: config.mode,
-          achievedAt: Date.now(),
-        });
+
+        const user = getStoredUser();
+
+        if (!user) {
+          alert("Please login to submit your scores.");
+          console.warn("Score submission failed: User is not logged in.");
+          return;
+        }
+
+        // Retry until success or all retry attempts exhausted
+        let retry_attempts = 3; 
+        let shouldRetry = true;
+
+        while (shouldRetry && retry_attempts !== 0) {
+          try {
+            await submitScore({
+              user_id: user.id,
+              gamemode: config.mode,
+              input_type: "mouse",
+              score: core.level,
+            });
+
+            // Success, stop retrying
+            shouldRetry = false;
+          } catch (error) {
+            retry_attempts--;
+
+            if (error instanceof Error) {
+              console.error("Score submission failed:", error.message);
+            } else {
+              console.error("Failed to submit score due to an unknown error \n", error);
+            }
+
+            shouldRetry = confirm(
+              "Failed to submit score. Would you like to retry?",
+            );
+          }
+        }
+
         return;
       }
 

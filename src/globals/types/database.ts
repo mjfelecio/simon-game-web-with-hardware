@@ -39,60 +39,32 @@ export type Database = {
   }
   public: {
     Tables: {
-      gamemodes: {
-        Row: {
-          created_at: string
-          description: string
-          id: number
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string
-          id?: number
-          name: string
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: number
-          name?: string
-        }
-        Relationships: []
-      }
       scores: {
         Row: {
           created_at: string
+          gamemode: string
           id: number
-          input_id: number
-          mode_id: number
+          input_type: string
           score: number
           user_id: number
         }
         Insert: {
           created_at?: string
+          gamemode: string
           id?: number
-          input_id: number
-          mode_id: number
+          input_type: string
           score: number
           user_id: number
         }
         Update: {
           created_at?: string
+          gamemode?: string
           id?: number
-          input_id?: number
-          mode_id?: number
+          input_type?: string
           score?: number
           user_id?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "scores_mode_id_fkey"
-            columns: ["mode_id"]
-            isOneToOne: false
-            referencedRelation: "gamemodes"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "scores_user_id_fkey"
             columns: ["user_id"]
