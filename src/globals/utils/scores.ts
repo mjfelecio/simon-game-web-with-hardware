@@ -1,16 +1,26 @@
 import { supabase } from "@/globals/libs/db";
-import type { Tables, TablesInsert, TablesUpdate } from "@/globals/types/database";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/globals/types/database";
+import type { ScoreView } from "@/globals/types/simon";
 
 export type Score = Tables<"scores">;
 export type ScoreInsert = TablesInsert<"scores">;
 export type ScoreUpdate = TablesUpdate<"scores">;
 
+export const mapScore = (
+  s: Score & { users: { username: string } },
+): ScoreView => ({
+  ...s,
+  username: s.users.username ?? null,
+});
+
 /**
  * Create a new score entry.
  */
-export const createScore = async (
-  score: ScoreInsert,
-): Promise<Score> => {
+export const createScore = async (score: ScoreInsert): Promise<Score> => {
   const { data, error } = await supabase
     .from("scores")
     .insert(score)
@@ -27,12 +37,10 @@ export const createScore = async (
 /**
  * Fetch a score by its primary key.
  */
-export const getScoreById = async (
-  id: number,
-): Promise<Score | null> => {
+export const getScoreById = async (id: number): Promise<Score | null> => {
   const { data, error } = await supabase
     .from("scores")
-    .select("*")
+    .select("*, users(username)")
     .eq("id", id)
     .maybeSingle();
 
@@ -40,23 +48,23 @@ export const getScoreById = async (
     throw error;
   }
 
-  return data;
+  return data ? mapScore(data) : null;
 };
 
 /**
  * Fetch all scores.
  */
-export const getScores = async (): Promise<Score[]> => {
+export const getScores = async () => {
   const { data, error } = await supabase
     .from("scores")
-    .select("*")
+    .select("*, users(username)")
     .order("score", { ascending: false });
 
   if (error) {
     throw error;
   }
 
-  return data;
+  return data.map(mapScore);
 };
 
 /**
@@ -68,7 +76,7 @@ export const getTopScoresByGameMode = async (
 ): Promise<Score[]> => {
   const { data, error } = await supabase
     .from("scores")
-    .select("*")
+    .select("*, users(username)")
     .eq("gamemode", gamemode)
     .order("score", { ascending: false })
     .limit(limit);
@@ -77,18 +85,16 @@ export const getTopScoresByGameMode = async (
     throw error;
   }
 
-  return data;
+  return data.map(mapScore);
 };
 
 /**
  * Fetch all scores submitted by a user.
  */
-export const getScoresByUserId = async (
-  userId: number,
-): Promise<Score[]> => {
+export const getScoresByUserId = async (userId: number): Promise<Score[]> => {
   const { data, error } = await supabase
     .from("scores")
-    .select("*")
+    .select("*, users(username)")
     .eq("user_id", userId)
     .order("score", { ascending: false });
 
@@ -96,7 +102,7 @@ export const getScoresByUserId = async (
     throw error;
   }
 
-  return data;
+  return data.map(mapScore);
 };
 
 /**
@@ -113,7 +119,7 @@ export const getLeaderboard = async ({
 }): Promise<Score[]> => {
   let query = supabase
     .from("scores")
-    .select("*")
+    .select("*, users(username)")
     .order("score", { ascending: false })
     .limit(limit);
 
@@ -131,7 +137,7 @@ export const getLeaderboard = async ({
     throw error;
   }
 
-  return data;
+  return data.map(mapScore);
 };
 
 /**
@@ -159,10 +165,7 @@ export const updateScore = async (
  * Delete a score by ID.
  */
 export const deleteScore = async (id: number): Promise<void> => {
-  const { error } = await supabase
-    .from("scores")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("scores").delete().eq("id", id);
 
   if (error) {
     throw error;
@@ -190,8 +193,7 @@ export const submitScore = async (
 
   const createdScore = await createScore(score);
 
-  const isPersonalBest =
-    !bestScore || createdScore.score > bestScore.score;
+  const isPersonalBest = !bestScore || createdScore.score > bestScore.score;
 
   return {
     score: createdScore,

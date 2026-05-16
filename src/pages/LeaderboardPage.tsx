@@ -6,11 +6,11 @@ import StatCard from "@/globals/components/StatCard";
 import { calculateAvgScore } from "@/globals/utils";
 import { getScores } from "@/globals/utils/scores";
 import { useEffect, useState } from "react";
-import type { Score } from "@/globals/types/simon";
+import type { ScoreView } from "@/globals/types/simon";
 
 const LeaderboardPage = () => {
   const navigate = useNavigate();
-  const [topScores, setTopScores] = useState<Score[]>([]);
+  const [topScores, setTopScores] = useState<ScoreView[]>([]);
 
   // Fetch top 10 scores sorted by level/score descending
   // NOTE: Currently, this fetches all scores for now
@@ -79,7 +79,7 @@ const LeaderboardPage = () => {
                     {index + 1}
                   </span>
                   <div>
-                    <p className="font-bold text-white">{score.user_id}</p>
+                    <p className="font-bold text-white">{score.username}</p>
                     <p className="text-xs text-slate-500">
                       {new Date(score.created_at).toLocaleDateString()}
                     </p>

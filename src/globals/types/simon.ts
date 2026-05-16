@@ -1,6 +1,7 @@
 import type { Tables } from "@/globals/types/database";
 
 export type Score = Tables<"scores">
+export type ScoreView = Score & { username: string }
 
 export type GameMode =
   | "classic"
