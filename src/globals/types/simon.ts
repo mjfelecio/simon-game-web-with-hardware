@@ -12,6 +12,11 @@ export type GameMode =
   | "entropy"
   | "ghost";
 
+export type InputType =
+  | "mouse"
+  | "keyboard"
+  | "arduino"
+
 export type GameState =
   | "not-started"
   | "sequence"

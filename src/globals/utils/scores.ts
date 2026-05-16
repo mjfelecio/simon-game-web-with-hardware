@@ -105,41 +105,33 @@ export const getScoresByUserId = async (userId: number): Promise<Score[]> => {
   return data.map(mapScore);
 };
 
-/**
- * Fetch top scores for a specific game mode and input type.
- */
-export const getLeaderboard = async ({
-  gamemode,
-  inputType,
-  limit = 10,
-}: {
+export const getLeaderboard = async (filters?: {
   gamemode?: string;
-  inputType?: string;
+  input_type?: string;
   limit?: number;
-}): Promise<Score[]> => {
+}) => {
   let query = supabase
     .from("scores")
     .select("*, users(username)")
-    .order("score", { ascending: false })
-    .limit(limit);
+    .order("score", { ascending: false });
 
-  if (gamemode) {
-    query = query.eq("gamemode", gamemode);
+  if (filters?.gamemode) {
+    query = query.eq("gamemode", filters.gamemode);
   }
 
-  if (inputType) {
-    query = query.eq("input_type", inputType);
+  if (filters?.input_type) {
+    query = query.eq("input_type", filters.input_type);
+  }
+
+  if (filters?.limit) {
+    query = query.limit(filters.limit);
   }
 
   const { data, error } = await query;
-
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   return data.map(mapScore);
 };
-
 /**
  * Update an existing score.
  */
