@@ -1,4 +1,4 @@
-import { SESSION_STORAGE_KEY } from "@/globals/constants/auth";
+import { SESSION_STORAGE_PLAYER_KEY } from "@/features/auth/constants/auth";
 import type { User } from "@/globals/types/auth";
 
 /**
@@ -9,7 +9,7 @@ export const getStoredUser = (): User | null => {
     return null;
   }
 
-  const storedUser = sessionStorage.getItem(SESSION_STORAGE_KEY);
+  const storedUser = sessionStorage.getItem(SESSION_STORAGE_PLAYER_KEY);
 
   if (!storedUser) {
     return null;
@@ -30,5 +30,5 @@ export const logout = () => {
     return;
   }
 
-  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_PLAYER_KEY);
 };

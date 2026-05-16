@@ -1,18 +1,24 @@
-"use client";
-
 import BaseModal from "@/globals/components/layouts/BaseModal";
-import { SESSION_STORAGE_KEY } from "@/globals/constants/auth";
 import { supabase } from "@/globals/libs/db";
 import type { User } from "@/globals/types/auth";
 import { useState } from "react";
+import { useAuth } from "@/features/auth/components/AuthProvider";
 
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onLogin?: (user: User) => void;
+  persistent?: boolean;
 };
 
-const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
+const LoginModal = ({
+  isOpen,
+  onClose,
+  onLogin,
+  persistent = false,
+}: LoginModalProps) => {
+  const { login } = useAuth();
+
   const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,8 +68,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
       }
 
       // Persist user session in browser storage
-      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
-
+      login(user);
       // Notify parent
       onLogin?.(user);
 
@@ -83,12 +88,21 @@ const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} className="max-w-md">
+    <BaseModal
+      isOpen={isOpen}
+      showCloseButton={!persistent}
+      onClose={persistent ? () => {} : (onClose ?? (() => {}))}
+      className="max-w-md"
+    >
       <div className="space-y-8">
         <div className="space-y-3 text-center">
-          <h2 className="text-3xl font-bold text-white">Login</h2>
+          <h2 className="text-3xl tracking-wide font-bold text-white">
+            {persistent ? "Welcome" : "Login"}
+          </h2>
           <p className="text-sm text-white/60">
-            Enter your username to continue.
+            {persistent
+              ? "Enter a username to start playing and save your scores."
+              : "Enter your username to continue."}
           </p>
         </div>
 

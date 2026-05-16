@@ -5,7 +5,7 @@ import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
-import { getStoredUser } from "@/globals/utils/auth";
+import { getStoredUser } from "@/features/auth/utils/auth";
 
 export default function useSimonGame() {
   const config = useGameMode();

@@ -2,12 +2,13 @@ import LoginModal from "@/features/title/components/LoginModal";
 import ManualModal from "@/features/title/components/ManualModal";
 import Button from "@/globals/components/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
-import { getStoredUser } from "@/globals/utils/auth";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useAuth } from "@/features/auth/components/AuthProvider";
 
 const TitlePage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth(); 
 
   const [activeModal, setActiveModal] = useState<"manual" | "login" | null>(
     null,
@@ -24,15 +25,13 @@ const TitlePage = () => {
   }, [navigate]);
 
   const handleAuth = useCallback(() => {
-    const user = getStoredUser();
-
-    if (!user) {
+    if (!isAuthenticated) {
       setActiveModal("login");
       return;
     }
 
     handleStartGame();
-  }, [handleStartGame]);
+  }, [isAuthenticated, handleStartGame]);
 
   return (
     <PageWrapper className="relative flex flex-col justify-between p-8 md:p-16 bg-slate-950 overflow-hidden">
