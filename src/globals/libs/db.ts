@@ -1,7 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Score } from '@/globals/types/simon';
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from "database.types"
+import type { Database } from "@/globals/types/database"
 
 export class SimonDatabase extends Dexie {
   scores!: EntityTable<Score, 'id'>;

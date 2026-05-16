@@ -1,16 +1,38 @@
+import LoginModal from "@/features/title/components/LoginModal";
 import ManualModal from "@/features/title/components/ManualModal";
+import Button from "@/globals/components/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
-import { useState } from "react";
-import { Link } from "react-router";
+import { getStoredUser } from "@/globals/utils/auth";
+import { useCallback, useState } from "react";
+import { Link, useNavigate } from "react-router";
 
 const TitlePage = () => {
-  const [isManualOpen, setIsManualOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const [activeModal, setActiveModal] = useState<"manual" | "login" | null>(
+    null,
+  );
 
   const date = new Date().toLocaleString("en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
+
+  const handleStartGame = useCallback(() => {
+    navigate("/mode");
+  }, [navigate]);
+
+  const handleAuth = useCallback(() => {
+    const user = getStoredUser();
+
+    if (!user) {
+      setActiveModal("login");
+      return;
+    }
+
+    handleStartGame();
+  }, [handleStartGame]);
 
   return (
     <PageWrapper className="relative flex flex-col justify-between p-8 md:p-16 bg-slate-950 overflow-hidden">
@@ -74,8 +96,8 @@ const TitlePage = () => {
 
         {/* Action Buttons - Clustered in the bottom right */}
         <nav className="flex flex-col items-center md:items-end gap-4 w-full max-w-xs">
-          <Link
-            to="/mode"
+          <Button
+            onClick={handleAuth}
             className="group relative md:w-full overflow-hidden bg-emerald-500 px-4 py-2 md:px-8 md:py-6 transition-all hover:-translate-y-1 active:translate-y-0 shadow-[8px_8px_0px_rgba(16,185,129,0.2)]"
           >
             <div className="flex items-center justify-between">
@@ -88,7 +110,7 @@ const TitlePage = () => {
             </div>
             {/* Glossy sweep */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-linear-to-r from-transparent via-white/40 to-transparent" />
-          </Link>
+          </Button>
 
           <div className="flex gap-2 w-full">
             <Link
@@ -98,7 +120,7 @@ const TitlePage = () => {
               Rankings
             </Link>
             <button
-              onClick={() => setIsManualOpen(true)}
+              onClick={() => setActiveModal("manual")}
               className="text-[8px] md:text-[10px] flex-1 border border-white/10 bg-white/5 py-2 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
             >
               Manual
@@ -108,8 +130,14 @@ const TitlePage = () => {
       </footer>
 
       <ManualModal
-        isOpen={isManualOpen}
-        onClose={() => setIsManualOpen(false)}
+        isOpen={activeModal === "manual"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <LoginModal
+        isOpen={activeModal === "login"}
+        onClose={() => setActiveModal(null)}
+        onLogin={handleStartGame}
       />
     </PageWrapper>
   );
