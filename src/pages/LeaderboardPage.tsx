@@ -1,19 +1,27 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/globals/libs/db";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import Button from "@/globals/components/Button";
 import { useNavigate } from "react-router";
 import { cn } from "@/globals/libs/styleUtils";
 import StatCard from "@/globals/components/StatCard";
 import { calculateAvgScore } from "@/globals/utils";
+import { getScores } from "@/globals/utils/scores";
+import { useEffect, useState } from "react";
+import type { Score } from "@/globals/types/simon";
 
 const LeaderboardPage = () => {
   const navigate = useNavigate();
+  const [topScores, setTopScores] = useState<Score[]>([]);
 
   // Fetch top 10 scores sorted by level/score descending
-  const topScores = useLiveQuery(() =>
-    db.scores.orderBy("score").reverse().limit(10).toArray(),
-  );
+  // NOTE: Currently, this fetches all scores for now
+  useEffect(() => {
+    async function fetchScores() {
+      const scores = (await getScores()) ?? [];
+      setTopScores(scores);
+    }
+
+    fetchScores();
+  }, []);
 
   return (
     <PageWrapper className="flex flex-col items-center">
@@ -30,8 +38,11 @@ const LeaderboardPage = () => {
       {/* Stats Overview (Placeholder for future modes) */}
       <div className="grid w-full max-w-2xl grid-cols-3 gap-4 mb-8">
         <StatCard label="Total Games" value={topScores?.length || 0} />
-        <StatCard label="Best Level" value={topScores?.[0]?.level || 0} />
-        <StatCard label="Avg. Score" value={calculateAvgScore(topScores || [])} />
+        <StatCard label="Best Level" value={topScores[0]?.score || 0} />
+        <StatCard
+          label="Avg. Score"
+          value={calculateAvgScore(topScores || [])}
+        />
       </div>
 
       {/* Leaderboard Table */}
@@ -68,18 +79,18 @@ const LeaderboardPage = () => {
                     {index + 1}
                   </span>
                   <div>
-                    <p className="font-bold text-white">{score.playerName}</p>
+                    <p className="font-bold text-white">{score.user_id}</p>
                     <p className="text-xs text-slate-500">
-                      {new Date(score.achievedAt).toLocaleDateString()}
+                      {new Date(score.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-black text-white italic">
-                    LVL {score.level}
+                    LVL {score.score}
                   </p>
                   <p className="text-[10px] uppercase tracking-widest text-slate-400">
-                    {score.mode}
+                    {score.gamemode}
                   </p>
                 </div>
               </div>

@@ -1,11 +1,6 @@
-export type Score = {
-  id?: number;
-  playerName: string;
-  score: number;
-  level: number;
-  mode: GameMode;
-  achievedAt: number;
-};
+import type { Tables } from "@/globals/types/database";
+
+export type Score = Tables<"scores">
 
 export type GameMode =
   | "classic"
