@@ -5,9 +5,11 @@ import { ArrowRight, Lock } from "lucide-react";
 import { MODES, type ModeConfig } from "@/features/mode/constants/mode-config";
 import { useState } from "react";
 import ModeConfigModal from "@/features/mode/components/ModeConfigModal";
+import { useTransition } from "@/globals/providers/TransitionProvider";
 
 const ModeSelectionPage = () => {
   const navigate = useNavigate();
+  const { startTransition } = useTransition();
 
   const [selectedMode, setSelectedMode] = useState<ModeConfig | null>(null);
 
@@ -15,7 +17,7 @@ const ModeSelectionPage = () => {
     if (mode.id === "static") {
       setSelectedMode(mode);
     } else {
-      navigate(`/play?mode=${mode.id}`);
+      navigateWithTransition(`/play?mode=${mode.id}`);
     }
   };
 
@@ -25,8 +27,16 @@ const ModeSelectionPage = () => {
       ...(settings.goal && { goal: settings.goal.toString() }),
     }).toString();
 
-    navigate(`/play?${query}`);
+    navigateWithTransition(`/play?${query}`);
     setSelectedMode(null);
+  };
+
+  const navigateWithTransition = (path: string) => {
+    startTransition("Initializing sequence...", 2000);
+
+    setTimeout(() => {
+      navigate(path);
+    }, 650);
   };
 
   return (
