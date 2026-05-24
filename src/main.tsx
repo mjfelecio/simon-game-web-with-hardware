@@ -12,12 +12,14 @@ import {
   TransitionOverlay,
   TransitionProvider,
 } from "@/globals/providers/TransitionProvider";
+import { Toaster } from "react-hot-toast";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <AuthGuard>
         <TransitionProvider>
+          <Toaster />
           <BrowserRouter>
             <Routes>
               {/* Main Layout */}
@@ -29,7 +31,6 @@ createRoot(document.getElementById("root")!).render(
               </Route>
             </Routes>
           </BrowserRouter>
-
           <TransitionOverlay />
         </TransitionProvider>
       </AuthGuard>
