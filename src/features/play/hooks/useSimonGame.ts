@@ -6,6 +6,7 @@ import useSimonAudio from "./useSimonAudio";
 import type { SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
 import { getStoredUser } from "@/features/auth/utils/auth";
+import { toastPromise, toastWarning } from "@/globals/utils/toast";
 
 export default function useSimonGame() {
   const config = useGameMode();
@@ -38,6 +39,62 @@ export default function useSimonGame() {
     [config.mode, audio, core],
   );
 
+  const submitScoreWithRetry = useCallback(async () => {
+    const user = getStoredUser();
+
+    if (!user) {
+      toastWarning("Login required", {
+        description: "Please login to submit your score.",
+      });
+
+      return;
+    }
+
+    let retryAttempts = 3;
+
+    const executeSubmission = async (): Promise<void> => {
+      try {
+        await submitScore({
+          user_id: user.id,
+          gamemode: config.mode,
+          input_type: "mouse",
+          score: core.level,
+        });
+      } catch (error) {
+        retryAttempts--;
+
+        if (retryAttempts <= 0) {
+          throw error;
+        }
+
+        return executeSubmission();
+      }
+    };
+
+    await toastPromise(executeSubmission(), {
+      loading: {
+        title: "Submitting score...",
+        description: "Syncing with leaderboard",
+      },
+
+      success: {
+        title: "Score submitted",
+        description: `Reached level ${core.level}`,
+      },
+
+      error: {
+        title: "Submission failed",
+        description: "Could not sync your score.",
+        action: {
+          label: "Retry",
+          onClick: () => {
+            submitScoreWithRetry();
+          },
+        },
+      },
+    });
+  }, [config.mode, core.level]);
+
   const handleInput = useCallback(
     async (input: SimonButtonType) => {
       if (core.status !== "playing") return;
@@ -54,46 +111,12 @@ export default function useSimonGame() {
       // Check for Loss
       if (input !== core.sequence[nextIndex]) {
         core.setStatus("lose");
+
         await delay(1000);
+
         audio.playLoseDissonance();
 
-        const user = getStoredUser();
-
-        if (!user) {
-          alert("Please login to submit your scores.");
-          console.warn("Score submission failed: User is not logged in.");
-          return;
-        }
-
-        // Retry until success or all retry attempts exhausted
-        let retry_attempts = 3; 
-        let shouldRetry = true;
-
-        while (shouldRetry && retry_attempts !== 0) {
-          try {
-            await submitScore({
-              user_id: user.id,
-              gamemode: config.mode,
-              input_type: "mouse",
-              score: core.level,
-            });
-
-            // Success, stop retrying
-            shouldRetry = false;
-          } catch (error) {
-            retry_attempts--;
-
-            if (error instanceof Error) {
-              console.error("Score submission failed:", error.message);
-            } else {
-              console.error("Failed to submit score due to an unknown error \n", error);
-            }
-
-            shouldRetry = confirm(
-              "Failed to submit score. Would you like to retry?",
-            );
-          }
-        }
+        await submitScoreWithRetry();
 
         return;
       }
@@ -122,7 +145,7 @@ export default function useSimonGame() {
         }
       }
     },
-    [core, config, audio, playSequence],
+    [core, config, audio, playSequence, submitScoreWithRetry],
   );
 
   const startGame = () => {
