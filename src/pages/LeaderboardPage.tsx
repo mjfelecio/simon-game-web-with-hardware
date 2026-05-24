@@ -81,7 +81,7 @@ const LeaderboardPage = () => {
       {/* Stats */}
       <div className="grid w-full max-w-2xl grid-cols-3 gap-4 mb-8">
         <StatCard label="Total Games" value={topScores.length} />
-        <StatCard label="Best Level" value={topScores[0]?.score || 0} />
+        <StatCard label="Best Level" value={topScores[0]?.level || 0} />
         <StatCard label="Avg. Score" value={calculateAvgScore(topScores)} />
       </div>
 
@@ -133,7 +133,7 @@ const LeaderboardPage = () => {
 
                 <div className="text-right">
                   <p className="text-xl font-black text-white italic">
-                    LVL {score.score}
+                    LVL {score.level}
                   </p>
                   <p className="text-[10px] uppercase text-slate-400">
                     {score.gamemode}

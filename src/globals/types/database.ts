@@ -45,7 +45,7 @@ export type Database = {
           gamemode: string
           id: number
           input_type: string
-          score: number
+          level: number
           user_id: number
         }
         Insert: {
@@ -53,7 +53,7 @@ export type Database = {
           gamemode: string
           id?: number
           input_type: string
-          score: number
+          level: number
           user_id: number
         }
         Update: {
@@ -61,7 +61,7 @@ export type Database = {
           gamemode?: string
           id?: number
           input_type?: string
-          score?: number
+          level?: number
           user_id?: number
         }
         Relationships: [

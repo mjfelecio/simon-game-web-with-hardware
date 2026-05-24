@@ -78,7 +78,7 @@ export const getTopScoresByGameMode = async (
     .from("scores")
     .select("*, users(username)")
     .eq("gamemode", gamemode)
-    .order("score", { ascending: false })
+    .order("level", { ascending: false })
     .limit(limit);
 
   if (error) {
@@ -96,7 +96,7 @@ export const getScoresByUserId = async (userId: number): Promise<Score[]> => {
     .from("scores")
     .select("*, users(username)")
     .eq("user_id", userId)
-    .order("score", { ascending: false });
+    .order("level", { ascending: false });
 
   if (error) {
     throw error;
@@ -113,7 +113,7 @@ export const getLeaderboard = async (filters?: {
   let query = supabase
     .from("scores")
     .select("*, users(username)")
-    .order("score", { ascending: false });
+    .order("level", { ascending: false });
 
   if (filters?.gamemode) {
     query = query.eq("gamemode", filters.gamemode);
@@ -175,17 +175,17 @@ export const submitScore = async (
 }> => {
   const { data: bestScore } = await supabase
     .from("scores")
-    .select("score")
+    .select("level")
     .eq("user_id", score.user_id)
     .eq("gamemode", score.gamemode)
     .eq("input_type", score.input_type)
-    .order("score", { ascending: false })
+    .order("level", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   const createdScore = await createScore(score);
 
-  const isPersonalBest = !bestScore || createdScore.score > bestScore.score;
+  const isPersonalBest = !bestScore || createdScore.level > bestScore.level;
 
   return {
     score: createdScore,

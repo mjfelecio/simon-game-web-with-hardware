@@ -58,7 +58,7 @@ export default function useSimonGame() {
           user_id: user.id,
           gamemode: config.mode,
           input_type: "mouse",
-          score: core.level,
+          level: core.level,
         });
       } catch (error) {
         retryAttempts--;

@@ -6,6 +6,6 @@ export function delay(ms: number) {
 
 export const calculateAvgScore = (scores: Score[]) => {
   if (scores.length === 0) return 0;
-  const sum = scores.reduce((acc, curr) => acc + curr.score, 0);
+  const sum = scores.reduce((acc, curr) => acc + curr.level, 0);
   return Math.round(sum / scores.length);
 };
