@@ -7,4 +7,5 @@ export const STATUS_CONFIG: Record<GameState, { label: string; color: string }> 
   won: { label: "Nice!", color: "text-blue-400" },
   lose: { label: "Game Over", color: "text-red-500" },
   paused: { label: "Paused", color: "text-gray-400" },
+  victory: { label: "You won!", color: "text-blue-400" },
 };
