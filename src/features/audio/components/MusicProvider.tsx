@@ -44,7 +44,7 @@ export function MusicProvider({ children }: Props) {
             const elapsed = now - start;
             const progress = Math.min(elapsed / duration, 1);
 
-            audio.volume = from + (to - from) * progress;
+            audio.volume = Math.max(from + (to - from) * progress, 0);
 
             if (progress < 1) {
               fadeFrameRef.current = requestAnimationFrame(tick);
