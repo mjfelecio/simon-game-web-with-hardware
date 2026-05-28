@@ -14,6 +14,7 @@ import {
 } from "@/globals/providers/TransitionProvider";
 import { Toaster } from "react-hot-toast";
 import { MusicProvider } from "@/features/audio/components/MusicProvider";
+import WelcomeModal from "@/features/title/components/WelcomeModal";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -22,6 +23,7 @@ createRoot(document.getElementById("root")!).render(
         <MusicProvider>
           <TransitionProvider>
             <Toaster />
+            <WelcomeModal />
             <BrowserRouter>
               <Routes>
                 {/* Main Layout */}
