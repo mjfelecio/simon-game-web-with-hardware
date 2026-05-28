@@ -1,11 +1,19 @@
 import type { SimonButtonType } from "@/globals/types/simon";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { setupSerialConnection } from "simple-web-serial";
+
+/** 
+* Weird bug (or is it intended?), either way it isn't clear from the error message
+* So SerialConnection is a class but I need it as a type
+* If I just import it directly without the type directive,
+* they can't see the SerialConnection and crashes the app
+* Whereas I add the type, it doesn't crash anymore.
+*/ 
+import { type SerialConnection, setupSerialConnection } from "simple-web-serial";
 
 /**
  * Current state of the Arduino connection.
  */
-export type ConnectionStatus = "idle" | "loading" | "connected" | "error";
+export type ConnectionStatus = "idle" | "loading" | "connected" | "error" | "unsupported";
 
 const ACK_TIMEOUT_MS = 5000;
 const HANDSHAKE_RETRY_DELAY_MS = 1500;
@@ -14,12 +22,18 @@ const MAX_HANDSHAKE_ATTEMPTS = 3;
 const HEARTBEAT_INTERVAL_MS = 3000;
 const HEARTBEAT_TIMEOUT_MS = 7000;
 
+let isUnsupportedBrowser = false;
 /**
  * Shared serial connection instance.
  */
-const connection = setupSerialConnection({
-  baudRate: 57600,
-});
+let connection: SerialConnection
+try {
+	connection = setupSerialConnection({
+		baudRate: 57600,
+	});
+} catch {
+  isUnsupportedBrowser = true;
+}
 
 /**
  * Valid button colors accepted from the Arduino.
@@ -142,6 +156,11 @@ export default function useArduinoInput(
    * Registers serial event listeners once.
    */
   useEffect(() => {
+    if (!connection || isUnsupportedBrowser) {
+      setStatus("unsupported");
+      return;
+    }
+
     /**
      * Fired when the Arduino acknowledges the handshake.
      */
@@ -189,8 +208,10 @@ export default function useArduinoInput(
    * Opens the serial connection and starts the handshake.
    */
   const connect = useCallback(async () => {
+    if (!connection) return;
     if (statusRef.current === "loading") return;
     if (statusRef.current === "connected") return;
+    if (statusRef.current === "unsupported") return;
 
     setStatus("loading");
     handshakeAttemptRef.current = 0;
