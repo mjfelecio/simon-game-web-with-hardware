@@ -5,8 +5,14 @@ import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "@/features/auth/components/AuthProvider";
+import usePlayBGMusicOnLoad from "@/features/audio/hooks/usePlayBGMusicOnLoad";
+import { MUSIC } from "@/features/audio/constants/music";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { SFX } from "@/features/audio/constants/sfx";
 
 const TitlePage = () => {
+  usePlayBGMusicOnLoad(MUSIC.MENU)
+
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth(); 
 
@@ -70,7 +76,7 @@ const TitlePage = () => {
             Simon
           </h1>
           <div className="absolute -bottom-4 left-2 flex items-center gap-4">
-            <span className="text-4xl md:text-6xl text-white font-header tracking-widest uppercase italic drop-shadow-[4px_4px_0px_#eb5353]">
+            <span className="animate-pulse text-4xl md:text-6xl text-white font-header tracking-widest uppercase italic drop-shadow-[4px_4px_0px_#eb5353]">
               Game
             </span>
             <div className="h-1 w-32 bg-linear-to-r from-red-500 via-yellow-400 to-emerald-500" />
@@ -96,6 +102,7 @@ const TitlePage = () => {
         {/* Action Buttons - Clustered in the bottom right */}
         <nav className="flex flex-col items-center md:items-end gap-4 w-full max-w-xs">
           <Button
+          onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
             onClick={handleAuth}
             className="group relative md:w-full overflow-hidden bg-emerald-500 px-4 py-2 md:px-8 md:py-6 transition-all hover:-translate-y-1 active:translate-y-0 shadow-[8px_8px_0px_rgba(16,185,129,0.2)]"
           >

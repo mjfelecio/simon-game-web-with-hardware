@@ -23,7 +23,7 @@ class MusicPlayer {
   /**
    * Get cached music instance.
    */
-  private getAudio(src: string) {
+  getAudio(src: string) {
     if (!this.cache.has(src)) {
       this.load(src);
     }
