@@ -20,7 +20,7 @@ const HardwareModal = ({ isOpen, onClose, status, onConnect }: Props) => {
   const isUnsupported = status === "unsupported";
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal showCloseButton={false} isOpen={isOpen} onClose={onClose}>
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-wider text-white">

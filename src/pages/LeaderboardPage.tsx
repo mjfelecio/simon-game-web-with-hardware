@@ -153,7 +153,11 @@ const LeaderboardPage = () => {
           onClick={() => navigate("/")}
           variant="secondary"
         />
-        <Button size="sm" text="Play Again" onClick={() => navigate("/play")} />
+        <Button
+          size="sm"
+          text="Play Again"
+          onClick={() => navigate("/play")}
+        />
       </div>
     </PageWrapper>
   );

@@ -5,7 +5,7 @@ type PlaySfxOptions = {
 
 class SfxPlayer {
   private cache = new Map<string, HTMLAudioElement[]>();
-  private lastPlayed = new Map<string, number>();
+  // private lastPlayed = new Map<string, number>();
 
   /**
    * Preload a sound into memory.
@@ -37,10 +37,10 @@ class SfxPlayer {
     }
 
     // Debouncing
-    const now = Date.now();
-    const last = this.lastPlayed.get(src) ?? 0;
-    if (now - last < 40) return;
-    this.lastPlayed.set(src, now);
+    // const now = Date.now();
+    // const last = this.lastPlayed.get(src) ?? 0;
+    // if (now - last < 40) return;
+    // this.lastPlayed.set(src, now);
 
     const pool = this.cache.get(src);
 

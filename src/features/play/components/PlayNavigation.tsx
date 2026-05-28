@@ -1,3 +1,5 @@
+import { SFX } from "@/features/audio/constants/sfx";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { cn } from "@/globals/libs/styleUtils";
 
 type Props = {
@@ -11,6 +13,8 @@ const PlayNavigation = ({ isConnected, onOpenMenu, onOpenHardware }: Props) => {
     <nav className="w-full z-50 flex items-center justify-between gap-4 p-6 xl:fixed top-0 left-0 right-0">
       <button
         onClick={onOpenMenu}
+        onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+        onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
         className="group flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/40 backdrop-blur-md transition-all hover:border-white/30 hover:text-white"
       >
         <span className="text-xl transition-transform group-hover:-translate-x-0.5">
@@ -20,6 +24,8 @@ const PlayNavigation = ({ isConnected, onOpenMenu, onOpenHardware }: Props) => {
 
       <button
         onClick={onOpenHardware}
+        onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+        onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
         className={cn(
           "flex items-center gap-3 rounded-xl border px-5 py-2.5 backdrop-blur-md transition-all",
           isConnected

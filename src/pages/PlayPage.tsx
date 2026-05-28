@@ -14,6 +14,8 @@ import useSimonGame from "@/features/play/hooks/useSimonGame";
 import Button from "@/globals/components/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import { STATUS_CONFIG } from "@/features/play/constants";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { SFX } from "@/features/audio/constants/sfx";
 
 const PlayPage = () => {
   const game = useSimonGame();
@@ -74,13 +76,21 @@ const PlayPage = () => {
 
         <div className="flex items-center justify-center gap-4">
           {game.status === "not-started" ? (
-            <Button text="Start Sequence" onClick={game.startGame} size="sm" />
+            <Button
+              text="Start Sequence"
+              onClick={game.startGame}
+              onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              size="sm"
+            />
           ) : (
             <Button
               text="Reset System"
               size="sm"
               variant="danger"
               onClick={game.reset}
+              onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
             />
           )}
         </div>

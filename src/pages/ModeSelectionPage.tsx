@@ -6,6 +6,8 @@ import { MODES, type ModeConfig } from "@/features/mode/constants/mode-config";
 import { useState } from "react";
 import ModeConfigModal from "@/features/mode/components/ModeConfigModal";
 import { useTransition } from "@/globals/providers/TransitionProvider";
+import { SFX } from "@/features/audio/constants/sfx";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 
 const ModeSelectionPage = () => {
   const navigate = useNavigate();
@@ -67,6 +69,8 @@ const ModeSelectionPage = () => {
                   key={mode.id}
                   disabled={!isAvailable}
                   onClick={() => handleModeClick(mode)}
+                  onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+                  onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
                   className={cn(
                     "group relative flex items-center justify-between p-6 rounded-2xl border transition-all duration-300 w-full text-left",
                     isAvailable
