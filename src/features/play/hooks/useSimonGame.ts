@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { delay } from "@/globals/utils";
 import useGameMode from "./useGameMode";
 import useSimonCore from "./useSimonCore";
@@ -7,9 +7,12 @@ import type { SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
 import { getStoredUser } from "@/features/auth/utils/auth";
 import { toastPromise, toastWarning } from "@/globals/utils/toast";
+import { useMusic } from "@/features/audio/components/MusicProvider";
+import { MUSIC } from "@/features/audio/constants/music";
 
 export default function useSimonGame() {
   const config = useGameMode();
+  const { playMusic } = useMusic();
   const core = useSimonCore();
   const audio = useSimonAudio();
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
@@ -148,19 +151,32 @@ export default function useSimonGame() {
     [core, config, audio, playSequence, submitScoreWithRetry],
   );
 
-  const startGame = () => {
+  const resetGame = () => {
+    playMusic(MUSIC.BG, { volume: 0.4, loop: true });
+    core.resetGame();
+  };
+
+  const startGame = async () => {
+    playMusic(MUSIC.GAMEPLAY, { volume: 1, loop: true });
+
+    await delay(1000);
+
     const startSeq = core.generateNextSequence([]);
     core.setSequence(startSeq);
     core.setLevel(1);
     playSequence(startSeq);
   };
 
+  useEffect(() => {
+    return () => void playMusic(MUSIC.BG, { volume: 0.4, loop: true });
+  }, [playMusic]);
+
   return {
     ...core,
     activeButton,
     startGame,
     handleInput,
-    reset: core.resetGame,
+    reset: resetGame,
     mode: config.mode,
   };
 }

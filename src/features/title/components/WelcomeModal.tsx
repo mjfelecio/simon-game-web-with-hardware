@@ -12,7 +12,6 @@ export default function WelcomeModal() {
   const handleStart = async () => {
     await playMusic(MUSIC.BG, {
       volume: 0.4,
-      fadeDuration: 800,
 			loop: true
     });
 
