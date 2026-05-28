@@ -5,7 +5,7 @@ import {
   playTone,
   playWinMelody,
   playLoseDissonance,
-} from "@/globals/utils/audio";
+} from "@/features/audio/simonTones";
 import type { GameMode, SimonButtonType } from "@/globals/types/simon";
 import { delay } from "@/globals/utils";
 
