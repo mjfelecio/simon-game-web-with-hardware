@@ -1,11 +1,10 @@
-// @/features/play/hooks/useSimonAudio.ts
 import { useCallback } from "react";
 import {
   BUTTON_FREQUENCIES,
   playTone,
   playWinMelody,
   playLoseDissonance,
-} from "@/features/audio/simonTones";
+} from "@/features/audio/utils/simonTones";
 import type { GameMode, SimonButtonType } from "@/globals/types/simon";
 import { delay } from "@/globals/utils";
 
