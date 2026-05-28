@@ -1,3 +1,5 @@
+import { SFX } from "@/features/audio/constants/sfx";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { cn } from "@/globals/libs/styleUtils";
 
 export type Option = {
@@ -18,10 +20,19 @@ const Select = ({ value, onChange, options, className }: Props) => {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={cn(
-        "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none",
+        "w-full rounded-xl cursor-pointer border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none",
         "focus:border-white/20 transition",
-        className
+        className,
       )}
+      onMouseEnter={() => {
+        sfxPlayer.play(SFX.BTN_HOVER);
+      }}
+      onTouchStart={() => {
+        sfxPlayer.play(SFX.BTN_HOVER);
+      }}
+      onClick={() => {
+        sfxPlayer.play(SFX.BTN_CLICK);
+      }}
     >
       {options.map((opt) => (
         <option key={opt.value} value={opt.value} className="bg-slate-950">

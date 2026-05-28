@@ -152,7 +152,7 @@ export default function useSimonGame() {
   );
 
   const resetGame = () => {
-    playMusic(MUSIC.BG, { volume: 0.4, loop: true });
+    playMusic(MUSIC.BG, { volume: 0.2, loop: true });
     core.resetGame();
   };
 
@@ -168,7 +168,7 @@ export default function useSimonGame() {
   };
 
   useEffect(() => {
-    return () => void playMusic(MUSIC.BG, { volume: 0.4, loop: true });
+    return () => void playMusic(MUSIC.BG, { volume: 0.2, loop: true });
   }, [playMusic]);
 
   return {

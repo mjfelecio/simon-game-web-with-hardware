@@ -68,7 +68,10 @@ const ModeSelectionPage = () => {
                 <button
                   key={mode.id}
                   disabled={!isAvailable}
-                  onClick={() => handleModeClick(mode)}
+                  onClick={() => {
+                    sfxPlayer.play(SFX.BTN_CLICK)
+                    handleModeClick(mode)
+                  }}
                   onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
                   onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
                   className={cn(

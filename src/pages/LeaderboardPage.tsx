@@ -8,6 +8,8 @@ import { getLeaderboard } from "@/globals/utils/scores";
 import { useEffect, useState } from "react";
 import type { GameMode, InputType, ScoreView } from "@/globals/types/simon";
 import Select from "@/globals/components/Select";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { SFX } from "@/features/audio/constants/sfx";
 
 const GAMEMODES: { label: string; value: GameMode | "" }[] = [
   { label: "All Modes", value: "" },
@@ -110,6 +112,9 @@ const LeaderboardPage = () => {
                   "flex items-center justify-between px-6 py-4 hover:bg-white/5 transition",
                   index === 0 && "bg-yellow-500/5",
                 )}
+                onMouseEnter={
+                  () => sfxPlayer.play(SFX.LB_HOVER)
+                }
               >
                 <div className="flex items-center gap-4">
                   <span
