@@ -53,10 +53,11 @@ const Button = ({
 }: ButtonProps) => {
   return (
     <button
+      {...props}
       className={cn(buttonVariants({ variant, size, fullWidth }), className)}
-      onMouseOver={(e) => {
+      onMouseEnter={(e) => {
         sfxPlayer.play(SFX.BTN_HOVER);
-        props?.onMouseOver?.(e);
+        props?.onMouseEnter?.(e);
       }}
       onTouchStart={(e) => {
         sfxPlayer.play(SFX.BTN_HOVER);
@@ -66,7 +67,6 @@ const Button = ({
         sfxPlayer.play(SFX.BTN_CLICK);
         props?.onClick?.(e);
       }}
-      {...props}
     >
       {text || children}
     </button>

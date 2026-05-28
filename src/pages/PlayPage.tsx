@@ -79,7 +79,7 @@ const PlayPage = () => {
             <Button
               text="Start Sequence"
               onClick={game.startGame}
-              onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
               size="sm"
             />
@@ -89,7 +89,7 @@ const PlayPage = () => {
               size="sm"
               variant="danger"
               onClick={game.reset}
-              onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
             />
           )}

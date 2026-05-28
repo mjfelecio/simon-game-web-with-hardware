@@ -116,7 +116,7 @@ const TitlePage = () => {
           <div className="flex gap-2 w-full">
             <Link
               to="/leaderboard"
-              onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
               className="text-[8px] md:text-[10px] flex-1 border border-white/10 bg-white/5 py-2 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center"
             >
@@ -124,7 +124,7 @@ const TitlePage = () => {
             </Link>
             <button
               onClick={() => setActiveModal("manual")}
-              onMouseOver={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
               className="text-[8px] md:text-[10px] flex-1 border border-white/10 bg-white/5 py-2 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
             >
