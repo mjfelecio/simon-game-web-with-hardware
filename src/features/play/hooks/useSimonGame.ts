@@ -95,7 +95,7 @@ export default function useSimonGame() {
         },
       },
     });
-  }, [config.mode, core.level]);
+  }, [config.mode, core.level, user]);
 
   const handleInput = useCallback(
     async (input: SimonButtonType) => {

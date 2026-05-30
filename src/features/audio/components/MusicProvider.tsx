@@ -19,6 +19,7 @@ type MusicContextValue = {
   playMusic: (src: string, options?: PlayMusicOptions) => Promise<void>;
   stopMusic: () => Promise<void>;
   setVolume: (volume: number) => void;
+  isPlaying: () => boolean;
 };
 
 const MusicContext = createContext<MusicContextValue | null>(null);
@@ -136,12 +137,17 @@ export function MusicProvider({ children }: Props) {
     };
   }, []);
 
+  const isPlaying = useCallback(() => {
+    return !!currentAudioRef.current?.paused;
+  }, [])
+
   return (
     <MusicContext.Provider
       value={{
         playMusic,
         stopMusic,
         setVolume,
+        isPlaying
       }}
     >
       {children}
