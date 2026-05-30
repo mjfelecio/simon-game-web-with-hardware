@@ -1,27 +1,42 @@
+import { useState } from "react";
 import BaseModal from "@/globals/components/layouts/BaseModal";
 import { supabase } from "@/globals/libs/db";
-import type { User } from "@/globals/types/auth";
-import { useState } from "react";
 import { useAuth } from "@/features/auth/components/AuthProvider";
+import { useMusic } from "@/features/audio/components/MusicProvider";
+import { MUSIC } from "@/features/audio/constants/music";
+import type { User } from "@/globals/types/auth";
 
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onLogin?: (user: User) => void;
-  persistent?: boolean;
 };
 
 const LoginModal = ({
   isOpen,
   onClose,
   onLogin,
-  persistent = false,
 }: LoginModalProps) => {
-  const { login } = useAuth();
+  const { login, proceedAsGuest } = useAuth();
+  const { playMusic } = useMusic();
 
   const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const startGame = async () => {
+    await playMusic(MUSIC.BG, {
+      volume: 0.1,
+      loop: true,
+    });
+
+    onClose();
+  };
+
+  const handleGuestContinue = async () => {
+    proceedAsGuest();
+    await startGame();
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +52,6 @@ const LoginModal = ({
       setIsSubmitting(true);
       setError(null);
 
-      // Try to find an existing user
       const { data: existingUser, error: selectError } = await supabase
         .from("users")
         .select("*")
@@ -50,7 +64,6 @@ const LoginModal = ({
 
       let user = existingUser;
 
-      // If user doesn't exist, create one
       if (!user) {
         const { data: newUser, error: insertError } = await supabase
           .from("users")
@@ -67,21 +80,18 @@ const LoginModal = ({
         user = newUser;
       }
 
-      // Persist user session in browser storage
       login(user);
-      // Notify parent
       onLogin?.(user);
 
-      // Reset and close
       setUsername("");
-      onClose();
+
+      await startGame();
     } catch (err) {
+      console.error(err);
+
       if (err instanceof Error) {
-        console.error("Login failed:", err);
         setError(err.message ?? "Something went wrong.");
       }
-
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -90,54 +100,62 @@ const LoginModal = ({
   return (
     <BaseModal
       isOpen={isOpen}
-      showCloseButton={!persistent}
-      onClose={persistent ? () => {} : (onClose ?? (() => {}))}
+      onClose={() => {}}
+      showCloseButton={false}
       className="max-w-md"
     >
       <div className="space-y-8">
-        <div className="space-y-3 text-center">
-          <h2 className="text-3xl tracking-wide font-bold text-white">
-            {persistent ? "Welcome" : "Login"}
-          </h2>
-          <p className="text-sm text-white/60">
-            {persistent
-              ? "Enter a username to start playing and save your scores."
-              : "Enter your username to continue."}
+        {/* Welcome Section */}
+        <div className="space-y-3">
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400">
+            Welcome Player
+          </p>
+
+          <h1 className="text-4xl font-black italic uppercase text-white">
+            Simon Game
+          </h1>
+
+          <p className="text-sm leading-relaxed text-slate-400">
+            A modern arcade reinterpretation of the classic Simon memory game.
+            Built as a school project using React, Vite, Supabase, and Arduino
+            hardware integration.
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div className="space-y-2">
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-white/80"
-            >
-              Username
-            </label>
+        {/* Login */}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter username"
+            maxLength={20}
+            disabled={isSubmitting}
+            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 outline-none"
+          />
 
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. gamerXD420"
-              maxLength={20}
-              autoFocus
-              disabled={isSubmitting}
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors focus:border-white/20"
-            />
-          </div>
-
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-400">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={isSubmitting || username.trim().length < 3}
-            className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 disabled:opacity-50"
           >
-            {isSubmitting ? "Signing in..." : "Continue"}
+            {isSubmitting ? "Signing in..." : "Continue & Save Progress"}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={handleGuestContinue}
+          className="w-full text-sm text-slate-400 hover:text-white transition-colors"
+        >
+          Continue as Guest
+        </button>
       </div>
     </BaseModal>
   );

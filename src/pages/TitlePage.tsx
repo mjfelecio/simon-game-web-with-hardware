@@ -1,40 +1,23 @@
-import LoginModal from "@/features/title/components/LoginModal";
 import ManualModal from "@/features/title/components/ManualModal";
 import Button from "@/globals/components/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "@/features/auth/components/AuthProvider";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 
-const TitlePage = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  const [activeModal, setActiveModal] = useState<"manual" | "login" | null>(
-    null,
-  );
-
-  const date = new Date().toLocaleString("en-US", {
+const date = new Date().toLocaleString("en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
 
-  const handleStartGame = useCallback(() => {
-    navigate("/mode");
-  }, [navigate]);
+const TitlePage = () => {
+  const navigate = useNavigate();
 
-  const handleAuth = useCallback(() => {
-    if (!isAuthenticated) {
-      sfxPlayer.play(SFX.SHOW_MODAL);
-      setActiveModal("login");
-      return;
-    }
-
-    handleStartGame();
-  }, [isAuthenticated, handleStartGame]);
+  const [activeModal, setActiveModal] = useState<"manual" | "login" | null>(
+    "login",
+  );
 
   return (
     <PageWrapper className="relative flex flex-col justify-between p-8 md:p-16 bg-slate-950 overflow-hidden">
@@ -99,7 +82,7 @@ const TitlePage = () => {
         {/* Action Buttons - Clustered in the bottom right */}
         <nav className="flex flex-col items-center md:items-end gap-4 w-full max-w-xs">
           <Button
-            onClick={handleAuth}
+            onClick={() => navigate("/mode")}
             className="group relative md:w-full overflow-hidden bg-emerald-500 px-4 py-2 md:px-8 md:py-6 transition-all hover:-translate-y-1 active:translate-y-0 shadow-[8px_8px_0px_rgba(16,185,129,0.2)]"
           >
             <div className="flex items-center justify-between">
@@ -143,12 +126,6 @@ const TitlePage = () => {
       <ManualModal
         isOpen={activeModal === "manual"}
         onClose={() => setActiveModal(null)}
-      />
-
-      <LoginModal
-        isOpen={activeModal === "login"}
-        onClose={() => setActiveModal(null)}
-        onLogin={handleStartGame}
       />
     </PageWrapper>
   );

@@ -8,26 +8,19 @@ type AuthGuardProps = {
 };
 
 const AuthGuard = ({ children }: AuthGuardProps) => {
-  const { user, isLoading } = useAuth();
-	const isInTitleScreen = window.location.pathname === "/";
+  const { isAuthenticated, isAGuest, isLoading } = useAuth();
 
   // Avoid showing the login modal until session restoration completes.
   if (isLoading) {
     return <LoadingScreen text="Restoring session..." />;
   }
 
-	// Don't show modal if we are in title screen
-	if (isInTitleScreen) {
-		return children;
-	}
-
   return (
     <>
       {children}
 
       <LoginModal
-        isOpen={!user}
-        persistent
+        isOpen={!(isAuthenticated || isAGuest)}
         onClose={() => {}}
       />
     </>

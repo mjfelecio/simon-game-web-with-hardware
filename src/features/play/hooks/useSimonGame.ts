@@ -46,7 +46,7 @@ export default function useSimonGame() {
     const user = getStoredUser();
 
     if (!user) {
-      toastWarning("Login required", {
+      toastWarning("Score discarded", {
         description: "Please login to submit your score.",
       });
 
