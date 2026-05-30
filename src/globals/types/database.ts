@@ -46,7 +46,7 @@ export type Database = {
           id: number
           input_type: string
           level: number
-          user_id: number
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -54,7 +54,7 @@ export type Database = {
           id?: number
           input_type: string
           level: number
-          user_id: number
+          user_id: string
         }
         Update: {
           created_at?: string
@@ -62,7 +62,7 @@ export type Database = {
           id?: number
           input_type?: string
           level?: number
-          user_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -77,18 +77,18 @@ export type Database = {
       users: {
         Row: {
           created_at: string
-          id: number
-          username: string
+          id: string
+          username: string,
         }
         Insert: {
           created_at?: string
-          id?: number
-          username: string
+          id?: string
+          username: string,
         }
         Update: {
           created_at?: string
-          id?: number
-          username?: string
+          id?: string
+          username?: string,
         }
         Relationships: []
       }

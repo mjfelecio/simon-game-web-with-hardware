@@ -1,26 +1,24 @@
 import { useState } from "react";
 import BaseModal from "@/globals/components/layouts/BaseModal";
-import { supabase } from "@/globals/libs/db";
 import { useAuth } from "@/features/auth/components/AuthProvider";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
-import type { User } from "@/globals/types/auth";
+import { emailFromUsername } from "@/features/auth/constants/auth";
+import { InfoIcon } from "lucide-react";
 
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onLogin?: (user: User) => void;
 };
 
-const LoginModal = ({
-  isOpen,
-  onClose,
-  onLogin,
-}: LoginModalProps) => {
-  const { login, proceedAsGuest } = useAuth();
+const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
+  const { login, register, proceedAsGuest } = useAuth();
   const { playMusic } = useMusic();
 
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [isRegistering, setIsRegistering] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,59 +36,42 @@ const LoginModal = ({
     await startGame();
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const normalizedUsername = username.trim().toLowerCase();
+    setError(null);
 
-    if (normalizedUsername.length < 3) {
-      setError("Username must be at least 3 characters long.");
+    if (isRegistering && username.trim().length < 3) {
+      setError("Username must be at least 3 characters.");
       return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    const email = emailFromUsername(username);
+
     try {
       setIsSubmitting(true);
-      setError(null);
 
-      const { data: existingUser, error: selectError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("username", normalizedUsername)
-        .maybeSingle();
-
-      if (selectError) {
-        throw selectError;
+      if (isRegistering) {
+        await register(
+          email.trim().toLowerCase(),
+          password,
+          username.trim().toLowerCase(),
+        );
+      } else {
+        await login(username.trim().toLowerCase(), password);
       }
-
-      let user = existingUser;
-
-      if (!user) {
-        const { data: newUser, error: insertError } = await supabase
-          .from("users")
-          .insert({
-            username: normalizedUsername,
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        user = newUser;
-      }
-
-      login(user);
-      onLogin?.(user);
-
-      setUsername("");
 
       await startGame();
     } catch (err) {
-      console.error(err);
-
       if (err instanceof Error) {
-        setError(err.message ?? "Something went wrong.");
+        setError(err.message);
+      } else {
+        setError("Something went wrong.");
       }
     } finally {
       setIsSubmitting(false);
@@ -105,7 +86,6 @@ const LoginModal = ({
       className="max-w-md"
     >
       <div className="space-y-8">
-        {/* Welcome Section */}
         <div className="space-y-3">
           <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400">
             Welcome Player
@@ -117,42 +97,79 @@ const LoginModal = ({
 
           <p className="text-sm leading-relaxed text-slate-400">
             A modern arcade reinterpretation of the classic Simon memory game.
-            Built as a school project using React, Vite, Supabase, and Arduino
-            hardware integration.
           </p>
         </div>
 
-        {/* Login */}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username"
-            maxLength={20}
-            disabled={isSubmitting}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 outline-none"
-          />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-white/80"
+            >
+              Username
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+              maxLength={20}
+              disabled={isSubmitting}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-white/80"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              disabled={isSubmitting}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white"
+            />
+          </div>
 
           {error && (
-            <p className="text-sm text-red-400">
-              {error}
-            </p>
+            <div className="flex items-center gap-1">
+              <InfoIcon color="red" size={16} />
+              <p className="text-sm text-red-400">{error}</p>
+            </div>
           )}
 
           <button
             type="submit"
-            disabled={isSubmitting || username.trim().length < 3}
+            disabled={isSubmitting}
             className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 disabled:opacity-50"
           >
-            {isSubmitting ? "Signing in..." : "Continue & Save Progress"}
+            {isSubmitting
+              ? "Please wait..."
+              : isRegistering
+                ? "Create Account"
+                : "Sign In"}
           </button>
         </form>
 
         <button
           type="button"
+          onClick={() => setIsRegistering((v) => !v)}
+          className="w-full text-sm text-slate-400 hover:text-white"
+        >
+          {isRegistering
+            ? "Already have an account? Sign In"
+            : "Need an account? Register"}
+        </button>
+
+        <button
+          type="button"
           onClick={handleGuestContinue}
-          className="w-full text-sm text-slate-400 hover:text-white transition-colors"
+          className="w-full text-sm text-slate-400 hover:text-white"
         >
           Continue as Guest
         </button>

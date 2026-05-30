@@ -5,13 +5,14 @@ import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
-import { getStoredUser } from "@/features/auth/utils/auth";
 import { toastPromise, toastWarning } from "@/globals/utils/toast";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
+import { useAuth } from "@/features/auth/components/AuthProvider";
 
 export default function useSimonGame() {
   const config = useGameMode();
+  const { user } = useAuth();
   const { playMusic } = useMusic();
   const core = useSimonCore();
   const audio = useSimonAudio();
@@ -43,8 +44,6 @@ export default function useSimonGame() {
   );
 
   const submitScoreWithRetry = useCallback(async () => {
-    const user = getStoredUser();
-
     if (!user) {
       toastWarning("Score discarded", {
         description: "Please login to submit your score.",
