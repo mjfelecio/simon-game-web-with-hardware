@@ -29,7 +29,7 @@ class SfxPlayer {
    * Play a sound effect.
    */
   play(src: string, options: PlaySfxOptions = {}) {
-    const { volume = 1, playbackRate = 1 } = options;
+    const { volume = .5, playbackRate = 1 } = options;
 
     // Auto-load if not yet cached
     if (!this.cache.has(src)) {

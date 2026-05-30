@@ -28,6 +28,7 @@ const TitlePage = () => {
 
   const handleAuth = useCallback(() => {
     if (!isAuthenticated) {
+      sfxPlayer.play(SFX.SHOW_MODAL);
       setActiveModal("login");
       return;
     }
@@ -116,6 +117,7 @@ const TitlePage = () => {
           <div className="flex gap-2 w-full">
             <Link
               to="/leaderboard"
+              onClick={() => sfxPlayer.play(SFX.BTN_CLICK)}
               onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
               className="text-[8px] md:text-[10px] flex-1 border border-white/10 bg-white/5 py-2 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center"
@@ -123,7 +125,11 @@ const TitlePage = () => {
               Rankings
             </Link>
             <button
-              onClick={() => setActiveModal("manual")}
+              onClick={() => {
+                sfxPlayer.play(SFX.BTN_CLICK);
+                sfxPlayer.play(SFX.SHOW_MODAL);
+                setActiveModal("manual");
+              }}
               onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
               className="text-[8px] md:text-[10px] flex-1 border border-white/10 bg-white/5 py-2 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"

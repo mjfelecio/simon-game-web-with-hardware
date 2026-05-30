@@ -14,6 +14,7 @@ const PlayNavigation = ({ isConnected, onOpenMenu, onOpenHardware }: Props) => {
       <button
         onClick={() => {
           sfxPlayer.play(SFX.BTN_CLICK);
+          sfxPlayer.play(SFX.SHOW_MODAL);
           onOpenMenu();
         }}
         onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
@@ -28,6 +29,7 @@ const PlayNavigation = ({ isConnected, onOpenMenu, onOpenHardware }: Props) => {
       <button
         onClick={() => {
           sfxPlayer.play(SFX.BTN_CLICK);
+          sfxPlayer.play(SFX.SHOW_MODAL);
           onOpenHardware();
         }}
         onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
