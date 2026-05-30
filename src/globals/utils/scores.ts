@@ -91,7 +91,7 @@ export const getTopScoresByGameMode = async (
 /**
  * Fetch all scores submitted by a user.
  */
-export const getScoresByUserId = async (userId: number): Promise<Score[]> => {
+export const getScoresByUserId = async (userId: string): Promise<Score[]> => {
   const { data, error } = await supabase
     .from("scores")
     .select("*, users(username)")
