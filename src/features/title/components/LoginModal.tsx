@@ -8,10 +8,10 @@ import { InfoIcon } from "lucide-react";
 
 type LoginModalProps = {
   isOpen: boolean;
-  onClose: () => void;
+  onLogin: () => void;
 };
 
-const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
+const LoginModal = ({ isOpen, onLogin: onClose }: LoginModalProps) => {
   const { login, register, proceedAsGuest } = useAuth();
   const { playMusic } = useMusic();
 
@@ -86,19 +86,9 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       className="max-w-md"
     >
       <div className="space-y-8">
-        <div className="space-y-3">
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400">
-            Welcome Player
-          </p>
-
-          <h1 className="text-4xl font-black italic uppercase text-white">
-            Simon Game
-          </h1>
-
-          <p className="text-sm leading-relaxed text-slate-400">
-            A modern arcade reinterpretation of the classic Simon memory game.
-          </p>
-        </div>
+        <h1 className="text-4xl text-center font-black tracking-wide uppercase text-white">
+          {isRegistering ? "Sign up" : "Login"}
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
