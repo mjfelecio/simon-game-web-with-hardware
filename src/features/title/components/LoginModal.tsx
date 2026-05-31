@@ -5,13 +5,15 @@ import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import { emailFromUsername } from "@/features/auth/constants/auth";
 import { InfoIcon } from "lucide-react";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { SFX } from "@/features/audio/constants/sfx";
 
 type LoginModalProps = {
   isOpen: boolean;
-  onLogin: () => void;
+  onLogin?: () => void;
 };
 
-const LoginModal = ({ isOpen, onLogin: onClose }: LoginModalProps) => {
+const LoginModal = ({ isOpen, onLogin }: LoginModalProps) => {
   const { login, register, proceedAsGuest } = useAuth();
   const { playMusic } = useMusic();
 
@@ -28,11 +30,16 @@ const LoginModal = ({ isOpen, onLogin: onClose }: LoginModalProps) => {
       loop: true,
     });
 
-    onClose();
+    setUsername("");
+    setPassword("");
+    setError("");
+    onLogin?.();
   };
 
   const handleGuestContinue = async () => {
     proceedAsGuest();
+
+    sfxPlayer.play(SFX.BTN_CLICK);
     await startGame();
   };
 

@@ -8,7 +8,8 @@ type PauseMenuProps = {
   onRetry: () => void;
   onResume: () => void;
   onQuit: () => void;
-  isConnected: boolean; // Pass this from PlayPage
+  onSettingsOpen: () => void;
+  isConnected: boolean;
 };
 
 const PauseMenu = ({
@@ -16,6 +17,7 @@ const PauseMenu = ({
   onRetry,
   onResume,
   onQuit,
+  onSettingsOpen,
   isConnected,
 }: PauseMenuProps) => (
   <BaseModal
@@ -51,21 +53,19 @@ const PauseMenu = ({
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <Button
-          text="Retry"
-          variant="secondary"
-          onClick={onRetry}
-          size="sm"
-        />
+        <Button text="Retry" variant="secondary" onClick={onRetry} size="sm" />
+
         <Link to="/leaderboard" className="w-full">
-          <Button
-            text="Rankings"
-            variant="secondary"
-            size="sm"
-            fullWidth
-          />
+          <Button text="Rankings" variant="secondary" size="sm" fullWidth />
         </Link>
       </div>
+
+      <Button
+        text="Settings"
+        variant="secondary"
+        onClick={onSettingsOpen}
+        size="sm"
+      />
 
       <div className="mt-4 pt-6 border-t border-white/10 text-center">
         <Button

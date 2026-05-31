@@ -15,30 +15,33 @@ import {
 import { Toaster } from "react-hot-toast";
 import { MusicProvider } from "@/features/audio/components/MusicProvider";
 import WelcomeModal from "@/features/title/components/WelcomeModal";
+import { SettingsProvider } from "@/globals/providers/SettingsProvider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MusicProvider>
-      <TransitionProvider>
-        <AuthProvider>
-          <AuthGuard>
-            <WelcomeModal />
-            <Toaster />
-            <BrowserRouter>
-              <Routes>
-                {/* Main Layout */}
-                <Route element={<App />}>
-                  <Route index element={<TitlePage />} />
-                  <Route path="/leaderboard" element={<LeaderboardPage />} />
-                  <Route path="/mode" element={<ModeSelectionPage />} />
-                  <Route path="play" element={<PlayPage />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </AuthGuard>
-        </AuthProvider>
-        <TransitionOverlay />
-      </TransitionProvider>
-    </MusicProvider>
+    <SettingsProvider>
+      <MusicProvider>
+        <TransitionProvider>
+          <AuthProvider>
+            <AuthGuard>
+              <WelcomeModal />
+              <Toaster />
+              <BrowserRouter>
+                <Routes>
+                  {/* Main Layout */}
+                  <Route element={<App />}>
+                    <Route index element={<TitlePage />} />
+                    <Route path="/leaderboard" element={<LeaderboardPage />} />
+                    <Route path="/mode" element={<ModeSelectionPage />} />
+                    <Route path="play" element={<PlayPage />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </AuthGuard>
+          </AuthProvider>
+          <TransitionOverlay />
+        </TransitionProvider>
+      </MusicProvider>
+    </SettingsProvider>
   </StrictMode>,
 );

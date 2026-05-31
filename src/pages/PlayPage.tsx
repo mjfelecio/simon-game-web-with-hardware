@@ -16,6 +16,7 @@ import PageWrapper from "@/globals/components/layouts/PageWrapper";
 import { STATUS_CONFIG } from "@/features/play/constants";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
+import SettingsModal from "@/features/play/components/SettingsModal";
 
 const PlayPage = () => {
   const game = useSimonGame();
@@ -24,24 +25,26 @@ const PlayPage = () => {
   );
   const navigate = useNavigate();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isHardwareModalOpen, setIsHardwareModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<"menu" | "hardware" | null>(
+    null,
+  );
 
   const openMenu = () => {
-    setIsMenuOpen(true);
+    setActiveModal("menu");
     game.setStatus((prev) =>
       prev === "playing" || prev === "sequence" ? "paused" : prev,
     );
   };
 
   const resumeGame = () => {
-    setIsMenuOpen(false);
+    setActiveModal(null);
     game.setStatus((prev) => (prev === "paused" ? "playing" : prev));
   };
 
   const saveAndQuit = () => {
     game.reset();
-    setIsMenuOpen(false);
+    setActiveModal(null);
     navigate("/");
   };
 
@@ -53,7 +56,7 @@ const PlayPage = () => {
       <PlayNavigation
         isConnected={isConnected}
         onOpenMenu={openMenu}
-        onOpenHardware={() => setIsHardwareModalOpen(true)}
+        onOpenHardware={() => setActiveModal("hardware")}
       />
 
       <div className="relative w-full max-w-md mt-12 flex flex-col items-center gap-10">
@@ -97,21 +100,30 @@ const PlayPage = () => {
       </div>
 
       <HardwareModal
-        isOpen={isHardwareModalOpen}
-        onClose={() => setIsHardwareModalOpen(false)}
+        isOpen={activeModal === "hardware"}
+        onClose={() => setActiveModal(null)}
         status={connectionStatus}
         onConnect={connect}
       />
 
       <PauseMenu
-        isOpen={isMenuOpen}
+        isOpen={activeModal === "menu"}
         isConnected={isConnected}
         onRetry={() => {
           game.reset();
-          setIsMenuOpen(false);
+          setActiveModal(null);
         }}
         onResume={resumeGame}
         onQuit={saveAndQuit}
+        onSettingsOpen={() => {
+          sfxPlayer.play(SFX.SHOW_MODAL);
+          setIsSettingsOpen(true);
+        }}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
       />
     </PageWrapper>
   );
