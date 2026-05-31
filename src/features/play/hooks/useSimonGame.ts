@@ -9,11 +9,13 @@ import { toastPromise, toastWarning } from "@/globals/utils/toast";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import { useAuth } from "@/features/auth/components/AuthProvider";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { SFX } from "@/features/audio/constants/sfx";
 
 export default function useSimonGame() {
   const config = useGameMode();
   const { user } = useAuth();
-  const { playMusic } = useMusic();
+  const { playMusic, stopMusic } = useMusic();
   const core = useSimonCore();
   const audio = useSimonAudio();
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
@@ -155,10 +157,30 @@ export default function useSimonGame() {
     core.resetGame();
   };
 
-  const startGame = async () => {
-    playMusic(MUSIC.GAMEPLAY, { volume: 1, loop: true });
+  const startingSequence = async () => {
+    document.documentElement.requestFullscreen();
+    await stopMusic();
+    await delay(500);
 
+    const buttons = [...core.currentButtons]
+    // Flash all buttons in a spiral
+    const sequence = [...buttons, ...[...buttons].reverse()];
+    for await (const b of sequence) {
+      setActiveButton(b);
+      audio.playColor(b, config.mode);
+
+      await delay(100);
+      setActiveButton(null);
+    }
+
+    sfxPlayer.play(SFX.BEGIN, { volume: 1 });
     await delay(1000);
+  };
+
+  const startGame = async () => {
+    await startingSequence();
+
+    playMusic(MUSIC.GAMEPLAY, { loop: true });
 
     const startSeq = core.generateNextSequence([]);
     core.setSequence(startSeq);
@@ -167,7 +189,7 @@ export default function useSimonGame() {
   };
 
   useEffect(() => {
-    return () => void playMusic(MUSIC.BG, { volume: 0.1, loop: true });
+    return () => void playMusic(MUSIC.BG, { loop: true });
   }, [playMusic]);
 
   return {
