@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { delay } from "@/globals/utils";
 import useGameMode from "./useGameMode";
 import useSimonCore from "./useSimonCore";
@@ -21,6 +21,7 @@ export default function useSimonGame() {
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
+  const startedAtRef = useRef<number>(null);
 
   const playSequence = useCallback(
     async (seq: SimonButtonType[]) => {
@@ -45,59 +46,67 @@ export default function useSimonGame() {
     [config.mode, audio, core],
   );
 
-  const submitScoreWithRetry = useCallback(async () => {
-    if (!user) {
-      toastWarning("Score discarded", {
-        description: "Please login to submit your score.",
-      });
+  const submitScoreWithRetry = useCallback(
+    async (inputs: SimonButtonType[], timeTaken: number | undefined) => {
+      // level depends on burst
+      const level = config.isBurst ? inputs.length : core.level;
 
-      return;
-    }
-
-    let retryAttempts = 3;
-
-    const executeSubmission = async (): Promise<void> => {
-      try {
-        await submitScore({
-          user_id: user.id,
-          gamemode: config.mode,
-          input_type: "mouse",
-          level: core.level,
+      if (!user) {
+        toastWarning("Score discarded", {
+          description: "Please login to submit your score.",
         });
-      } catch (error) {
-        retryAttempts--;
 
-        if (retryAttempts <= 0) {
-          throw error;
-        }
-
-        return executeSubmission();
+        return;
       }
-    };
 
-    await toastPromise(executeSubmission(), {
-      loading: {
-        title: "Submitting score...",
-        description: "Syncing with leaderboard",
-      },
+      let retryAttempts = 3;
 
-      success: {
-        title: "Score submitted",
-        description: `Reached level ${core.level}`,
-      },
+      const executeSubmission = async (): Promise<void> => {
+        try {
+          await submitScore({
+            user_id: user.id,
+            gamemode: config.mode,
+            input_type: "mouse",
+            level: level,
+            goal: config.goal ?? undefined,
+            time_taken: timeTaken,
+          });
+        } catch (error) {
+          retryAttempts--;
 
-      error: {
-        title: "Submission failed",
-        description: "Could not sync your score.",
-        action: {
-          label: "Retry",
-          onClick: () => {
-            submitScoreWithRetry();
+          if (retryAttempts <= 0) {
+            throw error;
+          }
+
+          return executeSubmission();
+        }
+      };
+
+      await toastPromise(executeSubmission(), {
+        loading: {
+          title: "Submitting score...",
+          description: "Syncing with leaderboard",
+        },
+
+        success: {
+          title: "Score submitted",
+          description: `Reached level ${core.level}`,
+        },
+
+        error: {
+          title: "Submission failed",
+          description: "Could not sync your score.",
+          action: {
+            label: "Retry",
+            onClick: () => {
+              submitScoreWithRetry(inputs, timeTaken);
+            },
           },
         },
-      },
-    });
-  }, [config.mode, core.level, user]);
+      });
+    },
+    [config.mode, config.goal, core.level, user, config.isBurst],
+  );
 
   const handleInput = useCallback(
     async (input: SimonButtonType) => {
@@ -120,7 +129,11 @@ export default function useSimonGame() {
 
         audio.playLoseDissonance();
 
-        await submitScoreWithRetry();
+        const timeTaken =
+          startedAtRef.current != null
+            ? Math.round(performance.now() - startedAtRef.current)
+            : undefined;
+        await submitScoreWithRetry(core.inputs, timeTaken);
 
         return;
       }
@@ -132,6 +145,12 @@ export default function useSimonGame() {
       if (newInputs.length === core.sequence.length) {
         if (config.checkVictory(core.sequence.length)) {
           core.setStatus("victory");
+
+          const timeTaken =
+            startedAtRef.current != null
+              ? Math.round(performance.now() - startedAtRef.current)
+              : undefined;
+          await submitScoreWithRetry(newInputs, timeTaken);
         } else {
           core.setStatus("won");
           await delay(400);
@@ -189,6 +208,9 @@ export default function useSimonGame() {
       : core.generateNextSequence([]);
     core.setSequence(startSeq);
     core.setLevel(1);
+
+    // Timer starts when the sequence starts playing
+    startedAtRef.current = performance.now();
     playSequence(startSeq);
   };
 

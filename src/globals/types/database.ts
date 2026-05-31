@@ -47,6 +47,8 @@ export type Database = {
           input_type: string
           level: number
           user_id: string
+          goal?: number
+          time_taken?: number
         }
         Insert: {
           created_at?: string
@@ -55,6 +57,8 @@ export type Database = {
           input_type: string
           level: number
           user_id: string
+          goal?: number
+          time_taken?: number
         }
         Update: {
           created_at?: string
@@ -63,6 +67,8 @@ export type Database = {
           input_type?: string
           level?: number
           user_id?: string
+          goal?: number
+          time_taken?: number
         }
         Relationships: [
           {
