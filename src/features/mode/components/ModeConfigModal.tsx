@@ -18,7 +18,7 @@ const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
 
   const handleStart = () => {
     onConfirm({
-      goal: mode.id === "static" ? goal : undefined,
+      goal: mode.id === "burst" ? goal : undefined,
     });
   };
 
@@ -43,8 +43,8 @@ const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
           </div>
         </div>
 
-        {/* Conditional Input: Static Transmission Specific */}
-        {mode.id === "static" && (
+        {/* Conditional Input: Burst Transmission Specific */}
+        {mode.id === "burst" && (
           <div className="space-y-3">
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
               <Target className="w-3 h-3" /> Target Sequence Length

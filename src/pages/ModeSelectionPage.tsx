@@ -16,7 +16,7 @@ const ModeSelectionPage = () => {
   const [selectedMode, setSelectedMode] = useState<ModeConfig | null>(null);
 
   const handleModeClick = (mode: ModeConfig) => {
-    if (mode.id === "static") {
+    if (mode.id === "burst") {
       setSelectedMode(mode);
     } else {
       navigateWithTransition(`/play?mode=${mode.id}`);

@@ -10,10 +10,10 @@ export default function useGameMode() {
     mode,
     goal,
     isEcho: mode === "echo",
-    isStatic: mode === "static",
+    isBurst: mode === "burst",
     // Logic to check if the current round results in a total game victory
     checkVictory: (currentLength: number) => {
-      if (mode === "static" && goal > 0) {
+      if (mode === "burst" && goal > 0) {
         return currentLength === goal;
       }
       return false;

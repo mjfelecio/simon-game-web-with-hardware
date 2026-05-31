@@ -15,10 +15,22 @@ export default function useSimonCore() {
     setCurrentButtons([...INITIAL_BUTTONS].sort(() => Math.random() - 0.5));
   }, []);
 
-  const generateNextSequence = useCallback((currentSeq: SimonButtonType[]) => {
-    const nextColor = currentButtons[Math.floor(Math.random() * currentButtons.length)];
-    return [...currentSeq, nextColor];
+  const generateSequence = useCallback((length: number) => {
+    return Array(length)
+      .fill(0)
+      .map(
+        () => currentButtons[Math.floor(Math.random() * currentButtons.length)],
+      );
   }, [currentButtons]);
+
+  const generateNextSequence = useCallback(
+    (currentSeq: SimonButtonType[]) => {
+      const nextColor =
+        currentButtons[Math.floor(Math.random() * currentButtons.length)];
+      return [...currentSeq, nextColor];
+    },
+    [currentButtons],
+  );
 
   const resetGame = useCallback(() => {
     setSequence([]);
@@ -38,6 +50,7 @@ export default function useSimonCore() {
     status,
     setStatus,
     generateNextSequence,
+    generateSequence,
     shuffleButtons,
     resetGame,
   };

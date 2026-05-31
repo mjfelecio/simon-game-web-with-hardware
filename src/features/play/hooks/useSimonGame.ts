@@ -184,7 +184,9 @@ export default function useSimonGame() {
       playMusic(MUSIC.GAMEPLAY, { loop: true });
     }
 
-    const startSeq = core.generateNextSequence([]);
+    const startSeq = config.isBurst
+      ? core.generateSequence(config.goal)
+      : core.generateNextSequence([]);
     core.setSequence(startSeq);
     core.setLevel(1);
     playSequence(startSeq);

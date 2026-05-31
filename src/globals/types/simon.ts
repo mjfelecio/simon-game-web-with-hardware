@@ -6,7 +6,7 @@ export type ScoreView = Score & { username: string }
 export type GameMode =
   | "classic"
   | "echo"
-  | "static"
+  | "burst"
   | "blitz"
   | "fragment"
   | "entropy"

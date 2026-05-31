@@ -19,7 +19,7 @@ const GAMEMODES: { label: string; value: GameMode | "" }[] = [
   { label: "Echo", value: "echo" },
   { label: "Fragment", value: "fragment" },
   { label: "Ghost", value: "ghost" },
-  { label: "Static", value: "static" },
+  { label: "Burst", value: "burst" },
 ];
 
 const INPUT_TYPES: { label: string; value: InputType | "" }[] = [

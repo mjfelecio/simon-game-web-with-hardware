@@ -31,10 +31,10 @@ export const MODES: ModeConfig[] = [
     available: true,
   },
   {
-    id: "static",
-    title: "Static Transmission",
+    id: "burst",
+    title: "Burst Transmission",
     description:
-      "Select a specific data length. Complete the full string to verify system integrity.",
+      "Select a specific data length. Receive the burst of sequence at once.",
     icon: <Binary className="w-6 h-6" />,
     color: "cyan",
     available: true,
