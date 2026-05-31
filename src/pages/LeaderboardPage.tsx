@@ -10,9 +10,9 @@ import type { GameMode, InputType, ScoreView } from "@/globals/types/simon";
 import Select from "@/globals/components/Select";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
+import { formatDuration } from "@/globals/utils/formatter";
 
-const GAMEMODES: { label: string; value: GameMode | "" }[] = [
-  { label: "All Modes", value: "" },
+const GAMEMODES: { label: string; value: GameMode }[] = [
   { label: "Classic", value: "classic" },
   { label: "Blitz", value: "blitz" },
   { label: "Entropy", value: "entropy" },
@@ -20,6 +20,7 @@ const GAMEMODES: { label: string; value: GameMode | "" }[] = [
   { label: "Fragment", value: "fragment" },
   { label: "Ghost", value: "ghost" },
   { label: "Burst", value: "burst" },
+  { label: "Time Attack", value: "timeattack" },
 ];
 
 const INPUT_TYPES: { label: string; value: InputType | "" }[] = [
@@ -33,9 +34,12 @@ const LeaderboardPage = () => {
   const navigate = useNavigate();
 
   const [topScores, setTopScores] = useState<ScoreView[]>([]);
-  const [gamemode, setGamemode] = useState("");
+  const [gamemode, setGamemode] = useState("classic");
   const [inputType, setInputType] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const isTimeAttack = gamemode === "timeattack";
+  const isBurst = gamemode === "burst";
 
   useEffect(() => {
     const fetchScores = async () => {
@@ -82,18 +86,57 @@ const LeaderboardPage = () => {
 
       {/* Stats */}
       <div className="grid w-full max-w-2xl grid-cols-3 gap-4 mb-8">
-        <StatCard label="Total Games" value={topScores.length} />
-        <StatCard label="Best Level" value={topScores[0]?.level || 0} />
-        <StatCard label="Avg. Score" value={calculateAvgScore(topScores)} />
+        <StatCard label="Entries" value={topScores.length} />
+
+        {isTimeAttack ? (
+          <>
+            <StatCard
+              label="Best Time"
+              value={
+                topScores[0]?.time_taken
+                  ? formatDuration(topScores[0].time_taken)
+                  : "--"
+              }
+            />
+
+            <StatCard
+              label="Runs"
+              value={topScores.filter((s) => s.time_taken != null).length}
+            />
+          </>
+        ) : (
+          <>
+            <StatCard
+              label={isBurst ? "Largest Burst" : "Top Score"}
+              value={
+                isBurst ? (topScores[0]?.goal ?? 0) : (topScores[0]?.level ?? 0)
+              }
+            />
+
+            <StatCard
+              label={isBurst ? "Avg Burst" : "Avg Level"}
+              value={calculateAvgScore(topScores)}
+            />
+          </>
+        )}
       </div>
 
       {/* Leaderboard */}
       <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-        <div className="bg-white/10 px-6 py-4 border-b border-white/10">
-          <h3 className="font-bold text-white uppercase tracking-wider">
-            Top Performers
-          </h3>
-        </div>
+        {/* <h3 className="pl-4 pt-1 font-bold text-white uppercase tracking-wider">
+          {isTimeAttack
+            ? "Fastest Runs"
+            : isBurst
+              ? "Largest Bursts"
+              : "Top Performers"}
+        </h3> */}
+        <h3 className="px-6 py-4 font-bold text-white uppercase tracking-wider border-b border-white/10">
+          {isTimeAttack
+            ? "Fastest Runs"
+            : isBurst
+              ? "Largest Bursts"
+              : "Top Performers"}
+        </h3>
 
         <div className="divide-y divide-white/5">
           {loading ? (
@@ -112,9 +155,7 @@ const LeaderboardPage = () => {
                   "flex items-center justify-between px-6 py-4 hover:bg-white/5 transition",
                   index === 0 && "bg-yellow-500/5",
                 )}
-                onMouseEnter={
-                  () => sfxPlayer.play(SFX.LB_HOVER)
-                }
+                onMouseEnter={() => sfxPlayer.play(SFX.LB_HOVER)}
               >
                 <div className="flex items-center gap-4">
                   <span
@@ -122,27 +163,50 @@ const LeaderboardPage = () => {
                       "flex h-8 w-8 items-center justify-center rounded-full text-sm font-black",
                       index === 0
                         ? "bg-yellow-400 text-black"
-                        : "bg-white/10 text-white",
+                        : index === 1
+                          ? "bg-slate-300 text-black"
+                          : index === 2
+                            ? "bg-orange-400 text-black"
+                            : "bg-white/10 text-white",
                     )}
                   >
                     {index + 1}
                   </span>
 
-                  <div>
-                    <p className="font-bold text-white">{score.username}</p>
-                    <p className="text-xs text-slate-500">
-                      {new Date(score.created_at).toLocaleDateString()}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="font-bold text-white">{score.username}</p>
+                      <p className="text-xs text-slate-500">
+                        {new Date(score.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-xl font-black text-white italic">
-                    LVL {score.level}
-                  </p>
-                  <p className="text-[10px] uppercase text-slate-400">
-                    {score.gamemode}
-                  </p>
+                  <div className="text-right">
+                    {isTimeAttack ? (
+                      <p className="text-xl font-black text-violet-300 italic">
+                        {formatDuration(score.time_taken ?? 0)}
+                      </p>
+                    ) : isBurst ? (
+                      <>
+                        <p className="text-xl font-black text-cyan-300 italic">
+                          {score.goal}
+                        </p>
+
+                        {score.time_taken && (
+                          <p className="text-[10px] uppercase text-slate-400">
+                            {formatDuration(score.time_taken)}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-xl font-black text-white italic">
+                        LVL {score.level}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))
@@ -151,18 +215,14 @@ const LeaderboardPage = () => {
       </div>
 
       {/* Actions */}
-      <div className="mt-10 flex gap-4 w-[50%]">
+      <div className="mt-10 flex w-full max-w-2xl gap-4">
         <Button
           size="sm"
           text="Back to Menu"
           onClick={() => navigate("/")}
           variant="secondary"
         />
-        <Button
-          size="sm"
-          text="Play Again"
-          onClick={() => navigate("/play")}
-        />
+        <Button size="sm" text="Play Again" onClick={() => navigate("/mode")} />
       </div>
     </PageWrapper>
   );

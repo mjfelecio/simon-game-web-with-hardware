@@ -5,6 +5,7 @@ import type {
   TablesUpdate,
 } from "@/globals/types/database";
 import type { ScoreView } from "@/globals/types/simon";
+import { getLeaderboardType } from "@/features/leaderboard/constants";
 
 export type Score = Tables<"scores">;
 export type ScoreInsert = TablesInsert<"scores">;
@@ -108,12 +109,12 @@ export const getScoresByUserId = async (userId: string): Promise<Score[]> => {
 export const getLeaderboard = async (filters?: {
   gamemode?: string;
   input_type?: string;
+  goal?: number;
   limit?: number;
 }) => {
-  let query = supabase
-    .from("scores")
-    .select("*, users(username)")
-    .order("level", { ascending: false });
+  const leaderboardType = getLeaderboardType(filters?.gamemode);
+
+  let query = supabase.from("scores").select("*, users(username)");
 
   if (filters?.gamemode) {
     query = query.eq("gamemode", filters.gamemode);
@@ -123,15 +124,33 @@ export const getLeaderboard = async (filters?: {
     query = query.eq("input_type", filters.input_type);
   }
 
+  if (filters?.goal) {
+    query = query.eq("goal", filters.goal);
+  }
+
+  if (leaderboardType === "speed") {
+    query = query
+      .not("time_taken", "is", null)
+      .order("time_taken", { ascending: true });
+  } else {
+    query = query
+      .order("level", { ascending: false })
+      .order("time_taken", { ascending: true });
+  }
+
   if (filters?.limit) {
     query = query.limit(filters.limit);
   }
 
   const { data, error } = await query;
-  if (error) throw error;
+
+  if (error) {
+    throw error;
+  }
 
   return data.map(mapScore);
 };
+
 /**
  * Update an existing score.
  */
@@ -173,20 +192,32 @@ export const submitScore = async (
   score: Score;
   isPersonalBest: boolean;
 }> => {
+  const leaderboardType = getLeaderboardType(score.gamemode);
+
   const { data: bestScore } = await supabase
     .from("scores")
-    .select("level")
+    .select("*")
     .eq("user_id", score.user_id)
     .eq("gamemode", score.gamemode)
     .eq("input_type", score.input_type)
-    .order("level", { ascending: false })
+    .eq("goal", score.goal ?? 0)
     .limit(1)
     .maybeSingle();
 
   const createdScore = await createScore(score);
 
-  const isPersonalBest = !bestScore || createdScore.level > bestScore.level;
+  let isPersonalBest = false;
 
+  if (!bestScore) {
+    isPersonalBest = true;
+  } else if (leaderboardType === "speed") {
+    isPersonalBest =
+      createdScore.time_taken != null &&
+      bestScore.time_taken != null &&
+      createdScore.time_taken < bestScore.time_taken;
+  } else {
+    isPersonalBest = createdScore.level > bestScore.level;
+  }
   return {
     score: createdScore,
     isPersonalBest,

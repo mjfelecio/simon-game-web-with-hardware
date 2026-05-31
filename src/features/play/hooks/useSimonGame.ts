@@ -5,7 +5,7 @@ import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
-import { toastError, toastPromise, toastWarning } from "@/globals/utils/toast";
+import { toastError, toastInfo, toastPromise, toastWarning } from "@/globals/utils/toast";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import { useAuth } from "@/features/auth/components/AuthProvider";
@@ -66,7 +66,8 @@ export default function useSimonGame() {
       }
 
       const formattedTime = formatDuration(timeTaken);
-      toastWarning(`Time taken: ${formattedTime}`);
+
+      if (config.mode === "timeattack") toastInfo(`Time taken: ${formattedTime}`);
 
       // level depends on burst
       const level = config.isBurst ? inputs.length : core.level;

@@ -85,7 +85,7 @@ export const MODES: ModeConfig[] = [
   },
   {
     id: "timeattack",
-    title: "Latency Benchmark",
+    title: "Time Attack",
     description:
       "System response test. Complete the designated transmission objective with minimum execution time.",
     icon: <Timer className="w-6 h-6" />,
