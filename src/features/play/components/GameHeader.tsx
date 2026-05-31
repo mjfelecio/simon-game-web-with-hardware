@@ -33,7 +33,7 @@ const GameHeader = ({
       {currentStatus.label}
     </h2>
 
-    <div className="mt-2 flex gap-1.5">
+    <div className="mt-2 flex flex-wrap gap-1.5 max-w-[90%]">
       {sequence.map((type, i) => {
         const normalButtonStyle =
           i < inputsLength && mode !== "timeattack"

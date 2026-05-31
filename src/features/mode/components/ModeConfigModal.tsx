@@ -3,6 +3,8 @@ import { cn } from "@/globals/libs/styleUtils";
 import { Play, Target } from "lucide-react";
 import BaseModal from "@/globals/components/layouts/BaseModal";
 import type { ModeConfig } from "@/features/mode/constants/mode-config";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { SFX } from "@/features/audio/constants/sfx";
 
 type Props = {
   mode: ModeConfig | null;
@@ -14,7 +16,7 @@ type Props = {
 const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
   const [goal, setGoal] = useState(10);
 
-  const hasGoal = mode?.id === "burst" || mode?.id === "timeattack"
+  const hasGoal = mode?.id === "burst" || mode?.id === "timeattack";
 
   if (!mode) return null;
 
@@ -55,7 +57,16 @@ const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
               {[5, 10, 15, 20].map((val) => (
                 <button
                   key={val}
-                  onClick={() => setGoal(val)}
+                  onClick={() => {
+                    sfxPlayer.play(SFX.BTN_CLICK);
+                    setGoal(val);
+                  }}
+                  onMouseEnter={() => {
+                    sfxPlayer.play(SFX.BTN_HOVER);
+                  }}
+                  onTouchStart={() => {
+                    sfxPlayer.play(SFX.BTN_HOVER);
+                  }}
                   className={cn(
                     "py-3 rounded-lg border font-bold transition-all",
                     goal === val
@@ -71,7 +82,16 @@ const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
         )}
 
         <button
-          onClick={handleStart}
+          onClick={() => {
+            sfxPlayer.play(SFX.BTN_CLICK);
+            handleStart();
+          }}
+          onMouseEnter={() => {
+            sfxPlayer.play(SFX.BTN_HOVER);
+          }}
+          onTouchStart={() => {
+            sfxPlayer.play(SFX.BTN_HOVER);
+          }}
           className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 group"
         >
           Initialize Mission{" "}

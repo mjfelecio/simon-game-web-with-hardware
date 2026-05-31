@@ -20,7 +20,7 @@ const HardwareModal = ({ isOpen, onClose, status, onConnect }: Props) => {
   const isUnsupported = status === "unsupported";
 
   return (
-    <BaseModal showCloseButton={false} isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen} onClose={onClose}>
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-wider text-white">
@@ -170,7 +170,7 @@ const HardwareModal = ({ isOpen, onClose, status, onConnect }: Props) => {
                   ? "Processing..."
                   : isError
                     ? "Retry Connection"
-                    : "Initialize Serial Interface"
+                    : "Initialize"
               }
               variant={isError ? "danger" : "secondary"}
               disabled={isLoading}

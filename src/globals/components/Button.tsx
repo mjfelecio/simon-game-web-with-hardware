@@ -14,12 +14,12 @@ const buttonVariants = cva(
         secondary:
           "border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20",
         danger:
-          "border-red-400 text-red-400 hover:bg-red-400 hover:text-white shadow-none",
+          "border-red-400 text-red-400 hover:bg-red-700 hover:text-white shadow-none",
         ghost: "border-transparent text-white hover:bg-white/10",
       },
       size: {
-        default: "px-8 py-4 text-2xl",
-        sm: "px-8 py-2 text-lg",
+        default: "px-8 py-4 text-md md:text-2xl",
+        sm: "px-8 py-2 text-sm md:text-lg",
         icon: "h-14 w-14",
       },
       fullWidth: {

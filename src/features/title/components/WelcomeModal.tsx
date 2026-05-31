@@ -27,9 +27,9 @@ export default function WelcomeModal() {
   return (
     <BaseModal
       isOpen={isOpen}
-      onClose={() => {}}
+      onClose={handleStart}
     >
-      <div className="space-y-8 p-2">
+      <div className="space-y-12 p-2">
         <div className="space-y-3">
           <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400">
             Welcome Player
@@ -46,22 +46,9 @@ export default function WelcomeModal() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-          <p className="text-xs uppercase tracking-widest text-slate-500">
-            Features
-          </p>
-
-          <ul className="mt-3 space-y-2 text-sm text-slate-300">
-            <li>• Dynamic gameplay modifiers</li>
-            <li>• Competitive leaderboard system</li>
-            <li>• Hardware controller support</li>
-            <li>• Arcade-inspired audiovisual feedback</li>
-          </ul>
-        </div>
-
         <Button
           text="Let's Get Started"
-          className="w-full h-14 text-lg font-black uppercase tracking-widest"
+          className="w-full font-black"
           onClick={handleStart}
         />
       </div>

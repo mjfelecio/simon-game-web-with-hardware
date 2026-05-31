@@ -74,7 +74,7 @@ const LeaderboardPage = () => {
       </header>
 
       {/* Filters */}
-      <div className="w-full max-w-2xl grid grid-cols-2 gap-3 mb-6">
+      <section className="w-full max-w-2xl grid grid-cols-2 gap-3 mb-6">
         <Select value={gamemode} onChange={setGamemode} options={GAMEMODES} />
 
         <Select
@@ -82,10 +82,10 @@ const LeaderboardPage = () => {
           onChange={setInputType}
           options={INPUT_TYPES}
         />
-      </div>
+      </section>
 
       {/* Stats */}
-      <div className="grid w-full max-w-2xl grid-cols-3 gap-4 mb-8">
+      <section className="grid w-full max-w-2xl grid-cols-3 gap-4 mb-8">
         <StatCard label="Entries" value={topScores.length} />
 
         {isTimeAttack ? (
@@ -119,17 +119,10 @@ const LeaderboardPage = () => {
             />
           </>
         )}
-      </div>
+      </section>
 
       {/* Leaderboard */}
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-        {/* <h3 className="pl-4 pt-1 font-bold text-white uppercase tracking-wider">
-          {isTimeAttack
-            ? "Fastest Runs"
-            : isBurst
-              ? "Largest Bursts"
-              : "Top Performers"}
-        </h3> */}
+      <section className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
         <h3 className="px-6 py-4 font-bold text-white uppercase tracking-wider border-b border-white/10">
           {isTimeAttack
             ? "Fastest Runs"
@@ -212,17 +205,18 @@ const LeaderboardPage = () => {
             ))
           )}
         </div>
-      </div>
+      </section>
 
       {/* Actions */}
-      <div className="mt-10 flex w-full max-w-2xl gap-4">
+      <div className="mt-24 flex flex-col md:flex-row w-full max-w-2xl gap-4">
         <Button
           size="sm"
           text="Back to Menu"
           onClick={() => navigate("/")}
+          className="h-12"
           variant="secondary"
         />
-        <Button size="sm" text="Play Again" onClick={() => navigate("/mode")} />
+        <Button className="h-12" size="sm" text="Play Again" onClick={() => navigate("/mode")} />
       </div>
     </PageWrapper>
   );

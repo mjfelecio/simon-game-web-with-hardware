@@ -29,7 +29,7 @@ const SettingsModal = ({
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} className="max-w-md">
+    <BaseModal isOpen={isOpen} onClose={onClose} className="max-w-xl">
       <div className="space-y-8">
         {/* Header */}
         <div>

@@ -24,7 +24,7 @@ const PauseMenu = ({
     isOpen={isOpen}
     onClose={onResume}
     showCloseButton={false}
-    className="max-w-sm"
+    className="max-w-lg"
   >
     <div className="text-center mb-8">
       <h2 className="text-5xl font-black italic uppercase tracking-wider text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
@@ -53,27 +53,22 @@ const PauseMenu = ({
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <Button text="Retry" variant="secondary" onClick={onRetry} size="sm" />
+        <Button
+          text="Settings"
+          variant="secondary"
+          onClick={onSettingsOpen}
+          size="sm"
+        />
 
         <Link to="/leaderboard" className="w-full">
           <Button text="Rankings" variant="secondary" size="sm" fullWidth />
         </Link>
       </div>
 
-      <Button
-        text="Settings"
-        variant="secondary"
-        onClick={onSettingsOpen}
-        size="sm"
-      />
+      <Button text="Retry" variant="secondary" onClick={onRetry} size="sm" />
 
-      <div className="mt-4 pt-6 border-t border-white/10 text-center">
-        <Button
-          text="Save & Quit"
-          variant="danger"
-          onClick={onQuit}
-          size="sm"
-        />
+      <div className="mt-4 pt-6 border-t border-white/20">
+        <Button text="Save & Quit" variant="danger" onClick={onQuit} />
       </div>
     </div>
   </BaseModal>

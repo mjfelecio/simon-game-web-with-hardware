@@ -52,7 +52,7 @@ const PlayPage = () => {
   const isConnected = connectionStatus === "connected";
 
   return (
-    <PageWrapper className="relative flex flex-col items-center justify-center pb-20">
+    <PageWrapper className="relative flex flex-col items-center justify-center pb-24">
       <PlayNavigation
         isConnected={isConnected}
         onOpenMenu={openMenu}
@@ -85,12 +85,10 @@ const PlayPage = () => {
               onClick={game.startGame}
               onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
-              size="sm"
             />
           ) : (
             <Button
               text="Reset System"
-              size="sm"
               variant="danger"
               onClick={game.reset}
               onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
