@@ -154,6 +154,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           data: { session },
         } = await supabase.auth.getSession();
 
+
         if (session?.user) {
           await loadProfile(session.user.id);
         } else {
@@ -181,7 +182,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       setUser(null);
-      setIsAGuest(false);
       setIsLoading(false);
     });
 
