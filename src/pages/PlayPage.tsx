@@ -45,7 +45,7 @@ const PlayPage = () => {
   const saveAndQuit = () => {
     game.reset();
     setActiveModal(null);
-    navigate("/");
+    navigate("/mode");
   };
 
   const currentStatus = STATUS_CONFIG[game.status];
