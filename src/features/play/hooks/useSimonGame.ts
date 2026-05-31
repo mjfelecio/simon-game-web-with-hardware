@@ -5,12 +5,13 @@ import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
-import { toastPromise, toastWarning } from "@/globals/utils/toast";
+import { toastError, toastPromise, toastWarning } from "@/globals/utils/toast";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import { useAuth } from "@/features/auth/components/AuthProvider";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
+import { formatDuration } from "@/globals/utils/formatter";
 
 export default function useSimonGame() {
   const config = useGameMode();
@@ -21,10 +22,18 @@ export default function useSimonGame() {
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
-  const startedAtRef = useRef<number>(null);
+  const startedAtRef = useRef<number | null>(null);
 
   const playSequence = useCallback(
     async (seq: SimonButtonType[]) => {
+      // If in timeattack, we don 't play the sequence, we just show it directly
+      // on the UI so that its purely reaction based.
+      if (config.mode === "timeattack") {
+        core.setInputs([]);
+        core.setStatus("playing");
+        return;
+      }
+
       core.setStatus("sequence");
       await delay(200);
 
@@ -47,10 +56,7 @@ export default function useSimonGame() {
   );
 
   const submitScoreWithRetry = useCallback(
-    async (inputs: SimonButtonType[], timeTaken: number | undefined) => {
-      // level depends on burst
-      const level = config.isBurst ? inputs.length : core.level;
-
+    async (inputs: SimonButtonType[], timeTaken: number) => {
       if (!user) {
         toastWarning("Score discarded", {
           description: "Please login to submit your score.",
@@ -58,6 +64,15 @@ export default function useSimonGame() {
 
         return;
       }
+
+      const formattedTime = formatDuration(timeTaken);
+      toastWarning(`Time taken: ${formattedTime}`);
+
+      // level depends on burst
+      const level = config.isBurst ? inputs.length : core.level;
+
+      const hasGoal = config.mode === "burst" || config.mode === "timeattack";
+      const goal = hasGoal ? config.goal : undefined;
 
       let retryAttempts = 3;
 
@@ -68,7 +83,7 @@ export default function useSimonGame() {
             gamemode: config.mode,
             input_type: "mouse",
             level: level,
-            goal: config.goal ?? undefined,
+            goal: goal,
             time_taken: timeTaken,
           });
         } catch (error) {
@@ -133,6 +148,21 @@ export default function useSimonGame() {
           startedAtRef.current != null
             ? Math.round(performance.now() - startedAtRef.current)
             : undefined;
+
+        if (!timeTaken) {
+          toastError("Error", { description: "Time taken was not recorded" });
+          return;
+        }
+
+        const formattedTime = formatDuration(timeTaken);
+        if (config.mode === "timeattack") {
+          toastWarning("Score discarded", {
+            description: `Failing to reach goal in timeattack will not submit the score.
+              Time: ${formattedTime}`,
+          });
+          return;
+        }
+
         await submitScoreWithRetry(core.inputs, timeTaken);
 
         return;
@@ -150,12 +180,20 @@ export default function useSimonGame() {
             startedAtRef.current != null
               ? Math.round(performance.now() - startedAtRef.current)
               : undefined;
+
+          if (!timeTaken) {
+            toastError("Error", { description: "Time taken was not recorded" });
+            return;
+          }
+
           await submitScoreWithRetry(newInputs, timeTaken);
         } else {
           core.setStatus("won");
-          await delay(400);
+
+          // No delays when in timeattack mode
+          if (config.mode !== "timeattack") await delay(400);
           audio.playWinMelody();
-          await delay(1000);
+          if (config.mode !== "timeattack") await delay(1000);
 
           const nextSeq = core.generateNextSequence(core.sequence);
           core.setSequence(nextSeq);
@@ -203,14 +241,16 @@ export default function useSimonGame() {
       playMusic(MUSIC.GAMEPLAY, { loop: true });
     }
 
-    const startSeq = config.isBurst
+    const startSeq = config.hasGoal
       ? core.generateSequence(config.goal)
       : core.generateNextSequence([]);
+
     core.setSequence(startSeq);
     core.setLevel(1);
 
-    // Timer starts when the sequence starts playing
+    // Timer starts when the sequence is set
     startedAtRef.current = performance.now();
+
     playSequence(startSeq);
   };
 

@@ -10,7 +10,8 @@ export type GameMode =
   | "blitz"
   | "fragment"
   | "entropy"
-  | "ghost";
+  | "ghost"
+  | "timeattack";
 
 export type InputType =
   | "mouse"

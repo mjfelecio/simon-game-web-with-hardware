@@ -14,11 +14,13 @@ type Props = {
 const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
   const [goal, setGoal] = useState(10);
 
+  const hasGoal = mode?.id === "burst" || mode?.id === "timeattack"
+
   if (!mode) return null;
 
   const handleStart = () => {
     onConfirm({
-      goal: mode.id === "burst" ? goal : undefined,
+      goal: hasGoal ? goal : undefined,
     });
   };
 
@@ -43,8 +45,8 @@ const ModeConfigModal = ({ mode, isOpen, onClose, onConfirm }: Props) => {
           </div>
         </div>
 
-        {/* Conditional Input: Burst Transmission Specific */}
-        {mode.id === "burst" && (
+        {/* Conditional input for modes with goals */}
+        {hasGoal && (
           <div className="space-y-3">
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
               <Target className="w-3 h-3" /> Target Sequence Length

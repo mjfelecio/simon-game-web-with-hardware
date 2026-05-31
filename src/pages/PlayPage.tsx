@@ -62,10 +62,11 @@ const PlayPage = () => {
       <div className="relative w-full max-w-md mt-12 flex flex-col items-center gap-10">
         <div className="px-2">
           <GameHeader
-            level={game.mode === "burst" ? game.inputs.length : game.level}
+            level={game.mode === "burst" || game.mode === "timeattack" ? game.inputs.length : game.level}
             currentStatus={currentStatus}
-            sequenceLength={game.sequence.length}
+            sequence={game.sequence}
             inputsLength={game.inputs.length}
+            mode={game.mode}
           />
         </div>
 

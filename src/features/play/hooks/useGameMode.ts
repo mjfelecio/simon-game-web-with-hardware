@@ -5,15 +5,17 @@ export default function useGameMode() {
   const [searchParams] = useSearchParams();
   const mode = (searchParams.get("mode") ?? "classic") as GameMode;
   const goal = Number(searchParams.get("goal")) || 0;
+  const hasGoal = mode === "burst"  || mode === "timeattack"
 
   const config = {
     mode,
     goal,
     isEcho: mode === "echo",
     isBurst: mode === "burst",
+    hasGoal,
     // Logic to check if the current round results in a total game victory
     checkVictory: (currentLength: number) => {
-      if (mode === "burst" && goal > 0) {
+      if (hasGoal && goal > 0) {
         return currentLength === goal;
       }
       return false;

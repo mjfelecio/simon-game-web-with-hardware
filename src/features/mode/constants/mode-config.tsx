@@ -1,15 +1,24 @@
 import type { GameMode } from "@/globals/types/simon";
-import { Zap, Activity, Volume2, Binary, Cpu, Shuffle, EyeOff } from "lucide-react";
+import {
+  Zap,
+  Activity,
+  Volume2,
+  Binary,
+  Cpu,
+  Shuffle,
+  EyeOff,
+  Timer,
+} from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 export type ModeConfig = {
-  id: GameMode,
-  title: string,
-  description: string,
-  icon: ReactNode,
-  color: CSSProperties['color'],
+  id: GameMode;
+  title: string;
+  description: string;
+  icon: ReactNode;
+  color: CSSProperties["color"];
   available: boolean;
-}
+};
 
 export const MODES: ModeConfig[] = [
   {
@@ -34,7 +43,7 @@ export const MODES: ModeConfig[] = [
     id: "burst",
     title: "Burst Transmission",
     description:
-      "Select a specific data length. Receive the burst of sequence at once.",
+      "A complete data packet is transmitted simultaneously. Reconstruct the entire sequence from memory in a single attempt.",
     icon: <Binary className="w-6 h-6" />,
     color: "cyan",
     available: true,
@@ -72,6 +81,15 @@ export const MODES: ModeConfig[] = [
       "Hardware address failure. The physical button configuration re-routes after every successful transmission.",
     icon: <Shuffle className="w-6 h-6" />,
     color: "orange",
+    available: true,
+  },
+  {
+    id: "timeattack",
+    title: "Latency Benchmark",
+    description:
+      "System response test. Complete the designated transmission objective with minimum execution time.",
+    icon: <Timer className="w-6 h-6" />,
+    color: "violet",
     available: true,
   },
 ];

@@ -1,19 +1,6 @@
 import type { SimonButtonType } from "@/globals/types/simon";
 import { cn } from "@/globals/libs/styleUtils";
-
-const BUTTON_COLOR: Record<SimonButtonType, string> = {
-  red: "bg-red-500",
-  green: "bg-green-500",
-  blue: "bg-blue-500",
-  yellow: "bg-yellow-400",
-};
-
-const GLOW_COLOR: Record<SimonButtonType, string> = {
-  red: "shadow-[0_0_40px_rgba(239,68,68,0.6)]",
-  green: "shadow-[0_0_40px_rgba(34,197,94,0.6)]",
-  blue: "shadow-[0_0_40px_rgba(59,130,246,0.6)]",
-  yellow: "shadow-[0_0_40px_rgba(250,204,21,0.6)]",
-};
+import { BUTTON_COLOR, GLOW_COLOR } from "@/features/play/constants";
 
 type Props = {
   type: SimonButtonType;

@@ -16,7 +16,10 @@ const ModeSelectionPage = () => {
   const [selectedMode, setSelectedMode] = useState<ModeConfig | null>(null);
 
   const handleModeClick = (mode: ModeConfig) => {
-    if (mode.id === "burst") {
+    const hasGoal =
+      mode?.id === "burst" || mode?.id === "timeattack";
+
+    if (hasGoal) {
       setSelectedMode(mode);
     } else {
       navigateWithTransition(`/play?mode=${mode.id}`);
@@ -69,8 +72,8 @@ const ModeSelectionPage = () => {
                   key={mode.id}
                   disabled={!isAvailable}
                   onClick={() => {
-                    sfxPlayer.play(SFX.BTN_CLICK)
-                    handleModeClick(mode)
+                    sfxPlayer.play(SFX.BTN_CLICK);
+                    handleModeClick(mode);
                   }}
                   onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
                   onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
