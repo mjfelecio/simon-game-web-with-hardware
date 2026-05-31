@@ -162,7 +162,7 @@ export default function useSimonGame() {
     await stopMusic();
     await delay(500);
 
-    const buttons = [...core.currentButtons]
+    const buttons = [...core.currentButtons];
     // Flash all buttons in a spiral
     const sequence = [...buttons, ...[...buttons].reverse()];
     for await (const b of sequence) {
@@ -180,7 +180,9 @@ export default function useSimonGame() {
   const startGame = async () => {
     await startingSequence();
 
-    playMusic(MUSIC.GAMEPLAY, { loop: true });
+    if (config.mode !== "echo") {
+      playMusic(MUSIC.GAMEPLAY, { loop: true });
+    }
 
     const startSeq = core.generateNextSequence([]);
     core.setSequence(startSeq);

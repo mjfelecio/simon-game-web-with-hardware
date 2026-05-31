@@ -14,8 +14,8 @@ export default function useSimonAudio() {
       const freq = BUTTON_FREQUENCIES[color];
 
       if (mode === "echo") {
-        // Echo Mode: Softer "Sine" wave with a long tail for clarity
-        playTone(freq, { type: "sine", duration: 0.6 });
+        // Echo Mode
+        playTone(freq, { type: "square", duration: 0.6 });
         await delay(600); // Wait for the full sound in Echo mode
       } else if (mode === "blitz") {
         playTone(freq, { type: "square", duration: 0.2 });
