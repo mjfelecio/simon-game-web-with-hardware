@@ -1,5 +1,6 @@
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { setToneVolumeMultiplier } from "@/features/audio/utils/simonTones";
+import { DEFAULT_KEY_MAP, type KeyMap } from "@/features/controllers/constants";
 import {
   createContext,
   useCallback,
@@ -13,14 +14,17 @@ import {
 type SettingsContextValue = {
   musicVolume: number;
   sfxVolume: number;
+  keyMap: KeyMap;
 
   setMusicVolume: (volume: number) => void;
   setSfxVolume: (volume: number) => void;
+  setKeyMap: (keymap: KeyMap) => void;
 };
 
 const STORAGE_KEYS = {
   MUSIC_VOLUME: "simon-settings-music-volume",
   SFX_VOLUME: "simon-settings-sfx-volume",
+  KEY_MAP: "simon-settings-key-map",
 };
 
 const DEFAULT_MUSIC_VOLUME = 20;
@@ -35,12 +39,13 @@ type SettingsProviderProps = {
 export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   const [musicVolume, setMusicVolumeState] = useState(DEFAULT_MUSIC_VOLUME);
   const [sfxVolume, setSfxVolumeState] = useState(DEFAULT_SFX_VOLUME);
+  const [keyMap, setKeyMapState] = useState<KeyMap>(DEFAULT_KEY_MAP);
 
   useEffect(() => {
     try {
       const storedMusicVolume = localStorage.getItem(STORAGE_KEYS.MUSIC_VOLUME);
-
       const storedSfxVolume = localStorage.getItem(STORAGE_KEYS.SFX_VOLUME);
+      const storedKeyMap = localStorage.getItem(STORAGE_KEYS.KEY_MAP);
 
       if (storedMusicVolume !== null) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -49,6 +54,10 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
 
       if (storedSfxVolume !== null) {
         setSfxVolumeState(Number(storedSfxVolume));
+      }
+
+      if (storedKeyMap !== null) {
+        setKeyMapState(JSON.parse(storedKeyMap));
       }
     } catch (error) {
       console.error("Failed to load settings", error);
@@ -77,14 +86,22 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     localStorage.setItem(STORAGE_KEYS.SFX_VOLUME, String(clamped));
   }, []);
 
+  const setKeyMap = useCallback((keymap: KeyMap) => {
+    setKeyMapState(keymap);
+
+    localStorage.setItem(STORAGE_KEYS.KEY_MAP, JSON.stringify(keymap));
+  }, []);
+
   const value = useMemo(
     () => ({
       musicVolume,
       sfxVolume,
+      keyMap,
       setMusicVolume,
       setSfxVolume,
+      setKeyMap,
     }),
-    [musicVolume, sfxVolume, setMusicVolume, setSfxVolume],
+    [musicVolume, sfxVolume, keyMap, setMusicVolume, setSfxVolume, setKeyMap],
   );
 
   return (

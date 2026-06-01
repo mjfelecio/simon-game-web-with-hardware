@@ -19,12 +19,14 @@ import SettingsModal from "@/features/play/components/SettingsModal";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import GameResultOverlay from "@/features/play/components/GameResultOverlay";
 import useArduinoInput from "@/features/controllers/hooks/useArduinoInput";
+import useKeyboardInput from "@/features/controllers/hooks/useKeyboardInput";
 
 const PlayPage = () => {
   const game = useSimonGame();
   const { connect, status: connectionStatus } = useArduinoInput(
     game.handleInput,
   );
+  useKeyboardInput(game.handleInput);
   const { fadeToVolume, getEffectiveVolume } = useMusic();
   const navigate = useNavigate();
 
