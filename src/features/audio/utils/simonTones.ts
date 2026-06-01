@@ -1,4 +1,5 @@
 let audioCtx: AudioContext | null = null;
+let sfxVolumeMultiplier = 1;
 
 export const BUTTON_FREQUENCIES: Record<string, number> = {
   green: 523.25, // C5
@@ -22,6 +23,10 @@ const getAudioCtx = () => {
   return audioCtx;
 };
 
+export const setToneVolumeMultiplier = (volume: number) => {
+  sfxVolumeMultiplier = volume;
+};
+
 export const playTone = (frequency: number, options: ToneOptions = {}) => {
   const { duration = 0.2, type = "sine", volume = 0.5 } = options;
   const ctx = getAudioCtx();
@@ -33,7 +38,7 @@ export const playTone = (frequency: number, options: ToneOptions = {}) => {
   oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
 
   // Envelope: Start at volume, ramp down to near-zero to prevent popping/clicking
-  gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+  gainNode.gain.setValueAtTime(volume * sfxVolumeMultiplier, ctx.currentTime);
   gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
 
   oscillator.connect(gainNode);

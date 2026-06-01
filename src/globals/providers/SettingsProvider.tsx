@@ -1,3 +1,5 @@
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { setToneVolumeMultiplier } from "@/features/audio/utils/simonTones";
 import {
   createContext,
   useCallback,
@@ -52,6 +54,12 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       console.error("Failed to load settings", error);
     }
   }, []);
+
+  // Just putting it here for simplicity sake
+  useEffect(() => {
+    sfxPlayer.setVolumeMultiplier(sfxVolume / 100);
+    setToneVolumeMultiplier(sfxVolume / 100);
+  }, [sfxVolume]);
 
   const setMusicVolume = useCallback((volume: number) => {
     const clamped = Math.max(0, Math.min(100, volume));
