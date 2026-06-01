@@ -179,9 +179,15 @@ const LeaderboardPage = () => {
                 <div className="text-right">
                   <div className="text-right">
                     {isTimeAttack ? (
-                      <p className="text-xl font-black text-violet-300 italic">
-                        {formatDuration(score.time_taken ?? 0)}
-                      </p>
+                      <>
+                        <p className="text-xl font-black text-violet-300 italic">
+                          {formatDuration(score.time_taken ?? 0)}
+                        </p>
+
+                        <p className="text-[10px] font-bold uppercase text-slate-400">
+                          Goal {score.goal}
+                        </p>
+                      </>
                     ) : isBurst ? (
                       <>
                         <p className="text-xl font-black text-cyan-300 italic">
@@ -216,7 +222,12 @@ const LeaderboardPage = () => {
           className="h-12"
           variant="secondary"
         />
-        <Button className="h-12" size="sm" text="Play Again" onClick={() => navigate("/mode")} />
+        <Button
+          className="h-12"
+          size="sm"
+          text="Play Again"
+          onClick={() => navigate("/mode")}
+        />
       </div>
     </PageWrapper>
   );
