@@ -41,7 +41,9 @@ const GameHeader = ({
             : "bg-white/10";
 
         const timeAttackButtonStyle =
-          i < inputsLength ? `${BUTTON_COLOR[type]} opacity-50 border-2 border-white` : BUTTON_COLOR[type];
+          i < inputsLength
+            ? `${BUTTON_COLOR[type]} opacity-50 border-2 border-white`
+            : BUTTON_COLOR[type];
 
         return (
           <div
@@ -54,6 +56,9 @@ const GameHeader = ({
                 ? `${timeAttackButtonStyle} h-8 w-8 rounded-lg`
                 : normalButtonStyle,
             )}
+            style={{
+              animation: "popIn 100ms ease-out",
+            }}
           />
         );
       })}
