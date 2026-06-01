@@ -10,10 +10,7 @@ export default function WelcomeModal() {
   const { playMusic } = useMusic();
 
   const handleStart = async () => {
-    await playMusic(MUSIC.BG, {
-      volume: 0.1,
-			loop: true
-    });
+    await playMusic(MUSIC.BG);
 
     setIsOpen(false);
   };

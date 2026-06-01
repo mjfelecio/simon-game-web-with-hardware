@@ -3,11 +3,13 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   type ReactNode,
 } from "react";
 
 import { musicPlayer } from "@/features/audio/utils/musicPlayer";
+import { useSettings } from "@/globals/providers/SettingsProvider";
 
 type PlayMusicOptions = {
   volume?: number;
@@ -18,8 +20,9 @@ type PlayMusicOptions = {
 type MusicContextValue = {
   playMusic: (src: string, options?: PlayMusicOptions) => Promise<void>;
   stopMusic: () => Promise<void>;
-  setVolume: (volume: number) => void;
   isPlaying: () => boolean;
+  fadeToVolume: (to: number) => void;
+  getEffectiveVolume: () => number;
 };
 
 const MusicContext = createContext<MusicContextValue | null>(null);
@@ -29,52 +32,68 @@ type Props = {
 };
 
 export function MusicProvider({ children }: Props) {
+  const { musicVolume } = useSettings();
+
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const fadeFrameRef = useRef<number | null>(null);
 
   /**
-   * Smoothly fades audio volume.
+   * Track-specific volume override.
+   *
+   * Example:
+   * - Settings volume = 80%
+   * - Track volume override = 0.5
+   * - Actual volume = 0.4
    */
+  const volumeMultiplierRef = useRef(1);
+
+  const getEffectiveVolume = useCallback(() => {
+    return (musicVolume / 100) * volumeMultiplierRef.current;
+  }, [musicVolume]);
+
   const fadeVolume = useCallback(
     (audio: HTMLAudioElement, from: number, to: number, duration: number) => {
       return new Promise<void>((resolve) => {
-        try {
-          const start = performance.now();
+        const start = performance.now();
 
-          const tick = (now: number) => {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
+        const tick = (now: number) => {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
 
-            audio.volume = Math.max(from + (to - from) * progress, 0);
+          audio.volume = Math.min(Math.max(from + (to - from) * progress, 0), 1);
+          // audio.volume = Math.max(from + (to - from) * progress, 0);
 
-            if (progress < 1) {
-              fadeFrameRef.current = requestAnimationFrame(tick);
-            } else {
-              resolve();
-            }
-          };
-          fadeFrameRef.current = requestAnimationFrame(tick);
-        } catch (error) {
-          console.warn("MusicProvider: " + error);
-        }
+          if (progress < 1) {
+            fadeFrameRef.current = requestAnimationFrame(tick);
+          } else {
+            resolve();
+          }
+        };
+        fadeFrameRef.current = requestAnimationFrame(tick);
       });
     },
     [],
   );
 
-  /**
-   * Play music with crossfade.
-   */
+  const fadeToVolume = useCallback((to: number) => {
+    const current = currentAudioRef.current
+    if (!current) return;
+    fadeVolume(current, current?.volume, to, 500)
+  }, [fadeVolume])
+
   const playMusic = useCallback(
     async (src: string, options: PlayMusicOptions = {}) => {
-      const { volume = 0.5, loop = true, fadeDuration = 500 } = options;
+      const { volume, loop = true, fadeDuration = 500 } = options;
 
       const nextAudio = musicPlayer.getAudio(src);
 
-      // Prevent restarting same track
       if (currentAudioRef.current === nextAudio) {
         return;
       }
+
+      volumeMultiplierRef.current = volume ?? 1;
+
+      const targetVolume = (musicVolume / 100) * volumeMultiplierRef.current;
 
       nextAudio.loop = loop;
       nextAudio.volume = 0;
@@ -90,10 +109,8 @@ export function MusicProvider({ children }: Props) {
 
       currentAudioRef.current = nextAudio;
 
-      // Fade in next music
-      await fadeVolume(nextAudio, 0, volume, fadeDuration);
+      await fadeVolume(nextAudio, 0, targetVolume, fadeDuration);
 
-      // Fade out previous music
       if (previousAudio) {
         await fadeVolume(previousAudio, previousAudio.volume, 0, fadeDuration);
 
@@ -101,16 +118,15 @@ export function MusicProvider({ children }: Props) {
         previousAudio.currentTime = 0;
       }
     },
-    [fadeVolume],
+    [fadeVolume, musicVolume],
   );
 
-  /**
-   * Stop current music with fade out.
-   */
   const stopMusic = useCallback(async () => {
     const current = currentAudioRef.current;
 
-    if (!current) return;
+    if (!current) {
+      return;
+    }
 
     await fadeVolume(current, current.volume, 0, 400);
 
@@ -121,13 +137,14 @@ export function MusicProvider({ children }: Props) {
   }, [fadeVolume]);
 
   /**
-   * Change current music volume.
+   * Automatically react to settings changes.
    */
-  const setVolume = useCallback((volume: number) => {
-    if (!currentAudioRef.current) return;
+  useEffect(() => {
+    const current = currentAudioRef.current;
+    if (!current) return;
 
-    currentAudioRef.current.volume = volume;
-  }, []);
+    current.volume = getEffectiveVolume();
+  }, [musicVolume, getEffectiveVolume]);
 
   useEffect(() => {
     return () => {
@@ -138,20 +155,22 @@ export function MusicProvider({ children }: Props) {
   }, []);
 
   const isPlaying = useCallback(() => {
-    return !!currentAudioRef.current?.paused;
-  }, [])
+    return !!currentAudioRef.current && !currentAudioRef.current.paused;
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      playMusic,
+      stopMusic,
+      isPlaying,
+      fadeToVolume,
+      getEffectiveVolume
+    }),
+    [playMusic, stopMusic, isPlaying, fadeToVolume, getEffectiveVolume],
+  );
 
   return (
-    <MusicContext.Provider
-      value={{
-        playMusic,
-        stopMusic,
-        setVolume,
-        isPlaying
-      }}
-    >
-      {children}
-    </MusicContext.Provider>
+    <MusicContext.Provider value={value}>{children}</MusicContext.Provider>
   );
 }
 

@@ -245,7 +245,7 @@ export default function useSimonGame() {
   );
 
   const resetGame = () => {
-    playMusic(MUSIC.BG, { volume: 0.1, loop: true });
+    playMusic(MUSIC.BG);
     core.resetGame();
   };
 
@@ -273,7 +273,7 @@ export default function useSimonGame() {
     await startingSequence();
 
     if (config.mode !== "echo") {
-      playMusic(MUSIC.GAMEPLAY, { loop: true });
+      playMusic(MUSIC.GAMEPLAY);
     }
 
     const startSeq = config.hasGoal
@@ -295,8 +295,9 @@ export default function useSimonGame() {
   };
 
   useEffect(() => {
-    return () => void playMusic(MUSIC.BG, { loop: true });
-  }, [playMusic]);
+    return () => void playMusic(MUSIC.BG);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     ...core,

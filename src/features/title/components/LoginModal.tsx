@@ -25,10 +25,7 @@ const LoginModal = ({ isOpen, onLogin }: LoginModalProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const startGame = async () => {
-    await playMusic(MUSIC.BG, {
-      volume: 0.1,
-      loop: true,
-    });
+    await playMusic(MUSIC.BG);
 
     setUsername("");
     setPassword("");

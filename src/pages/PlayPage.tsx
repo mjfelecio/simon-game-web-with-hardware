@@ -17,6 +17,7 @@ import { STATUS_CONFIG } from "@/features/play/constants";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 import SettingsModal from "@/features/play/components/SettingsModal";
+import { useMusic } from "@/features/audio/components/MusicProvider";
 import GameResultOverlay from "@/features/play/components/GameResultOverlay";
 
 const PlayPage = () => {
@@ -24,6 +25,7 @@ const PlayPage = () => {
   const { connect, status: connectionStatus } = useArduinoInput(
     game.handleInput,
   );
+  const { fadeToVolume, getEffectiveVolume } = useMusic();
   const navigate = useNavigate();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -33,14 +35,26 @@ const PlayPage = () => {
 
   const openMenu = () => {
     setActiveModal("menu");
-    game.setStatus((prev) =>
-      prev === "playing" || prev === "sequence" ? "paused" : prev,
-    );
+    game.setStatus((prev) => {
+      const newState =
+        prev === "playing" || prev === "sequence" ? "paused" : prev;
+
+      // Fade to 20% volume wehen paused
+      if (newState === "paused") fadeToVolume(0.2);
+
+      return newState;
+    });
   };
 
   const resumeGame = () => {
     setActiveModal(null);
-    game.setStatus((prev) => (prev === "paused" ? "playing" : prev));
+    game.setStatus((prev) => {
+      const newState = prev === "paused" ? "playing" : prev;
+
+      if (newState === "playing") fadeToVolume(getEffectiveVolume());
+
+      return newState;
+    });
   };
 
   const saveAndQuit = () => {
