@@ -17,6 +17,7 @@ import { STATUS_CONFIG } from "@/features/play/constants";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 import SettingsModal from "@/features/play/components/SettingsModal";
+import GameResultOverlay from "@/features/play/components/GameResultOverlay";
 
 const PlayPage = () => {
   const game = useSimonGame();
@@ -62,7 +63,11 @@ const PlayPage = () => {
       <div className="relative w-full max-w-md mt-12 flex flex-col items-center gap-10">
         <div className="px-2">
           <GameHeader
-            level={game.mode === "burst" || game.mode === "timeattack" ? game.inputs.length : game.level}
+            level={
+              game.mode === "burst" || game.mode === "timeattack"
+                ? game.inputs.length
+                : game.level
+            }
             currentStatus={currentStatus}
             sequence={game.sequence}
             inputsLength={game.inputs.length}
@@ -124,6 +129,20 @@ const PlayPage = () => {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
+
+      {(game.status === "victory" || game.status === "lose") &&
+        game.timeTaken !== null && (
+          <GameResultOverlay
+            variant={game.status}
+            mode={game.mode}
+            level={game.level}
+            goal={game.goal}
+            timeTaken={game.timeTaken ?? undefined}
+            isEndless={game.isEndless}
+            avgReactionTime={game.avgReactionTime}
+            onRetry={game.reset}
+          />
+        )}
     </PageWrapper>
   );
 };

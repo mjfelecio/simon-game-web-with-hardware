@@ -17,7 +17,7 @@ const GameHeader = ({
   sequence,
   inputsLength,
 }: GameHeaderProps) => (
-  <div className="flex flex-col items-center gap-2">
+  <div className="flex flex-col min-w-80 items-center gap-2">
     <div className="rounded-full bg-white/10 px-4 py-1 border border-white/20">
       <span className="text-sm font-bold tracking-widest text-white/70 uppercase">
         Level {level}

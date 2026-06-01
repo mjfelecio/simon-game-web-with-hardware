@@ -5,7 +5,12 @@ import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
-import { toastError, toastInfo, toastPromise, toastWarning } from "@/globals/utils/toast";
+import {
+  toastError,
+  toastInfo,
+  toastPromise,
+  toastWarning,
+} from "@/globals/utils/toast";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import { useAuth } from "@/features/auth/components/AuthProvider";
@@ -22,7 +27,20 @@ export default function useSimonGame() {
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
+  const [timeTaken, setTimeTaken] = useState<number | null>(null);
   const startedAtRef = useRef<number | null>(null);
+
+  // Reaction time
+  const reactionTimesRef = useRef<number[]>([]);
+  const lastPromptAtRef = useRef<number | null>(null);
+
+  const avgReactionTime =
+    reactionTimesRef.current.length > 0
+      ? Math.round(
+          reactionTimesRef.current.reduce((a, b) => a + b, 0) /
+            reactionTimesRef.current.length,
+        )
+      : null;
 
   const playSequence = useCallback(
     async (seq: SimonButtonType[]) => {
@@ -31,6 +49,7 @@ export default function useSimonGame() {
       if (config.mode === "timeattack") {
         core.setInputs([]);
         core.setStatus("playing");
+        lastPromptAtRef.current = performance.now();
         return;
       }
 
@@ -51,6 +70,7 @@ export default function useSimonGame() {
 
       core.setInputs([]);
       core.setStatus("playing");
+      lastPromptAtRef.current = performance.now();
     },
     [config.mode, audio, core],
   );
@@ -67,7 +87,8 @@ export default function useSimonGame() {
 
       const formattedTime = formatDuration(timeTaken);
 
-      if (config.mode === "timeattack") toastInfo(`Time taken: ${formattedTime}`);
+      if (config.mode === "timeattack")
+        toastInfo(`Time taken: ${formattedTime}`);
 
       // level depends on burst
       const level = config.isBurst ? inputs.length : core.level;
@@ -128,6 +149,17 @@ export default function useSimonGame() {
     async (input: SimonButtonType) => {
       if (core.status !== "playing") return;
 
+      // Reaction time only on correct inputs
+      if (
+        lastPromptAtRef.current != null &&
+        input === core.sequence[core.inputs.length]
+      ) {
+        reactionTimesRef.current.push(
+          performance.now() - lastPromptAtRef.current,
+        );
+        lastPromptAtRef.current = performance.now();
+      }
+
       setActiveButton(input);
       audio.playColor(input, config.mode);
       setTimeout(
@@ -155,6 +187,7 @@ export default function useSimonGame() {
           return;
         }
 
+        setTimeTaken(timeTaken);
         const formattedTime = formatDuration(timeTaken);
         if (config.mode === "timeattack") {
           toastWarning("Score discarded", {
@@ -187,6 +220,7 @@ export default function useSimonGame() {
             return;
           }
 
+          setTimeTaken(timeTaken);
           await submitScoreWithRetry(newInputs, timeTaken);
         } else {
           core.setStatus("won");
@@ -250,7 +284,12 @@ export default function useSimonGame() {
     core.setLevel(1);
 
     // Timer starts when the sequence is set
+    setTimeTaken(null);
     startedAtRef.current = performance.now();
+
+    // Reset refs
+    reactionTimesRef.current = [];
+    lastPromptAtRef.current = null;
 
     playSequence(startSeq);
   };
@@ -261,10 +300,13 @@ export default function useSimonGame() {
 
   return {
     ...core,
+    ...config,
     activeButton,
     startGame,
     handleInput,
     reset: resetGame,
     mode: config.mode,
+    timeTaken,
+    avgReactionTime,
   };
 }

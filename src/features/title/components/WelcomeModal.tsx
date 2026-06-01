@@ -3,10 +3,8 @@ import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import BaseModal from "@/globals/components/layouts/BaseModal";
 import Button from "@/globals/components/Button";
-import { useAuth } from "@/features/auth/components/AuthProvider";
 
 export default function WelcomeModal() {
-  const { isAuthenticated, isAGuest } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
 
   const { playMusic } = useMusic();
@@ -19,10 +17,6 @@ export default function WelcomeModal() {
 
     setIsOpen(false);
   };
-
-  if (isAuthenticated || isAGuest) {
-    return;
-  }
 
   return (
     <BaseModal

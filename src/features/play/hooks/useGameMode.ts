@@ -1,17 +1,28 @@
 import { useSearchParams } from "react-router";
 import type { GameMode } from "@/globals/types/simon";
 
+const ENDLESS_MODES = new Set<GameMode>([
+  "classic",
+  "blitz",
+  "echo",
+  "entropy",
+  "fragment",
+  "ghost",
+]);
+
 export default function useGameMode() {
   const [searchParams] = useSearchParams();
   const mode = (searchParams.get("mode") ?? "classic") as GameMode;
   const goal = Number(searchParams.get("goal")) || 0;
   const hasGoal = mode === "burst"  || mode === "timeattack"
+  const isEndless = ENDLESS_MODES.has(mode);
 
   const config = {
     mode,
     goal,
     isEcho: mode === "echo",
     isBurst: mode === "burst",
+    isEndless,
     hasGoal,
     // Logic to check if the current round results in a total game victory
     checkVictory: (currentLength: number) => {
