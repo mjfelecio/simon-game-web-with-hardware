@@ -17,6 +17,7 @@ import { useAuth } from "@/features/auth/components/AuthProvider";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 import { formatDuration } from "@/globals/utils/formatter";
+import { musicPlayer } from "@/features/audio/utils/musicPlayer";
 
 export default function useSimonGame() {
   const config = useGameMode();
@@ -173,9 +174,10 @@ export default function useSimonGame() {
       if (input !== core.sequence[nextIndex]) {
         core.setStatus("lose");
 
-        await delay(1000);
-
-        audio.playLoseDissonance();
+        // SFX for losing
+        await stopMusic();
+        await audio.playLoseTone();
+        musicPlayer.play(MUSIC.GAMEFINISHED);
 
         const timeTaken =
           startedAtRef.current != null
@@ -208,6 +210,13 @@ export default function useSimonGame() {
       // Check for Round Win / Victory
       if (newInputs.length === core.sequence.length) {
         if (config.checkVictory(core.sequence.length)) {
+          // PLay victory music
+
+          await stopMusic();
+          await audio.playVictoryTone();
+          await sfxPlayer.play(SFX.AWESOME);
+          musicPlayer.play(MUSIC.GAMEFINISHED);
+
           core.setStatus("victory");
 
           const timeTaken =

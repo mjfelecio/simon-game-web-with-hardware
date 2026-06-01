@@ -1,3 +1,5 @@
+import { delay } from "@/globals/utils";
+
 let audioCtx: AudioContext | null = null;
 let sfxVolumeMultiplier = 1;
 
@@ -56,8 +58,69 @@ export const playWinMelody = async () => {
   }
 };
 
-export const playLoseDissonance = () => {
-  // Low, clashing frequencies for that "incorrect" arcade feel
-  playTone(110, { duration: 0.6, type: "sawtooth", volume: 0.3 });
-  playTone(116, { duration: 0.6, type: "sawtooth", volume: 0.3 });
+export const playVictoryTone = async () => {
+  const melody = [
+    523.25, // C5
+    659.25, // E5
+    783.99, // G5
+    1046.5, // C6
+    1318.5, // E6
+    1567.98, // G6
+  ];
+
+  for (const freq of melody) {
+    playTone(freq, {
+      duration: 0.1,
+      type: "square",
+      volume: 0.55,
+    });
+
+    await delay(100);
+  }
+
+  // Hero chord
+  [
+    523.25, // C
+    659.25, // E
+    783.99, // G
+    1046.5, // C
+    1318.5, // E
+  ].forEach((freq) =>
+    playTone(freq, {
+      duration: 2.5,
+      type: "square",
+      volume: 0.4,
+    }),
+  );
+};
+
+export const playLoseTone = async () => {
+  const notes = [
+    440,
+    392,
+    349,
+    293,
+    246,
+    196,
+    146,
+  ];
+
+  for (const freq of notes) {
+    playTone(freq, {
+      duration: 0.5,
+      type: "square",
+      volume: 0.45,
+    });
+
+    await delay(200);
+  }
+  
+  // final doom chord
+  [110, 116, 123].forEach((freq) =>
+    playTone(freq, {
+      duration: 3,
+      type: "square",
+      volume: 0.5,
+    }),
+  );
 };

@@ -8,6 +8,8 @@ import AWESOME from "@/globals/assets/audio/sfx/awesome.wav";
 import EXCELLENT from "@/globals/assets/audio/sfx/excellent.wav";
 import WONDERFUL from "@/globals/assets/audio/sfx/wonderful.wav";
 
+import FAIL from "@/globals/assets/audio/sfx/failsound.wav";
+
 import BEGIN from "@/globals/assets/audio/sfx/begin.wav";
 import OVER from "@/globals/assets/audio/sfx/over.wav";
 
@@ -25,5 +27,7 @@ export const SFX = {
 	// APPLAUSE
 	AWESOME,
 	EXCELLENT,
-	WONDERFUL
+	WONDERFUL,
+
+	FAIL
 } as const

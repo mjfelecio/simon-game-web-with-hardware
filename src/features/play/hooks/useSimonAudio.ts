@@ -3,7 +3,8 @@ import {
   BUTTON_FREQUENCIES,
   playTone,
   playWinMelody,
-  playLoseDissonance,
+  playLoseTone,
+  playVictoryTone
 } from "@/features/audio/utils/simonTones";
 import type { GameMode, SimonButtonType } from "@/globals/types/simon";
 import { delay } from "@/globals/utils";
@@ -29,5 +30,10 @@ export default function useSimonAudio() {
     [],
   );
 
-  return { playColor, playWinMelody, playLoseDissonance };
+  return {
+    playColor,
+    playWinMelody,
+    playVictoryTone,
+    playLoseTone
+  };
 }
