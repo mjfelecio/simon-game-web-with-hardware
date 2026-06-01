@@ -121,7 +121,7 @@ export const getLeaderboard = async (filters?: {
   }
 
   if (filters?.input_type) {
-    query = query.ilike("input_type", filters.input_type);
+    query = query.ilike("input_type", `%${filters.input_type}%`);
   }
 
   if (filters?.goal) {

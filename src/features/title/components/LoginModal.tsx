@@ -152,7 +152,10 @@ const LoginModal = ({ isOpen, onLogin }: LoginModalProps) => {
 
         <button
           type="button"
-          onClick={() => setIsRegistering((v) => !v)}
+          onClick={() => {
+            sfxPlayer.play(SFX.BTN_CLICK);
+            setIsRegistering((v) => !v);
+          }}
           className="w-full text-sm text-slate-400 hover:text-white"
         >
           {isRegistering
