@@ -96,7 +96,7 @@ const PlayPage = () => {
           mode={game.mode}
           activeButton={game.activeButton}
           isButtonDisabled={game.status !== "playing"}
-          onInput={game.handleInput}
+          onInput={(color) => game.handleInput("mouse", color)}
         />
 
         <div className="flex items-center justify-center gap-4">

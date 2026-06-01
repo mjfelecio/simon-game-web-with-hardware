@@ -3,7 +3,7 @@ import { delay } from "@/globals/utils";
 import useGameMode from "./useGameMode";
 import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
-import type { SimonButtonType } from "@/globals/types/simon";
+import type { InputType, SimonButtonType } from "@/globals/types/simon";
 import { submitScore } from "@/globals/utils/scores";
 import {
   toastError,
@@ -28,6 +28,8 @@ export default function useSimonGame() {
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
+  const inputsUsed = useRef<Set<InputType>>(new Set());
+
   const [timeTaken, setTimeTaken] = useState<number | null>(null);
   const startedAtRef = useRef<number | null>(null);
 
@@ -97,6 +99,9 @@ export default function useSimonGame() {
       const hasGoal = config.mode === "burst" || config.mode === "timeattack";
       const goal = hasGoal ? config.goal : undefined;
 
+      // Stored as CSV in string form
+      const inputType = Array.from(inputsUsed.current).join(",");
+
       let retryAttempts = 3;
 
       const executeSubmission = async (): Promise<void> => {
@@ -104,7 +109,7 @@ export default function useSimonGame() {
           await submitScore({
             user_id: user.id,
             gamemode: config.mode,
-            input_type: "mouse",
+            input_type: inputType,
             level: level,
             goal: goal,
             time_taken: timeTaken,
@@ -147,8 +152,13 @@ export default function useSimonGame() {
   );
 
   const handleInput = useCallback(
-    async (input: SimonButtonType) => {
+    async (type: InputType, input: SimonButtonType) => {
       if (core.status !== "playing") return;
+
+      // Recording the input type
+      if (!inputsUsed.current.has(type)) {
+        inputsUsed.current.add(type);
+      }
 
       // Reaction time only on correct inputs
       if (
@@ -250,7 +260,7 @@ export default function useSimonGame() {
         }
       }
     },
-    [core, config, audio, playSequence, submitScoreWithRetry],
+    [core, config, audio, stopMusic, playSequence, submitScoreWithRetry],
   );
 
   const resetGame = () => {
@@ -299,6 +309,7 @@ export default function useSimonGame() {
     // Reset refs
     reactionTimesRef.current = [];
     lastPromptAtRef.current = null;
+    inputsUsed.current = new Set();
 
     playSequence(startSeq);
   };

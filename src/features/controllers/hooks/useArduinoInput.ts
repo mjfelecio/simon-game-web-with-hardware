@@ -1,4 +1,4 @@
-import type { SimonButtonType } from "@/globals/types/simon";
+import type { InputType, SimonButtonType } from "@/globals/types/simon";
 import useArduinoConnection, {
   getArduinoConnection,
 } from "./useArduinoConnection";
@@ -10,7 +10,7 @@ import { useEffect, useRef } from "react";
 const VALID_INPUTS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
 
 export default function useArduinoInput(
-  onInput?: (color: SimonButtonType) => void,
+  onInput?: (type: InputType, color: SimonButtonType) => void,
 ) {
   const { connect, status } = useArduinoConnection();
 
@@ -40,7 +40,7 @@ export default function useArduinoInput(
 
       if (!VALID_INPUTS.includes(color)) return;
 
-      onInputRef.current?.(color);
+      onInputRef.current?.("arduino", color);
     });
 
     return () => {

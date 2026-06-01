@@ -3,7 +3,7 @@ import Button from "@/globals/components/Button";
 import { useNavigate } from "react-router";
 import { cn } from "@/globals/libs/styleUtils";
 import StatCard from "@/globals/components/StatCard";
-import { calculateAvgScore } from "@/globals/utils";
+import { calculateAvgScore, formatInputTypes } from "@/globals/utils";
 import { getLeaderboard } from "@/globals/utils/scores";
 import { useEffect, useState } from "react";
 import type { GameMode, InputType, ScoreView } from "@/globals/types/simon";
@@ -170,7 +170,8 @@ const LeaderboardPage = () => {
                     <div>
                       <p className="font-bold text-white">{score.username}</p>
                       <p className="text-xs text-slate-500">
-                        {new Date(score.created_at).toLocaleDateString()}
+                        {new Date(score.created_at).toLocaleDateString()}{" | "}
+                        {formatInputTypes(score.input_type)}
                       </p>
                     </div>
                   </div>

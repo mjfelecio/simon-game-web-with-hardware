@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef } from "react";
-import type { SimonButtonType } from "@/globals/types/simon";
+import type { InputType, SimonButtonType } from "@/globals/types/simon";
 import { useSettings } from "@/globals/providers/SettingsProvider";
 
 export default function useKeyboardInput(
-  onInput?: (color: SimonButtonType) => void,
+  onInput?: (type: InputType, color: SimonButtonType) => void,
 ) {
   const { keyMap } = useSettings();
   const onInputRef = useRef(onInput);
@@ -32,7 +32,7 @@ export default function useKeyboardInput(
 
       if (!color) return;
 
-      onInputRef.current?.(color);
+      onInputRef.current?.("keyboard", color);
     };
 
     window.addEventListener("keydown", handleKeyDown);
