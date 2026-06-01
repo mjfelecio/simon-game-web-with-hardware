@@ -1,19 +1,18 @@
-import type { SimonButtonType } from "@/globals/types/simon";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-/** 
-* Weird bug (or is it intended?), either way it isn't clear from the error message
-* So SerialConnection is a class but I need it as a type
-* If I just import it directly without the type directive,
-* they can't see the SerialConnection and crashes the app
-* Whereas I add the type, it doesn't crash anymore.
-*/ 
-import { type SerialConnection, setupSerialConnection } from "simple-web-serial";
+import {
+  type SerialConnection,
+  setupSerialConnection,
+} from "simple-web-serial";
 
 /**
  * Current state of the Arduino connection.
  */
-export type ConnectionStatus = "idle" | "loading" | "connected" | "error" | "unsupported";
+export type ConnectionStatus =
+  | "idle"
+  | "loading"
+  | "connected"
+  | "error"
+  | "unsupported";
 
 const ACK_TIMEOUT_MS = 5000;
 const HANDSHAKE_RETRY_DELAY_MS = 1500;
@@ -26,19 +25,18 @@ let isUnsupportedBrowser = false;
 /**
  * Shared serial connection instance.
  */
-let connection: SerialConnection
+let connection: SerialConnection | undefined;
 try {
-	connection = setupSerialConnection({
-		baudRate: 57600,
-	});
+  connection = setupSerialConnection({
+    baudRate: 57600,
+  });
 } catch {
   isUnsupportedBrowser = true;
 }
 
-/**
- * Valid button colors accepted from the Arduino.
- */
-const VALID_INPUTS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
+export function getArduinoConnection() {
+	return connection;
+}
 
 /**
  * React hook for receiving button input from the Arduino through Web Serial.
@@ -53,16 +51,13 @@ const VALID_INPUTS: SimonButtonType[] = ["red", "green", "blue", "yellow"];
  *
  * @param onInput Callback invoked whenever a valid Simon color is received.
  */
-export default function useArduinoInput(
-  onInput?: (color: SimonButtonType) => void,
-) {
+export default function useArduinoConnection() {
   const [status, setStatus] = useState<ConnectionStatus>("idle");
 
   /**
    * Mutable refs used inside event listeners to avoid stale closures.
    */
   const statusRef = useRef<ConnectionStatus>("idle");
-  const onInputRef = useRef(onInput);
   const ackTimeoutRef = useRef<number | null>(null);
   const handshakeAttemptRef = useRef(0);
   const heartbeatIntervalRef = useRef<number | null>(null);
@@ -74,10 +69,6 @@ export default function useArduinoInput(
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
-
-  useEffect(() => {
-    onInputRef.current = onInput;
-  }, [onInput]);
 
   /**
    * Clears the active handshake timeout.
@@ -121,7 +112,7 @@ export default function useArduinoInput(
     heartbeatIntervalRef.current = window.setInterval(() => {
       if (statusRef.current !== "connected") return;
 
-      connection.sendEvent("connection-syn");
+      connection?.sendEvent("connection-syn");
     }, HEARTBEAT_INTERVAL_MS);
   };
 
@@ -135,7 +126,7 @@ export default function useArduinoInput(
       `Sending handshake attempt ${handshakeAttemptRef.current}/${MAX_HANDSHAKE_ATTEMPTS}`,
     );
 
-    connection.sendEvent("connection-syn");
+    connection?.sendEvent("connection-syn");
 
     clearAckTimeout();
 
@@ -181,20 +172,6 @@ export default function useArduinoInput(
     });
 
     /**
-     * Fired whenever the Arduino sends a button press.
-     */
-    connection.on("simon-input", (data: unknown) => {
-      if (statusRef.current !== "connected") return;
-      if (typeof data !== "string") return;
-
-      const color = data.trim() as SimonButtonType;
-
-      if (!VALID_INPUTS.includes(color)) return;
-
-      onInputRef.current?.(color);
-    });
-
-    /**
      * Cleanup timeout when component unmounts.
      */
     return () => {
@@ -209,9 +186,8 @@ export default function useArduinoInput(
    */
   const connect = useCallback(async () => {
     if (!connection) return;
-    if (statusRef.current === "loading") return;
-    if (statusRef.current === "connected") return;
-    if (statusRef.current === "unsupported") return;
+    if (["loading", "connected", "unsupported"].includes(statusRef.current))
+      return;
 
     setStatus("loading");
     handshakeAttemptRef.current = 0;

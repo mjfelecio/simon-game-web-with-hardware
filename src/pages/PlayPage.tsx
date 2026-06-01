@@ -9,7 +9,6 @@ import PlayNavigation from "@/features/play/components/PlayNavigation";
 import GameConsole from "@/features/play/components/GameConsole";
 
 // Hooks & Globals
-import useArduinoInput from "@/features/play/hooks/useArduinoInput";
 import useSimonGame from "@/features/play/hooks/useSimonGame";
 import Button from "@/globals/components/Button";
 import PageWrapper from "@/globals/components/layouts/PageWrapper";
@@ -19,6 +18,7 @@ import { SFX } from "@/features/audio/constants/sfx";
 import SettingsModal from "@/features/play/components/SettingsModal";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import GameResultOverlay from "@/features/play/components/GameResultOverlay";
+import useArduinoInput from "@/features/controllers/hooks/useArduinoInput";
 
 const PlayPage = () => {
   const game = useSimonGame();
