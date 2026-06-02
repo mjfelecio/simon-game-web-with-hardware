@@ -15,6 +15,7 @@ export function formatInputTypes(inputTypesStr: string) {
 
   if (inputTypes.length > 1) return "Mixed";
 
+  if (inputTypes[0] === "touch") return "Touch"
   if (inputTypes[0] === "mouse") return "Mouse"
   if (inputTypes[0] === "keyboard") return "Keyboard"
   if (inputTypes[0] === "arduino") return "Arduino"

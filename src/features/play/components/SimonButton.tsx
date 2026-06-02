@@ -1,4 +1,4 @@
-import type { SimonButtonType } from "@/globals/types/simon";
+import type { InputType, SimonButtonType } from "@/globals/types/simon";
 import { cn } from "@/globals/libs/styleUtils";
 import { BUTTON_COLOR, GLOW_COLOR } from "@/features/play/constants";
 
@@ -7,7 +7,7 @@ type Props = {
   isActive: boolean;
   isDisabled: boolean;
   isGhosted: boolean;
-  onClick: (type: SimonButtonType) => void;
+  onClick: (inputType: InputType, type: SimonButtonType) => void;
 };
 
 const SimonButton = ({
@@ -21,7 +21,8 @@ const SimonButton = ({
     <button
       type="button"
       disabled={isDisabled}
-      onClick={() => !isDisabled && onClick(type)}
+      onTouchStart={() => !isDisabled && onClick("touch", type)}
+      onClick={() => !isDisabled && onClick("mouse", type)}
       style={{
         width: "clamp(120px, 25vw, 180px)",
       }}

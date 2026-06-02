@@ -25,6 +25,7 @@ const GAMEMODES: { label: string; value: GameMode }[] = [
 
 const INPUT_TYPES: { label: string; value: InputType | "" }[] = [
   { label: "All Inputs", value: "" },
+  { label: "Touch", value: "touch" },
   { label: "Mouse", value: "mouse" },
   { label: "Keyboard", value: "keyboard" },
   { label: "Arduino", value: "arduino" },

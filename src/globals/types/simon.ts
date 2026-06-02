@@ -17,6 +17,7 @@ export type InputType =
   | "mouse"
   | "keyboard"
   | "arduino"
+  | "touch"
 
 export type GameState =
   | "not-started"

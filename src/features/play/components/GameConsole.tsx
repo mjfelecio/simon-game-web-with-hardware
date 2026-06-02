@@ -1,12 +1,12 @@
 import SimonButton from "@/features/play/components/SimonButton";
-import type { GameMode, SimonButtonType } from "@/globals/types/simon";
+import type { GameMode, InputType, SimonButtonType } from "@/globals/types/simon";
 
 type Props = {
   buttons: SimonButtonType[];
   mode: GameMode;
   activeButton: SimonButtonType | null;
   isButtonDisabled: boolean;
-  onInput: (color: SimonButtonType) => void;
+  onInput: (type: InputType, color: SimonButtonType) => void;
 };
 
 const GameConsole = ({

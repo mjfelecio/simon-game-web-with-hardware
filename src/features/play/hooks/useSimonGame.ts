@@ -156,6 +156,8 @@ export default function useSimonGame() {
     async (type: InputType, input: SimonButtonType) => {
       if (core.status !== "playing") return;
 
+      alert(type)
+
       // Recording the input type
       if (!inputsUsed.current.has(type)) {
         inputsUsed.current.add(type);
