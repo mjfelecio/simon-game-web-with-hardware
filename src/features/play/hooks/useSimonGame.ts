@@ -28,6 +28,7 @@ export default function useSimonGame() {
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
+  const hasStartedGameRef = useRef(false);
   const inputsUsed = useRef<Set<InputType>>(new Set());
 
   const [timeTaken, setTimeTaken] = useState<number | null>(null);
@@ -266,6 +267,7 @@ export default function useSimonGame() {
   const resetGame = () => {
     playMusic(MUSIC.BG);
     core.resetGame();
+    hasStartedGameRef.current = false;
   };
 
   const startingSequence = async () => {
@@ -289,6 +291,11 @@ export default function useSimonGame() {
   };
 
   const startGame = async () => {
+    if (hasStartedGameRef.current) return;
+
+    // lock this shit
+    hasStartedGameRef.current = true;
+
     await startingSequence();
 
     if (config.mode !== "echo") {
