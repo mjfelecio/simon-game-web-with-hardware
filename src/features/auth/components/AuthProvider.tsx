@@ -46,19 +46,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const loadProfile = async (authUserId: string) => {
-    const { data } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", authUserId)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUserId)
+        .maybeSingle();
 
-    if (!data) {
+      if (error) {
+        console.error(error);
+        setUser(null);
+        return;
+      }
+
+      if (!data) {
+        setUser(null);
+        return;
+      }
+
+      setUser(data);
+      setIsAGuest(false);
+    } catch (error) {
+      console.error(error);
       setUser(null);
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    setUser(data);
-    setIsAGuest(false);
   };
 
   const login = useCallback(async (username: string, password: string) => {
@@ -148,15 +161,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Restore auth state on initial load
   useEffect(() => {
+    console.log("initialize start");
+
     const initialize = async () => {
       try {
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
+        console.log("session", session?.user?.id);
 
         if (session?.user) {
+          console.log("loading profile");
+
           await loadProfile(session.user.id);
+
+          console.log("profile loaded");
         } else {
           const storedGuestFlag = sessionStorage.getItem(
             SESSION_STORAGE_PROCEED_AS_GUEST,
@@ -167,6 +187,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         }
       } finally {
+        console.log("initialize done");
         setIsLoading(false);
       }
     };
