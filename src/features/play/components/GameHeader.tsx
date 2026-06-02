@@ -18,10 +18,17 @@ const GameHeader = ({
   inputsLength,
 }: GameHeaderProps) => (
   <div className="flex flex-col min-w-80 items-center gap-2">
-    <div className="rounded-full bg-white/10 px-4 py-1 border border-white/20">
-      <span className="text-sm font-bold tracking-widest text-white/70 uppercase">
-        Level {level}
-      </span>
+    <div className="flex gap-2">
+      <div className="rounded-full flex justify-center items-center bg-white/10 px-4 py-1 border border-white/20">
+        <span className="text-[10px] md:text-sm font-bold tracking-widest text-white/70 uppercase">
+          {mode}
+        </span>
+      </div>
+      <div className="rounded-full flex justify-center items-center bg-white/10 px-4 py-1 border border-white/20">
+        <span className="text-[10px] md:text-sm font-bold tracking-widest text-white/70 uppercase">
+          Level {level}
+        </span>
+      </div>
     </div>
 
     <h2
