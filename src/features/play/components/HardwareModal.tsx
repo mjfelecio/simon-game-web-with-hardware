@@ -2,7 +2,7 @@ import BaseModal from "@/globals/components/layouts/BaseModal";
 import Button from "@/globals/components/Button";
 import { cn } from "@/globals/libs/styleUtils";
 import { Loader2, AlertCircle, CheckCircle2, Cpu } from "lucide-react";
-import type { ConnectionStatus } from "@/features/play/hooks/useArduinoInput";
+import type { ConnectionStatus } from "@/features/controllers/hooks/useArduinoConnection";
 
 type Props = {
   isOpen: boolean;
