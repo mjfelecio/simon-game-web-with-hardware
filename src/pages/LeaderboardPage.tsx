@@ -149,9 +149,16 @@ const LeaderboardPage = () => {
 
         <div className="divide-y divide-white/5">
           {loading ? (
-            <div className="p-10 text-center text-slate-500">
-              Loading scores...
-            </div>
+            Array(10)
+              .fill(0)
+              .map((_val, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "flex items-center justify-between h-16 bg-white/5 even:bg-slate-600/5 animate-pulse transition",
+                  )}
+                />
+              ))
           ) : topScores.length === 0 ? (
             <div className="p-10 text-center text-slate-500">
               No scores recorded yet. Go play!
