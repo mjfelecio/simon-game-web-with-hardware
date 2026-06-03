@@ -1,3 +1,5 @@
+import { SFX } from "@/features/audio/constants/sfx";
+import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { cn } from "@/globals/libs/styleUtils";
 
 type Props = {
@@ -21,7 +23,16 @@ const PaginationButton = ({
           "hover:bg-slate-50/20 disabled:opacity-40 disabled:cursor-not-allowed",
         )}
         disabled={prevDisabled}
-        onClick={() => onPageChange(page - 1)}
+        onMouseEnter={() => {
+          sfxPlayer.play(SFX.BTN_HOVER);
+        }}
+        onTouchStart={() => {
+          sfxPlayer.play(SFX.BTN_HOVER);
+        }}
+        onClick={() => {
+          sfxPlayer.play(SFX.BTN_CLICK);
+          onPageChange(page - 1);
+        }}
       >
         Previous
       </button>
@@ -34,7 +45,16 @@ const PaginationButton = ({
           "hover:bg-slate-50/20 disabled:opacity-40 disabled:cursor-not-allowed",
         )}
         disabled={nextDisabled}
-        onClick={() => onPageChange(Math.min(page + 1, 9))}
+        onMouseEnter={() => {
+          sfxPlayer.play(SFX.BTN_HOVER);
+        }}
+        onTouchStart={() => {
+          sfxPlayer.play(SFX.BTN_HOVER);
+        }}
+        onClick={() => {
+          sfxPlayer.play(SFX.BTN_CLICK);
+          onPageChange(Math.min(page + 1, 9));
+        }}
       >
         Next
       </button>
