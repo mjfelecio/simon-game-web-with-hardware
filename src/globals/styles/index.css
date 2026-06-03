@@ -84,3 +84,15 @@
     filter: blur(0);
   }
 }
+
+/* The BEGIN thingy that pops up */
+@keyframes beginGame {
+  from {
+    opacity: 1;
+    transform: scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}

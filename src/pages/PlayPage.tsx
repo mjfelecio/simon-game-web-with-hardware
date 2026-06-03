@@ -97,6 +97,7 @@ const PlayPage = () => {
           activeButton={game.activeButton}
           isButtonDisabled={game.status !== "playing"}
           onInput={game.handleInput}
+          showBegin={game.showBegin}
         />
 
         <div className="flex items-center justify-center gap-4">

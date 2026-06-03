@@ -28,6 +28,8 @@ export default function useSimonGame() {
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
+  const [showBegin, setShowBegin] = useState(false);
+
   const hasStartedGameRef = useRef(false);
   const inputsUsed = useRef<Set<InputType>>(new Set());
 
@@ -287,7 +289,10 @@ export default function useSimonGame() {
     }
 
     sfxPlayer.play(SFX.BEGIN, { volume: 1 });
+    setShowBegin(true);
     await delay(1000);
+
+    setShowBegin(false);
   };
 
   const startGame = async () => {
@@ -336,5 +341,6 @@ export default function useSimonGame() {
     mode: config.mode,
     timeTaken,
     avgReactionTime,
+    showBegin
   };
 }
