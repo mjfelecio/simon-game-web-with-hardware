@@ -110,11 +110,14 @@ export const getLeaderboard = async (filters?: {
   gamemode?: string;
   input_type?: string;
   goal?: number;
+  page?: number;
   limit?: number;
 }) => {
   const leaderboardType = getLeaderboardType(filters?.gamemode);
 
-  let query = supabase.from("scores").select("*, users(username)");
+  let query = supabase.from("scores").select("*, users(username)", {
+    count: "exact",
+  });
 
   if (filters?.gamemode) {
     query = query.eq("gamemode", filters.gamemode);
@@ -138,17 +141,25 @@ export const getLeaderboard = async (filters?: {
       .order("time_taken", { ascending: true });
   }
 
+  if (filters?.page && filters?.limit) {
+    const page = filters.page;
+    query = query.range(
+      page * filters.limit,
+      page * filters.limit + filters.limit - 1,
+    );
+  }
+
   if (filters?.limit) {
     query = query.limit(filters.limit);
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   if (error) {
     throw error;
   }
 
-  return data.map(mapScore);
+  return { data: data.map(mapScore), count: count };
 };
 
 /**

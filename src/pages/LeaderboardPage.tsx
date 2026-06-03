@@ -11,6 +11,7 @@ import Select from "@/globals/components/Select";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 import { formatDuration } from "@/globals/utils/formatter";
+import PaginationButton from "@/features/leaderboard/components/PaginationButton";
 
 const GAMEMODES: { label: string; value: GameMode }[] = [
   { label: "Classic", value: "classic" },
@@ -31,10 +32,16 @@ const INPUT_TYPES: { label: string; value: InputType | "" }[] = [
   { label: "Arduino", value: "arduino" },
 ];
 
+const LIMIT = 10;
+
 const LeaderboardPage = () => {
   const navigate = useNavigate();
 
+  const [page, setPage] = useState(0);
+  // Top 100
   const [topScores, setTopScores] = useState<ScoreView[]>([]);
+  const [totalEntries, setTotalEntries] = useState(0);
+
   const [gamemode, setGamemode] = useState("classic");
   const [inputType, setInputType] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,12 +54,14 @@ const LeaderboardPage = () => {
       setLoading(true);
 
       try {
-        const scores = await getLeaderboard({
+        const { data: scores, count } = await getLeaderboard({
           gamemode: gamemode || undefined,
           input_type: inputType || undefined,
-          limit: 50,
+          page,
+          limit: LIMIT,
         });
 
+        setTotalEntries(count ?? 0);
         setTopScores(scores);
       } finally {
         setLoading(false);
@@ -60,11 +69,17 @@ const LeaderboardPage = () => {
     };
 
     fetchScores();
+  }, [gamemode, page, inputType]);
+
+  // Reset page when changing filters
+  useEffect(() => {
+    setPage(0);
   }, [gamemode, inputType]);
 
   return (
     <PageWrapper className="flex flex-col items-center">
       {/* Header */}
+
       <header className="mb-10 text-center">
         <h1 className="text-5xl font-black italic text-white uppercase">
           Game Dashboard
@@ -87,7 +102,7 @@ const LeaderboardPage = () => {
 
       {/* Stats */}
       <section className="grid w-full max-w-2xl grid-cols-3 gap-4 mb-8">
-        <StatCard label="Entries" value={topScores.length} />
+        <StatCard label="Entries" value={totalEntries} />
 
         {isTimeAttack ? (
           <>
@@ -142,78 +157,90 @@ const LeaderboardPage = () => {
               No scores recorded yet. Go play!
             </div>
           ) : (
-            topScores.map((score, index) => (
-              <div
-                key={score.id}
-                className={cn(
-                  "flex items-center justify-between px-6 py-4 hover:bg-white/5 transition",
-                  index === 0 && "bg-yellow-500/5",
-                )}
-                onMouseEnter={() => sfxPlayer.play(SFX.LB_HOVER)}
-              >
-                <div className="flex items-center gap-4">
-                  <span
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full text-sm font-black",
-                      index === 0
-                        ? "bg-yellow-400 text-black"
-                        : index === 1
-                          ? "bg-slate-300 text-black"
-                          : index === 2
-                            ? "bg-orange-400 text-black"
-                            : "bg-white/10 text-white",
-                    )}
-                  >
-                    {index + 1}
-                  </span>
+            topScores.map((score, index) => {
+              const rank = page * LIMIT + index + 1;
 
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <p className="font-bold text-white">{score.username}</p>
-                      <p className="text-xs text-slate-500">
-                        {new Date(score.created_at).toLocaleDateString()}{" | "}
-                        {formatInputTypes(score.input_type)}
-                      </p>
+              return (
+                <div
+                  key={score.id}
+                  className={cn(
+                    "flex items-center justify-between px-6 py-4 hover:bg-white/5 transition",
+                    rank === 0 && "bg-yellow-500/5",
+                  )}
+                  onMouseEnter={() => sfxPlayer.play(SFX.LB_HOVER)}
+                >
+                  <div className="flex items-center gap-4">
+                    <span
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-full text-sm font-black",
+                        rank === 1
+                          ? "bg-yellow-400 text-black"
+                          : rank === 2
+                            ? "bg-slate-300 text-black"
+                            : rank === 3
+                              ? "bg-orange-400 text-black"
+                              : "bg-white/10 text-white",
+                      )}
+                    >
+                      {rank}
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <p className="font-bold text-white">{score.username}</p>
+                        <p className="text-xs text-slate-500">
+                          {new Date(score.created_at).toLocaleDateString()}
+                          {" | "}
+                          {formatInputTypes(score.input_type)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-right">
+                      {isTimeAttack ? (
+                        <>
+                          <p className="text-xl font-black text-violet-300 italic">
+                            {formatDuration(score.time_taken ?? 0)}
+                          </p>
+
+                          <p className="text-[10px] font-bold uppercase text-slate-400">
+                            Goal {score.goal}
+                          </p>
+                        </>
+                      ) : isBurst ? (
+                        <>
+                          <p className="text-xl font-black text-cyan-300 italic">
+                            {score.goal}
+                          </p>
+
+                          {score.time_taken && (
+                            <p className="text-[10px] uppercase text-slate-400">
+                              {formatDuration(score.time_taken)}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-xl font-black text-white italic">
+                          LVL {score.level}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
-
-                <div className="text-right">
-                  <div className="text-right">
-                    {isTimeAttack ? (
-                      <>
-                        <p className="text-xl font-black text-violet-300 italic">
-                          {formatDuration(score.time_taken ?? 0)}
-                        </p>
-
-                        <p className="text-[10px] font-bold uppercase text-slate-400">
-                          Goal {score.goal}
-                        </p>
-                      </>
-                    ) : isBurst ? (
-                      <>
-                        <p className="text-xl font-black text-cyan-300 italic">
-                          {score.goal}
-                        </p>
-
-                        {score.time_taken && (
-                          <p className="text-[10px] uppercase text-slate-400">
-                            {formatDuration(score.time_taken)}
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-xl font-black text-white italic">
-                        LVL {score.level}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </section>
+
+      <PaginationButton
+        page={page}
+        onPageChange={setPage}
+        prevDisabled={page === 0}
+        nextDisabled={(page + 1) * LIMIT >= totalEntries}
+      />
 
       {/* Actions */}
       <div className="mt-24 flex flex-col md:flex-row w-full max-w-2xl gap-4">
