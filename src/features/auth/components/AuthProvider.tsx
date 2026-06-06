@@ -161,22 +161,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Restore auth state on initial load
   useEffect(() => {
-    console.log("initialize start");
-
     const initialize = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        // Timeout if session get is hanging for some reason
+        const result = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise<null>((resolve) => setTimeout(resolve, 500))
+        ])
+        
+        if (!result) {
+          setIsLoading(false);
+          return;
+        }
 
-        console.log("session", session?.user?.id);
+        const { data: { session }} = result;
 
         if (session?.user) {
-          console.log("loading profile");
-
           await loadProfile(session.user.id);
-
-          console.log("profile loaded");
         } else {
           const storedGuestFlag = sessionStorage.getItem(
             SESSION_STORAGE_PROCEED_AS_GUEST,
@@ -187,7 +188,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         }
       } finally {
-        console.log("initialize done");
         setIsLoading(false);
       }
     };
