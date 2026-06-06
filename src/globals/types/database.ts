@@ -39,36 +39,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          key: string
+          name: string | null
+          rewards: Json | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          key: string
+          name?: string | null
+          rewards?: Json | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          key?: string
+          name?: string | null
+          rewards?: Json | null
+        }
+        Relationships: []
+      }
+      campaign_progress: {
+        Row: {
+          created_at: string
+          highest_level: number | null
+          id: string
+          mode: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          highest_level?: number | null
+          id?: string
+          mode?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          highest_level?: number | null
+          id?: string
+          mode?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scores: {
         Row: {
           created_at: string
           gamemode: string
+          goal: number | null
           id: number
           input_type: string
           level: number
+          time_taken: number | null
           user_id: string
-          goal?: number
-          time_taken?: number
         }
         Insert: {
           created_at?: string
           gamemode: string
+          goal?: number | null
           id?: number
           input_type: string
           level: number
+          time_taken?: number | null
           user_id: string
-          goal?: number
-          time_taken?: number
         }
         Update: {
           created_at?: string
           gamemode?: string
+          goal?: number | null
           id?: number
           input_type?: string
           level?: number
+          time_taken?: number | null
           user_id?: string
-          goal?: number
-          time_taken?: number
         }
         Relationships: [
           {
@@ -80,21 +148,57 @@ export type Database = {
           },
         ]
       }
+      unlocked_achievements: {
+        Row: {
+          achievement_key: string
+          id: number
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_key?: string
+          id?: number
+          unlocked_at?: string
+          user_id?: string
+        }
+        Update: {
+          achievement_key?: string
+          id?: number
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unlocked_achievements_achievement_key_fkey"
+            columns: ["achievement_key"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "unlocked_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
           id: string
-          username: string,
+          username: string
         }
         Insert: {
           created_at?: string
-          id?: string
-          username: string,
+          id: string
+          username: string
         }
         Update: {
           created_at?: string
           id?: string
-          username?: string,
+          username?: string
         }
         Relationships: []
       }
