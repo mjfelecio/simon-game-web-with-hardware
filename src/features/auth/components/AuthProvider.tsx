@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -42,10 +43,15 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAGuest, setIsAGuest] = useState(false);
-
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadProfile = async (authUserId: string) => {
+  const isMountedRef = useRef(true);
+  const loadingProfileRef = useRef(false);
+
+  const loadProfile = useCallback(async (authUserId: string) => {
+    if (loadingProfileRef.current) return;
+    loadingProfileRef.current = true;
+
     try {
       const { data, error } = await supabase
         .from("users")
@@ -55,24 +61,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error(error);
-        setUser(null);
+        if (isMountedRef.current) setUser(null);
         return;
       }
 
       if (!data) {
-        setUser(null);
+        if (isMountedRef.current) setUser(null);
         return;
       }
 
-      setUser(data);
-      setIsAGuest(false);
+      if (isMountedRef.current) {
+        setUser(data);
+        setIsAGuest(false);
+      }
     } catch (error) {
       console.error(error);
-      setUser(null);
+      if (isMountedRef.current) setUser(null);
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) setIsLoading(false);
+      loadingProfileRef.current = false;
     }
-  };
+  }, []);
 
   const login = useCallback(async (username: string, password: string) => {
     const email = emailFromUsername(username);
@@ -100,7 +109,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     toastSuccess("Success", {
       description: `Logged in successfully. Hi ${username}!`,
     });
-  }, []);
+  }, [loadProfile]);
 
   const register = useCallback(
     async (email: string, password: string, username: string) => {
@@ -128,7 +137,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         description: `Registered successfully. Hi ${username}!`,
       });
     },
-    [],
+    [loadProfile],
   );
 
   const logout = useCallback(async () => {
@@ -136,8 +145,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     sessionStorage.removeItem(SESSION_STORAGE_PROCEED_AS_GUEST);
 
-    setUser(null);
-    setIsAGuest(false);
+    if (isMountedRef.current) {
+      setUser(null);
+      setIsAGuest(false);
+    }
     toastSuccess("Success", {
       description: "Logged out successfully",
     });
@@ -151,30 +162,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       JSON.stringify(true),
     );
 
-    setUser(null);
-    setIsAGuest(true);
+    if (isMountedRef.current) {
+      setUser(null);
+      setIsAGuest(true);
+    }
 
     toastWarning("Proceeding as guest", {
       description: "Your scores will not be submitted.",
     });
   }, []);
 
-  // Restore auth state on initial load
   useEffect(() => {
+    isMountedRef.current = true;
+
     const initialize = async () => {
       try {
-        // Timeout if session get is hanging for some reason
         const result = await Promise.race([
           supabase.auth.getSession(),
-          new Promise<null>((resolve) => setTimeout(resolve, 500))
-        ])
-        
+          new Promise<null>((resolve) => setTimeout(resolve, 500)),
+        ]);
+
         if (!result) {
-          setIsLoading(false);
+          if (isMountedRef.current) setIsLoading(false);
           return;
         }
 
-        const { data: { session }} = result;
+        const {
+          data: { session },
+        } = result;
 
         if (session?.user) {
           await loadProfile(session.user.id);
@@ -183,12 +198,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             SESSION_STORAGE_PROCEED_AS_GUEST,
           );
 
-          if (storedGuestFlag) {
+          if (storedGuestFlag && isMountedRef.current) {
             setIsAGuest(JSON.parse(storedGuestFlag));
           }
+          if (isMountedRef.current) setIsLoading(false);
         }
-      } finally {
-        setIsLoading(false);
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        if (isMountedRef.current) setIsLoading(false);
       }
     };
 
@@ -196,18 +213,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        await loadProfile(session.user.id);
-        return;
-      }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setTimeout(() => {
+        if (!isMountedRef.current) return;
 
-      setUser(null);
-      setIsLoading(false);
+        if (session?.user) {
+          loadProfile(session.user.id);
+        } else {
+          setUser(null);
+          setIsLoading(false);
+        }
+      }, 0);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      isMountedRef.current = false;
+      subscription.unsubscribe();
+    };
+  }, [loadProfile]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
