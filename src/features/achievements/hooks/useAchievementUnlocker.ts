@@ -14,9 +14,7 @@ export function useAchievementUnlocker() {
 
   const handleGameCompleted = useCallback(
     async (payload: AppEvents["game_completed"]) => {
-      const { mode, level, won } = payload;
-
-      if (!won) return; // No achievements for losing
+      const { mode, level } = payload;
 
       // ── Classic mode level achievements ──────────────────────────────────
       if (mode === "classic") {

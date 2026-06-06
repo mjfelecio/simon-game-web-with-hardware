@@ -26,6 +26,12 @@ export type AppEvents = {
     won: boolean;
   };
 
+  game_advance: {
+    mode: GameMode;
+    level: number;
+    timeTakenMs?: number;
+  };
+
   /**
    * Fired when an achievement is unlocked.
    * Consumed by toast notifications, persistence layer, and reward applicators.

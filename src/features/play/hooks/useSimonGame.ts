@@ -18,8 +18,10 @@ import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 import { formatDuration } from "@/globals/utils/formatter";
 import { musicPlayer } from "@/features/audio/utils/musicPlayer";
+import useEventEmitter from "@/features/events/hooks/useEventEmitter";
 
 export default function useSimonGame() {
+  const emitter = useEventEmitter();
   const config = useGameMode();
   const { user } = useAuth();
   const { playMusic, stopMusic } = useMusic();
@@ -183,6 +185,11 @@ export default function useSimonGame() {
 
       const nextIndex = core.inputs.length;
 
+      const timeTaken =
+        startedAtRef.current != null
+          ? Math.round(performance.now() - startedAtRef.current)
+          : undefined;
+
       // Check for Loss
       if (input !== core.sequence[nextIndex]) {
         core.setStatus("lose");
@@ -191,11 +198,6 @@ export default function useSimonGame() {
         await stopMusic();
         await audio.playLoseTone();
         musicPlayer.play(MUSIC.GAMEFINISHED);
-
-        const timeTaken =
-          startedAtRef.current != null
-            ? Math.round(performance.now() - startedAtRef.current)
-            : undefined;
 
         if (!timeTaken) {
           toastError("Error", { description: "Time taken was not recorded" });
@@ -214,6 +216,12 @@ export default function useSimonGame() {
 
         await submitScoreWithRetry(core.inputs, timeTaken);
 
+        emitter.emit("game_completed", {
+          level: core.level,
+          mode: config.mode,
+          won: false,
+          timeTakenMs: timeTaken,
+        });
         return;
       }
 
@@ -232,11 +240,6 @@ export default function useSimonGame() {
 
           core.setStatus("victory");
 
-          const timeTaken =
-            startedAtRef.current != null
-              ? Math.round(performance.now() - startedAtRef.current)
-              : undefined;
-
           if (!timeTaken) {
             toastError("Error", { description: "Time taken was not recorded" });
             return;
@@ -244,6 +247,13 @@ export default function useSimonGame() {
 
           setTimeTaken(timeTaken);
           await submitScoreWithRetry(newInputs, timeTaken);
+
+          emitter.emit("game_completed", {
+            level: core.level,
+            mode: config.mode,
+            won: true,
+            timeTakenMs: timeTaken,
+          });
         } else {
           core.setStatus("won");
 
@@ -254,16 +264,32 @@ export default function useSimonGame() {
 
           const nextSeq = core.generateNextSequence(core.sequence);
           core.setSequence(nextSeq);
-          core.setLevel((prev) => prev + 1);
+          const nextLevel = core.level + 1;
+
+          core.setLevel(nextLevel);
 
           // Shuffle buttons if in entropy mode
           if (config.mode === "entropy") core.shuffleButtons();
 
           playSequence(nextSeq);
+
+          emitter.emit("game_advance", {
+            level: nextLevel,
+            mode: config.mode,
+            timeTakenMs: timeTaken,
+          });
         }
       }
     },
-    [core, config, audio, stopMusic, playSequence, submitScoreWithRetry],
+    [
+      core,
+      config,
+      audio,
+      stopMusic,
+      playSequence,
+      submitScoreWithRetry,
+      emitter,
+    ],
   );
 
   const resetGame = () => {
@@ -341,6 +367,6 @@ export default function useSimonGame() {
     mode: config.mode,
     timeTaken,
     avgReactionTime,
-    showBegin
+    showBegin,
   };
 }
