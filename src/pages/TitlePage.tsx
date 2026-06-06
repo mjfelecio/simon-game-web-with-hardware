@@ -8,13 +8,15 @@ import { useAuth } from "@/features/auth/components/AuthProvider";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 import SettingsModal from "@/features/play/components/SettingsModal";
+import { TrophyIcon, Settings2Icon, BookTextIcon } from "lucide-react";
+import AchievementListModal from "@/features/achievements/components/AchievementListModal";
 
 const TitlePage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isAGuest } = useAuth();
 
   const [activeModal, setActiveModal] = useState<
-    "manual" | "login" | "settings" | null
+    "manual" | "login" | "settings" | "achievements" | null
   >(null);
 
   const date = new Date().toLocaleString("en-US", {
@@ -117,8 +119,19 @@ const TitlePage = () => {
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-linear-to-r from-transparent via-white/40 to-transparent" />
           </Button>
 
+          <Link
+            to="/leaderboard"
+            onClick={() => sfxPlayer.play(SFX.BTN_CLICK)}
+            onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
+            onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
+            className="text-[8px] px-4 w-full md:text-[10px] flex-1 border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center"
+          >
+            Rankings
+          </Link>
+
           <div className="flex gap-2 w-full">
             <button
+              title="Settings"
               onClick={() => {
                 sfxPlayer.play(SFX.BTN_CLICK);
                 sfxPlayer.play(SFX.SHOW_MODAL);
@@ -126,11 +139,12 @@ const TitlePage = () => {
               }}
               onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
-              className="text-[8px] md:text-[10px] flex-1 border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
+              className="text-[8px] w-fit md:text-[10px] flex-1 items-center justify-center border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
             >
-              Settings
+              <Settings2Icon className="inline-block" />
             </button>
             <button
+              title="Manual"
               onClick={() => {
                 sfxPlayer.play(SFX.BTN_CLICK);
                 sfxPlayer.play(SFX.SHOW_MODAL);
@@ -138,20 +152,24 @@ const TitlePage = () => {
               }}
               onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
               onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
-              className="text-[8px] md:text-[10px] flex-1 border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
+              className="text-[8px] w-fit md:text-[10px] flex-1 items-center justify-center border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
             >
-              Manual
+              <BookTextIcon className="inline-block" />
+            </button>
+            <button
+              title="Achievements"
+              onClick={() => {
+                sfxPlayer.play(SFX.BTN_CLICK);
+                sfxPlayer.play(SFX.SHOW_MODAL);
+                setActiveModal("achievements");
+              }}
+              onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
+              className="text-[8px] w-fit md:text-[10px] flex-1 items-center justify-center border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
+            >
+              <TrophyIcon className="inline-block" />
             </button>
           </div>
-          <Link
-            to="/leaderboard"
-            onClick={() => sfxPlayer.play(SFX.BTN_CLICK)}
-            onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
-            onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
-            className="text-[8px] w-full md:text-[10px] flex-1 border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center"
-          >
-            Rankings
-          </Link>
         </nav>
       </footer>
 
@@ -164,6 +182,11 @@ const TitlePage = () => {
 
       <SettingsModal
         isOpen={activeModal === "settings"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <AchievementListModal
+        open={activeModal === "achievements"}
         onClose={() => setActiveModal(null)}
       />
     </PageWrapper>
