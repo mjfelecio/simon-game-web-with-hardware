@@ -1,7 +1,38 @@
 import { supabase } from "@/globals/libs/db";
-import type { AchievementKey, UnlockedAchievement } from "../constants/achievements";
+import { ACHIEVEMENTS, type AchievementKey, type AchievementRecord, type UnlockedAchievement } from "../constants/achievements";
 
 const TABLE = "unlocked_achievements";
+
+export type AchievementView = AchievementRecord & {
+  unlocked: boolean;
+  unlockedAt?: string;
+};
+
+export async function fetchAchievementsForUser(
+  userId: string,
+): Promise<AchievementView[]> {
+  const unlocked = await fetchUnlockedAchievements(userId);
+
+  const unlockedMap = new Map(
+    unlocked.map((a) => [
+      a.achievement_key,
+      a.unlocked_at,
+    ]),
+  );
+
+  return Object.entries(ACHIEVEMENTS).map(([key, def]) => ({
+    id: key,
+    key: key as AchievementKey,
+    name: def.name,
+    description: def.description,
+    category: def.category,
+    icon: def.icon,
+    rewards: [...def.rewards],
+    created_at: "",
+    unlocked: unlockedMap.has(key as AchievementKey),
+    unlockedAt: unlockedMap.get(key as AchievementKey),
+  }));
+}
 
 /**
  * Fetch all achievements unlocked by a specific user.

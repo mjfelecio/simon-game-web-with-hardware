@@ -9,6 +9,7 @@ type PauseMenuProps = {
   onResume: () => void;
   onQuit: () => void;
   onSettingsOpen: () => void;
+  onAchievementsOpen: () => void;
   isConnected: boolean;
 };
 
@@ -18,6 +19,7 @@ const PauseMenu = ({
   onResume,
   onQuit,
   onSettingsOpen,
+  onAchievementsOpen,
   isConnected,
 }: PauseMenuProps) => (
   <BaseModal
@@ -66,6 +68,12 @@ const PauseMenu = ({
       </div>
 
       <Button text="Retry" variant="secondary" onClick={onRetry} size="sm" />
+
+      <Button
+        text="Achievements"
+        onClick={onAchievementsOpen}
+        className="h-14 text-lg shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+      />
 
       <div className="mt-4 pt-6 border-t border-white/20">
         <Button text="Save & Quit" variant="danger" onClick={onQuit} />

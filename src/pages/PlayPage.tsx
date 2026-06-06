@@ -20,6 +20,7 @@ import { useMusic } from "@/features/audio/components/MusicProvider";
 import GameResultOverlay from "@/features/play/components/GameResultOverlay";
 import useArduinoInput from "@/features/controllers/hooks/useArduinoInput";
 import useKeyboardInput from "@/features/controllers/hooks/useKeyboardInput";
+import AchievementListModal from "@/features/achievements/components/AchievementListModal";
 
 const PlayPage = () => {
   const game = useSimonGame();
@@ -31,9 +32,10 @@ const PlayPage = () => {
   const navigate = useNavigate();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState<"menu" | "hardware" | null>(
-    null,
-  );
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<
+    "menu" | "hardware" | "achievements" | null
+  >(null);
 
   const openMenu = () => {
     setActiveModal("menu");
@@ -140,11 +142,20 @@ const PlayPage = () => {
           sfxPlayer.play(SFX.SHOW_MODAL);
           setIsSettingsOpen(true);
         }}
+        onAchievementsOpen={() => {
+          sfxPlayer.play(SFX.SHOW_MODAL);
+          setAchievementsOpen(true);
+        }}
       />
 
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+      />
+
+      <AchievementListModal
+        open={achievementsOpen}
+        onClose={() => setAchievementsOpen(false)}
       />
 
       {(game.status === "victory" || game.status === "lose") &&
