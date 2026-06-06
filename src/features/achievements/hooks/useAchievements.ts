@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { AchievementKey } from "../constants/achievements";
 import { useAuth } from "@/features/auth/components/AuthProvider";
-import { fetchUnlockedAchievements, recordAchievementUnlock } from "../services/achievementServices";
+import {
+  fetchUnlockedAchievements,
+  recordAchievementUnlock,
+} from "../services/achievementServices";
+import useEventEmitter from "@/features/events/hooks/useEventEmitter";
 
 interface AchievementState {
   unlocked: Set<AchievementKey>;
@@ -17,6 +21,7 @@ interface AchievementState {
  * - Exposes `unlock(key)` which persists to DB and updates local state.
  */
 export function useAchievements() {
+  const emitter = useEventEmitter();
   const { user } = useAuth();
   const userId = user?.id;
 
@@ -92,6 +97,8 @@ export function useAchievements() {
             next.add(key);
             return { ...prev, unlocked: next };
           });
+
+          emitter.emit("achievement_unlocked", { key });
           return true;
         }
 
@@ -105,7 +112,7 @@ export function useAchievements() {
         return false;
       }
     },
-    [userId],
+    [userId, emitter],
   );
 
   const hasUnlocked = useCallback(

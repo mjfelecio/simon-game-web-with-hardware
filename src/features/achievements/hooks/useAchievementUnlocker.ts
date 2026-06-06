@@ -39,13 +39,13 @@ export function useAchievementUnlocker() {
     [unlock],
   );
 
-  const handleUserLogin = useCallback(
+  const handleUserRegistration = useCallback(
     async () => {
-      await unlock("login");
+      await unlock("first_register");
     },
     [unlock],
   );
 
   useEventListener("game_completed", handleGameCompleted);
-  useEventListener("user_login", handleUserLogin);
+  useEventListener("registration", handleUserRegistration);
 }

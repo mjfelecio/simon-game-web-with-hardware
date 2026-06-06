@@ -1,4 +1,5 @@
 import type { GameMode } from "@/globals/types/simon";
+import type { AchievementKey } from "../achievements/constants/achievements";
 
 /**
  * Application-wide event bus contract.
@@ -9,10 +10,10 @@ import type { GameMode } from "@/globals/types/simon";
  */
 export type AppEvents = {
   /**
-   * Fired when a user successfully authenticates.
-   * Payload contains the authenticated user's ID for achievement tracking.
+   * Fired when a user successfully registers their account.
+   * Payload contains the authenticated user's ID.
    */
-  user_login: { userId: string };
+  registration: { userId: string };
 
   /**
    * Fired when a game session ends (win or loss).
@@ -30,8 +31,7 @@ export type AppEvents = {
    * Consumed by toast notifications, persistence layer, and reward applicators.
    */
   achievement_unlocked: {
-    key: string; // AchievementKey — kept as string to avoid circular imports
-    unlockedAt: string; // ISO timestamp
+    key: AchievementKey;
   };
 
   /**
@@ -39,7 +39,7 @@ export type AppEvents = {
    * Decouples achievement unlock from reward side-effects.
    */
   reward_applied: {
-    achievementKey: string;
+    achievementKey: AchievementKey;
     rewardType: "unlock_mode" | "title" | "theme";
     value: string;
   };

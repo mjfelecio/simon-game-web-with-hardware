@@ -12,9 +12,9 @@ export type AchievementCategory =
  */
 export const ACHIEVEMENTS = {
   // ── Progression ──────────────────────────────────────────────────────────
-  login: {
+  first_register: {
     name: "Welcome!",
-    description: "Log in for the first time.",
+    description: "Register your account.",
     category: "progression" as AchievementCategory,
     icon: "👋",
     rewards: [] as AchievementReward[],

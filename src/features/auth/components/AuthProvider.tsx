@@ -16,6 +16,7 @@ import {
 import type { User } from "@/globals/types/auth";
 import { supabase } from "@/globals/libs/db";
 import { toastSuccess, toastWarning } from "@/globals/utils/toast";
+import useEventEmitter from "@/features/events/hooks/useEventEmitter";
 
 type AuthContextValue = {
   user: User | null;
@@ -41,6 +42,8 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const emitter = useEventEmitter();
+
   const [user, setUser] = useState<User | null>(null);
   const [isAGuest, setIsAGuest] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,33 +86,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const email = emailFromUsername(username);
+  const login = useCallback(
+    async (username: string, password: string) => {
+      const email = emailFromUsername(username);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      throw error;
-    }
+      if (error) {
+        throw error;
+      }
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
 
-    if (!authUser) {
-      throw new Error("Failed to retrieve user.");
-    }
+      if (!authUser) {
+        throw new Error("Failed to retrieve user.");
+      }
 
-    sessionStorage.removeItem(SESSION_STORAGE_PROCEED_AS_GUEST);
-    await loadProfile(authUser.id);
+      sessionStorage.removeItem(SESSION_STORAGE_PROCEED_AS_GUEST);
+      await loadProfile(authUser.id);
 
-    toastSuccess("Success", {
-      description: `Logged in successfully. Hi ${username}!`,
-    });
-  }, [loadProfile]);
+      toastSuccess("Success", {
+        description: `Logged in successfully. Hi ${username}!`,
+      });
+    },
+    [loadProfile],
+  );
 
   const register = useCallback(
     async (email: string, password: string, username: string) => {
@@ -133,11 +139,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       sessionStorage.removeItem(SESSION_STORAGE_PROCEED_AS_GUEST);
       await loadProfile(data.user.id);
-      toastSuccess("Success", {
-        description: `Registered successfully. Hi ${username}!`,
-      });
+
+      // Delay to ensure that loading a profile has finished
+      setTimeout(
+        () => emitter.emit("registration", { userId: data?.user?.id ?? "" }),
+        1000,
+      );
     },
-    [loadProfile],
+    [loadProfile, emitter],
   );
 
   const logout = useCallback(async () => {
