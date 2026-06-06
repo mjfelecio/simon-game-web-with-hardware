@@ -43,7 +43,12 @@ const AchievementListModal = ({ open, onClose }: Props) => {
       acc[achievement.category].push(achievement);
       return acc;
     },
-    {} as Record<AchievementCategory, AchievementView[]>,
+    {
+      progression: [],
+      mastery: [],
+      social: [],
+      secret: [],
+    } as Record<AchievementCategory, AchievementView[]>,
   );
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
@@ -55,8 +60,10 @@ const AchievementListModal = ({ open, onClose }: Props) => {
         <div className="text-center">
           <h1 className="text-5xl text-center uppercase">Achievements</h1>
           <p className="text-lg font-black text-center uppercase">
-            Progress: <span className="text-emerald-400">{unlockedCount}</span> /{" "}
-            <span className="text-sky-400">{totalAchievements}</span>
+            Progress:{" "}
+            <span className="text-cyan-400">
+              {unlockedCount} / {totalAchievements}
+            </span>
           </p>
         </div>
 
@@ -65,20 +72,29 @@ const AchievementListModal = ({ open, onClose }: Props) => {
             Loading achievements...
           </div>
         ) : (
-          Object.entries(grouped).map(([category, items]) => (
-            <section key={category} className="space-y-3">
-              <h2 className="font-black uppercase tracking-widest text-yellow-300">
-                {category}
-              </h2>
+          Object.entries(grouped).map(([category, items]) => {
+            const unlockedInCategory = items.filter((a) => a.unlocked).length;
 
-              {items.map((achievement) => (
-                <AchievementItem
-                  key={achievement.key}
-                  achievement={achievement}
-                />
-              ))}
-            </section>
-          ))
+            return (
+              <section key={category} className="space-y-3">
+                <div className="flex items-center justify-between border-b border-cyan-500/10 pb-2">
+                  <h2 className="font-black uppercase tracking-widest text-cyan-400">
+                    {category}
+                  </h2>
+                  <span className="rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-black text-cyan-300">
+                    {unlockedInCategory} / {items.length}
+                  </span>
+                </div>
+
+                {items.map((achievement) => (
+                  <AchievementItem
+                    key={achievement.key}
+                    achievement={achievement}
+                  />
+                ))}
+              </section>
+            );
+          })
         )}
       </div>
     </BaseModal>

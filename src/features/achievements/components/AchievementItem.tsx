@@ -22,7 +22,7 @@ const AchievementItem = ({ achievement }: AchievementItemProps) => {
           {achievement.unlocked ? (
             achievement.icon
           ) : (
-            <LockKeyhole size={36} color="#21f8f6" />
+            <LockKeyhole size={36} color="#62748e" />
           )}
         </div>
 

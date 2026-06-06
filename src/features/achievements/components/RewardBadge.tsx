@@ -1,39 +1,48 @@
+import type { ReactElement } from "react";
 import type { AchievementReward } from "../constants/rewards";
 
 import { UnlockIcon, PaletteIcon, TagIcon } from "lucide-react";
 
-const RewardBadge = ({ reward }: { reward: AchievementReward }) => {
+function getRewardValue(reward: AchievementReward): string {
   switch (reward.type) {
     case "unlock_mode":
-      return (
-        <span
-          title="Unlock a new gamemode"
-          className="cursor-pointer flex gap-1 items-center rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-300"
-        >
-          <UnlockIcon size={14} /> {reward.mode}
-        </span>
-      );
-
-    case "theme":
-      return (
-        <span
-          title="Use a custom simon button theme"
-          className="cursor-pointer flex gap-1 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-bold text-purple-300"
-        >
-          <PaletteIcon size={14} /> {reward.theme}
-        </span>
-      );
-
+      return reward.mode;
     case "title":
-      return (
-        <span
-          title="Receive a title"
-          className="cursor-pointer flex gap-1 rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-bold text-yellow-300"
-        >
-          <TagIcon size={14} /> {reward.title}
-        </span>
-      );
+      return reward.title;
+    case "theme":
+      return reward.theme;
   }
+}
+
+const REWARD_BADGE_CONFIG: Record<
+  AchievementReward["type"],
+  { title: string; Icon: ReactElement }
+> = {
+  unlock_mode: {
+    title: "Unlock a new gamemode",
+    Icon: <UnlockIcon size={14} />,
+  },
+  theme: {
+    title: "Use a custom simon button theme",
+    Icon: <PaletteIcon size={14} />,
+  },
+  title: {
+    title: "Receive an in-game title",
+    Icon: <TagIcon size={14} />,
+  },
+};
+
+const RewardBadge = ({ reward }: { reward: AchievementReward }) => {
+  const config = REWARD_BADGE_CONFIG[reward.type];
+
+  return (
+    <span
+      title={config.title}
+      className="cursor-pointer flex gap-1 items-center rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-200"
+    >
+      {config.Icon} {getRewardValue(reward)}
+    </span>
+  );
 };
 
 export default RewardBadge;
