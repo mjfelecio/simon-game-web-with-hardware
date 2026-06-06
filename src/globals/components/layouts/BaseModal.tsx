@@ -25,7 +25,10 @@ const BaseModal = ({
       {/* Consistent Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
-        onClick={onClose}
+        onClick={() => {
+          sfxPlayer.play(SFX.SHOW_MODAL);
+          onClose();
+        }}
       />
 
       {/* Consistent Container */}
@@ -39,6 +42,7 @@ const BaseModal = ({
           <button
             onClick={() => {
               sfxPlayer.play(SFX.BTN_CLICK);
+              sfxPlayer.play(SFX.SHOW_MODAL);
               onClose();
             }}
             className="absolute top-6 right-6 group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all z-10"
