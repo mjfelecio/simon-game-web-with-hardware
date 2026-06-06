@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import DevOverlay from "../DevOverlay";
 
 type Props = {
   children: ReactNode;
@@ -12,6 +13,8 @@ const PageWrapper = ({ children, className = "" }: Props) => (
     <div className="w-full max-w-6xl flex flex-col items-center">
       {children}
     </div>
+
+    {import.meta.env.DEV && <DevOverlay />}
   </main>
 );
 

@@ -13,6 +13,8 @@ import FAIL from "@/globals/assets/audio/sfx/failsound.wav";
 import BEGIN from "@/globals/assets/audio/sfx/begin.wav";
 import OVER from "@/globals/assets/audio/sfx/over.wav";
 
+import ACHIEVEMENT from "@/globals/assets/audio/sfx/universfield-video-game-bonus-323603.mp3";
+
 export const SFX = {
 	// UI
 	BTN_HOVER,
@@ -29,5 +31,7 @@ export const SFX = {
 	EXCELLENT,
 	WONDERFUL,
 
-	FAIL
+	FAIL,
+
+	ACHIEVEMENT
 } as const
