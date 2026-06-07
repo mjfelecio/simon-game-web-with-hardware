@@ -1,5 +1,11 @@
 import { supabase } from "@/globals/libs/db";
-import { ACHIEVEMENTS, type AchievementKey, type AchievementRecord, type UnlockedAchievement } from "../constants/achievements";
+import {
+  type AchievementCategory,
+  type AchievementKey,
+  type AchievementRecord,
+  type UnlockedAchievement,
+} from "../constants/achievements";
+import type { AchievementReward } from "../constants/rewards";
 
 const TABLE = "unlocked_achievements";
 
@@ -9,28 +15,39 @@ export type AchievementView = AchievementRecord & {
 };
 
 export async function fetchAchievementsForUser(
-  userId: string,
+  userId: string | null,
 ): Promise<AchievementView[]> {
-  const unlocked = await fetchUnlockedAchievements(userId);
+  let unlockedMap: undefined | Map<AchievementKey, string>;
 
-  const unlockedMap = new Map(
-    unlocked.map((a) => [
-      a.achievement_key,
-      a.unlocked_at,
-    ]),
-  );
+  if (userId !== null) {
+    const unlocked = await fetchUnlockedAchievements(userId);
 
-  return Object.entries(ACHIEVEMENTS).map(([key, def]) => ({
-    id: key,
-    key: key as AchievementKey,
-    name: def.name,
-    description: def.description,
-    category: def.category,
-    icon: def.icon,
-    rewards: [...def.rewards],
+    unlockedMap = new Map(
+      unlocked.map((a) => [a.achievement_key, a.unlocked_at]),
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("achievements")
+    .select("*")
+    .order("category", { ascending: false });
+
+  if (error) {
+    console.error("[AchievementService] fetch all achievements failed:", error);
+    throw error;
+  }
+
+  return data.map((achievement) => ({
+    id: achievement.id,
+    key: achievement.key as AchievementKey,
+    name: achievement.name ?? "",
+    description: achievement.description ?? "",
+    category: achievement.category as AchievementCategory,
+    icon: achievement.icon ?? "",
+    rewards: achievement.rewards as AchievementReward[],
     created_at: "",
-    unlocked: unlockedMap.has(key as AchievementKey),
-    unlockedAt: unlockedMap.get(key as AchievementKey),
+    unlocked: unlockedMap?.has(achievement.key as AchievementKey) ?? false,
+    unlockedAt: unlockedMap?.get(achievement.key as AchievementKey) ?? undefined,
   }));
 }
 
@@ -47,11 +64,14 @@ export async function fetchUnlockedAchievements(
     .order("unlocked_at", { ascending: false });
 
   if (error) {
-    console.error("[AchievementService] fetchUnlockedAchievements failed:", error);
+    console.error(
+      "[AchievementService] fetchUnlockedAchievements failed:",
+      error,
+    );
     throw error;
   }
 
-  return data as UnlockedAchievement[] ?? [];
+  return (data as UnlockedAchievement[]) ?? [];
 }
 
 /**
@@ -93,13 +113,15 @@ export async function recordAchievementUnlock(
     .select()
     .single();
 
-
   if (error) {
     // 23505 = unique_violation — achievement already unlocked, swallow silently
     if (error.code === "23505") {
       return null;
     }
-    console.error("[AchievementService] recordAchievementUnlock failed:", error);
+    console.error(
+      "[AchievementService] recordAchievementUnlock failed:",
+      error,
+    );
     throw error;
   }
 

@@ -2,10 +2,13 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import type { AchievementKey } from "../constants/achievements";
 import { useAuth } from "@/features/auth/components/AuthProvider";
 import {
+  fetchAchievementsForUser,
   fetchUnlockedAchievements,
   recordAchievementUnlock,
+  type AchievementView,
 } from "../services/achievementServices";
 import useEventEmitter from "@/features/events/hooks/useEventEmitter";
+import { toastError } from "@/globals/utils/toast";
 
 interface AchievementState {
   unlocked: Set<AchievementKey>;
@@ -25,6 +28,8 @@ export function useAchievements() {
   const { user } = useAuth();
   const userId = user?.id;
 
+  const [achievements, setAchievements] = useState<AchievementView[]>([]);
+
   const [state, setState] = useState<AchievementState>({
     unlocked: new Set(),
     loading: false,
@@ -37,6 +42,28 @@ export function useAchievements() {
   useEffect(() => {
     unlockedRef.current = state.unlocked;
   }, [state.unlocked]);
+
+  // Load all achievement definitions
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchAchievementsForUser(userId ?? "")
+      .then((res) => {
+        if (!cancelled) setAchievements(res);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : err;
+        toastError("Error", {
+          description: `Failed to fetch achievements. \n ${msg}`,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   // -------------------------------------------------------------------------
   // Load achievements when user changes
@@ -123,6 +150,7 @@ export function useAchievements() {
   );
 
   return {
+    achievements,
     unlocked: state.unlocked,
     loading: state.loading,
     error: state.error,

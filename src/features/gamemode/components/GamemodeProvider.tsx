@@ -59,7 +59,6 @@ export function GamemodeProvider({ children }: { children: React.ReactNode }) {
 
         const result = [...modes];
 
-        console.log(modes);
         setUnlockedModes(result);
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(result));

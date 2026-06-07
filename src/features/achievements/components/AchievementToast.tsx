@@ -1,12 +1,15 @@
 import { useCallback } from "react";
 import toast, { type Toast } from "react-hot-toast";
-import { ACHIEVEMENTS, isAchievementKey } from "../constants/achievements";
+import { isAchievementKey } from "../constants/achievements";
 import type { AppEvents } from "@/features/events/appEvents";
 import useEventListener from "@/features/events/hooks/useEventListener";
 import { Trophy } from "lucide-react";
 import { cn } from "@/globals/libs/styleUtils";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
+import { useAchievements } from "../hooks/useAchievements";
+import RewardBadge from "./RewardBadge";
+import type { AchievementReward } from "../constants/rewards";
 
 /**
  * Renders nothing itself. Listens for achievement_unlocked events and
@@ -15,6 +18,8 @@ import { SFX } from "@/features/audio/constants/sfx";
  * Place this inside AuthProvider + EventBusProvider.
  */
 export function AchievementToast() {
+  const { achievements } = useAchievements();
+
   const handleUnlock = useCallback(
     (payload: AppEvents["achievement_unlocked"]) => {
       const { key } = payload;
@@ -24,7 +29,12 @@ export function AchievementToast() {
         return;
       }
 
-      const def = ACHIEVEMENTS[key];
+      const def = achievements.find((a) => a.key === key);
+
+      if (!def) {
+        console.warn(`[AchievementToast] Achievement not found, key: [${key}]`);
+        return;
+      }
 
       sfxPlayer.play(SFX.ACHIEVEMENT);
 
@@ -34,6 +44,7 @@ export function AchievementToast() {
             t={t}
             title={def.name}
             description={def.description}
+            rewards={def.rewards}
           />
         ),
         {
@@ -41,7 +52,7 @@ export function AchievementToast() {
         },
       );
     },
-    [],
+    [achievements],
   );
 
   useEventListener("achievement_unlocked", handleUnlock);
@@ -53,9 +64,10 @@ type Props = {
   t: Toast;
   title: string;
   description: string;
+  rewards: AchievementReward[]
 };
 
-const AchievementToastCard = ({ t, title, description }: Props) => {
+const AchievementToastCard = ({ t, title, description, rewards }: Props) => {
   return (
     <div
       className={cn(
@@ -86,9 +98,20 @@ const AchievementToastCard = ({ t, title, description }: Props) => {
             Achievement Unlocked
           </p>
 
-          <h3 className="mt-1 text-xl font-black text-white tracking-wider">{title}</h3>
+          <h3 className="mt-1 text-xl font-black text-white tracking-wider">
+            {title}
+          </h3>
 
           <p className="mt-1 text-sm text-slate-300">{description}</p>
+
+          {rewards.length > 0 && (
+            <div className="mt-3 flex items-center flex-wrap gap-2">
+              <p className="mt-1 text-sm text-slate-400">Rewards: </p>
+              {rewards.map((reward, index) => (
+                <RewardBadge key={index} reward={reward} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
