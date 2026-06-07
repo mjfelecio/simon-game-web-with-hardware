@@ -17,7 +17,7 @@ export type ModeConfig = {
   description: string;
   icon: ReactNode;
   color: CSSProperties["color"];
-  available: boolean;
+  unlockCondition: string | undefined;
 };
 
 export const MODES: ModeConfig[] = [
@@ -29,7 +29,7 @@ export const MODES: ModeConfig[] = [
       "Repeat the growing sequence exactly as shown. The classic Simon experience.",
     icon: <Activity className="w-6 h-6" />,
     color: "emerald",
-    available: true,
+    unlockCondition: undefined,
   },
   {
     id: "blitz",
@@ -39,9 +39,8 @@ export const MODES: ModeConfig[] = [
       "Sequences play much faster. React quickly and keep up with the pace.",
     icon: <Zap className="w-6 h-6" />,
     color: "blue",
-    available: true,
+    unlockCondition: "Reach Level 5 in Classic",
   },
-
   {
     id: "fragment",
     title: "Fragment Protocol",
@@ -50,7 +49,7 @@ export const MODES: ModeConfig[] = [
       "Only the newest button is shown each round. Remember the rest of the sequence yourself.",
     icon: <Cpu className="w-6 h-6" />,
     color: "rose",
-    available: true,
+    unlockCondition: "Reach Level 5 in Blitz",
   },
   {
     id: "echo",
@@ -60,7 +59,7 @@ export const MODES: ModeConfig[] = [
       "Follow the sequence using sounds only. No visual button highlights are shown.",
     icon: <Volume2 className="w-6 h-6" />,
     color: "amber",
-    available: true,
+    unlockCondition: "Reach Level 5 in Fragment",
   },
   {
     id: "timeattack",
@@ -70,7 +69,7 @@ export const MODES: ModeConfig[] = [
       "Reach the target sequence length as fast as possible.",
     icon: <Timer className="w-6 h-6" />,
     color: "violet",
-    available: true,
+    unlockCondition: "Reach Level 5 in Echo",
   },
   {
     id: "burst",
@@ -80,7 +79,7 @@ export const MODES: ModeConfig[] = [
       "Watch the entire sequence once, then repeat everything in a single attempt.",
     icon: <Binary className="w-6 h-6" />,
     color: "cyan",
-    available: true,
+    unlockCondition: "Reach Level 5 in Time Attack",
   },
   {
     id: "ghost",
@@ -90,7 +89,7 @@ export const MODES: ModeConfig[] = [
       "Button colors are hidden. Use position and memory instead.",
     icon: <EyeOff className="w-6 h-6" />,
     color: "slate",
-    available: true,
+    unlockCondition: "Reach Level 5 in Burst",
   },
 
   {
@@ -101,6 +100,6 @@ export const MODES: ModeConfig[] = [
       "Button positions change after every successful round.",
     icon: <Shuffle className="w-6 h-6" />,
     color: "orange",
-    available: true,
+    unlockCondition: "Reach Level 5 in Ghost",
   },
 ];

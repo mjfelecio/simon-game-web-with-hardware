@@ -18,6 +18,8 @@ import WelcomeModal from "@/features/title/components/WelcomeModal";
 import { SettingsProvider } from "@/globals/providers/SettingsProvider";
 import { Provider as EventBusProvider } from "react-bus";
 import { AchievementProvider } from "./features/achievements/components/AchievementProvider";
+import { GamemodeProvider } from "./features/gamemode/components/GamemodeProvider";
+import GamemodeGuard from "./features/gamemode/components/GamemodeGuard";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -26,25 +28,29 @@ createRoot(document.getElementById("root")!).render(
         <MusicProvider>
           <TransitionProvider>
             <AuthProvider>
-              <AuthGuard>
-                <AchievementProvider />
-                <WelcomeModal />
-                <Toaster />
-                <BrowserRouter>
-                  <Routes>
-                    {/* Main Layout */}
-                    <Route element={<App />}>
-                      <Route index element={<TitlePage />} />
-                      <Route
-                        path="/leaderboard"
-                        element={<LeaderboardPage />}
-                      />
-                      <Route path="/mode" element={<ModeSelectionPage />} />
-                      <Route path="play" element={<PlayPage />} />
-                    </Route>
-                  </Routes>
-                </BrowserRouter>
-              </AuthGuard>
+              <GamemodeProvider>
+                <AuthGuard>
+                  <AchievementProvider />
+                  <WelcomeModal />
+                  <Toaster />
+                  <BrowserRouter>
+                    <GamemodeGuard>
+                      <Routes>
+                        {/* Main Layout */}
+                        <Route element={<App />}>
+                          <Route index element={<TitlePage />} />
+                          <Route
+                            path="/leaderboard"
+                            element={<LeaderboardPage />}
+                          />
+                          <Route path="/mode" element={<ModeSelectionPage />} />
+                          <Route path="play" element={<PlayPage />} />
+                        </Route>
+                      </Routes>
+                    </GamemodeGuard>
+                  </BrowserRouter>
+                </AuthGuard>
+              </GamemodeProvider>
             </AuthProvider>
             <TransitionOverlay />
           </TransitionProvider>

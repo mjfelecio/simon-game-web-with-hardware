@@ -8,16 +8,17 @@ import ModeConfigModal from "@/features/mode/components/ModeConfigModal";
 import { useTransition } from "@/globals/providers/TransitionProvider";
 import { SFX } from "@/features/audio/constants/sfx";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
+import { useGamemodes } from "@/features/gamemode/components/GamemodeProvider";
 
 const ModeSelectionPage = () => {
   const navigate = useNavigate();
+  const { isUnlocked } = useGamemodes();
   const { startTransition } = useTransition();
 
   const [selectedMode, setSelectedMode] = useState<ModeConfig | null>(null);
 
   const handleModeClick = (mode: ModeConfig) => {
-    const hasGoal =
-      mode?.id === "burst" || mode?.id === "timeattack";
+    const hasGoal = mode?.id === "burst" || mode?.id === "timeattack";
 
     if (hasGoal) {
       setSelectedMode(mode);
@@ -65,7 +66,7 @@ const ModeSelectionPage = () => {
 
           <div className="grid gap-4">
             {MODES.map((mode) => {
-              const isAvailable = mode.available;
+              const isAvailable = isUnlocked(mode.id);
 
               return (
                 <button
@@ -106,13 +107,23 @@ const ModeSelectionPage = () => {
                       <p className="text-xs text-slate-400 max-w-xs mt-1 leading-relaxed">
                         {mode.description}
                       </p>
+
+                      {!isAvailable && (
+                        <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2">
+                          <Lock className="h-3.5 w-3.5 text-cyan-400" />
+
+                          <span className="text-xs font-bold text-cyan-300">
+                            {mode.unlockCondition}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {isAvailable ? (
                     <ArrowRight className="w-6 h-6 text-emerald-500 translate-x-0 group-hover:translate-x-2 transition-transform" />
                   ) : (
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-600">
+                    <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-cyan-300">
                       Locked
                     </span>
                   )}

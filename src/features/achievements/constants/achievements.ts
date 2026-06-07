@@ -25,7 +25,9 @@ export const ACHIEVEMENTS = {
     description: "Reach level 5 in Classic mode.",
     category: "progression" as AchievementCategory,
     icon: "🎯",
-    rewards: [] as AchievementReward[],
+    rewards: [
+      { type: "unlock_mode", mode: "blitz" },
+    ] satisfies AchievementReward[],
   },
 
   classic_lvl_10: {
@@ -34,8 +36,8 @@ export const ACHIEVEMENTS = {
     category: "progression" as AchievementCategory,
     icon: "🔥",
     rewards: [
-      { type: "title", title: "Veteran" } as const satisfies AchievementReward,
-    ],
+      { type: "title", title: "Veteran" },
+    ] satisfies AchievementReward[],
   },
 
   classic_lvl_20: {
@@ -43,10 +45,7 @@ export const ACHIEVEMENTS = {
     description: "Reach level 20 in Classic mode.",
     category: "mastery" as AchievementCategory,
     icon: "👑",
-    rewards: [
-      { type: "unlock_mode", mode: "blitz" } as const satisfies AchievementReward,
-      { type: "theme", theme: "gold" } as const satisfies AchievementReward,
-    ],
+    rewards: [{ type: "theme", theme: "gold" }] satisfies AchievementReward[],
   },
 
   // ── Mastery ──────────────────────────────────────────────────────────────
