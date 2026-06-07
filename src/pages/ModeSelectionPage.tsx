@@ -76,8 +76,8 @@ const ModeSelectionPage = () => {
                     sfxPlayer.play(SFX.BTN_CLICK);
                     handleModeClick(mode);
                   }}
-                  onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
-                  onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
+                  onMouseEnter={() => sfxPlayer.play(SFX.LB_HOVER)}
+                  onTouchStart={() => sfxPlayer.play(SFX.LB_HOVER)}
                   className={cn(
                     "group relative flex items-center justify-between p-6 rounded-2xl border transition-all duration-300 w-full text-left",
                     isAvailable
