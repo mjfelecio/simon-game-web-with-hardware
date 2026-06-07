@@ -32,6 +32,7 @@ export default function useSimonGame() {
   );
   const [showBegin, setShowBegin] = useState(false);
 
+  const statusRef = useRef(core.status);
   const hasStartedGameRef = useRef(false);
   const inputsUsed = useRef<Set<InputType>>(new Set());
 
@@ -49,6 +50,10 @@ export default function useSimonGame() {
             reactionTimesRef.current.length,
         )
       : null;
+
+  useEffect(() => {
+    statusRef.current = core.status;
+  }, [core.status]);
 
   const playSequence = useCallback(
     async (seq: SimonButtonType[]) => {
@@ -158,7 +163,7 @@ export default function useSimonGame() {
 
   const handleInput = useCallback(
     async (type: InputType, input: SimonButtonType) => {
-      if (core.status !== "playing") return;
+      if (statusRef.current !== "playing") return;
 
       // Recording the input type
       if (!inputsUsed.current.has(type)) {
