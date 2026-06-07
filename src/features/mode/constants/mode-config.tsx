@@ -32,6 +32,16 @@ export const MODES: ModeConfig[] = [
     unlockCondition: undefined,
   },
   {
+    id: "timeattack",
+    title: "Time Attack",
+    description:
+      // "System response test. Complete the designated transmission objective with minimum execution time.",
+      "Reach the target sequence length as fast as possible.",
+    icon: <Timer className="w-6 h-6" />,
+    color: "violet",
+    unlockCondition: "Reach Level 5 in Classic",
+  },
+  {
     id: "blitz",
     title: "Blitz Mode",
     description:
@@ -39,17 +49,7 @@ export const MODES: ModeConfig[] = [
       "Sequences play much faster. React quickly and keep up with the pace.",
     icon: <Zap className="w-6 h-6" />,
     color: "blue",
-    unlockCondition: "Reach Level 5 in Classic",
-  },
-  {
-    id: "fragment",
-    title: "Fragment Protocol",
-    description:
-      // "Legacy data omitted. Only the newest signal fragment is transmitted. You must maintain the full stack internally.",
-      "Only the newest button is shown each round. Remember the rest of the sequence yourself.",
-    icon: <Cpu className="w-6 h-6" />,
-    color: "rose",
-    unlockCondition: "Reach Level 5 in Blitz",
+    unlockCondition: "Reach Level 5 in Time Attack",
   },
   {
     id: "echo",
@@ -59,27 +59,7 @@ export const MODES: ModeConfig[] = [
       "Follow the sequence using sounds only. No visual button highlights are shown.",
     icon: <Volume2 className="w-6 h-6" />,
     color: "amber",
-    unlockCondition: "Reach Level 5 in Fragment",
-  },
-  {
-    id: "timeattack",
-    title: "Time Attack",
-    description:
-      // "System response test. Complete the designated transmission objective with minimum execution time.",
-      "Reach the target sequence length as fast as possible.",
-    icon: <Timer className="w-6 h-6" />,
-    color: "violet",
-    unlockCondition: "Reach Level 5 in Echo",
-  },
-  {
-    id: "burst",
-    title: "Burst Transmission",
-    description:
-      // "A complete data packet is transmitted simultaneously. Reconstruct the entire sequence from memory in a single attempt.",
-      "Watch the entire sequence once, then repeat everything in a single attempt.",
-    icon: <Binary className="w-6 h-6" />,
-    color: "cyan",
-    unlockCondition: "Reach Level 5 in Time Attack",
+    unlockCondition: "Reach Level 5 in Blitz",
   },
   {
     id: "ghost",
@@ -89,9 +69,18 @@ export const MODES: ModeConfig[] = [
       "Button colors are hidden. Use position and memory instead.",
     icon: <EyeOff className="w-6 h-6" />,
     color: "slate",
-    unlockCondition: "Reach Level 5 in Burst",
+    unlockCondition: "Reach Level 5 in Echo",
   },
-
+  {
+    id: "fragment",
+    title: "Fragment Protocol",
+    description:
+      // "Legacy data omitted. Only the newest signal fragment is transmitted. You must maintain the full stack internally.",
+      "Only the newest button is shown each round. Remember the rest of the sequence yourself.",
+    icon: <Cpu className="w-6 h-6" />,
+    color: "rose",
+    unlockCondition: "Reach Level 5 in Ghost",
+  },
   {
     id: "entropy",
     title: "Entropy Protocol",
@@ -100,6 +89,16 @@ export const MODES: ModeConfig[] = [
       "Button positions change after every successful round.",
     icon: <Shuffle className="w-6 h-6" />,
     color: "orange",
-    unlockCondition: "Reach Level 5 in Ghost",
+    unlockCondition: "Reach Level 5 in Fragment",
+  },
+  {
+    id: "burst",
+    title: "Burst Transmission",
+    description:
+      // "A complete data packet is transmitted simultaneously. Reconstruct the entire sequence from memory in a single attempt.",
+      "Watch the entire sequence once, then repeat everything in a single attempt.",
+    icon: <Binary className="w-6 h-6" />,
+    color: "cyan",
+    unlockCondition: "Reach Level 5 in Entropy",
   },
 ];

@@ -1,7 +1,7 @@
 import { cn } from "@/globals/libs/styleUtils";
 import RewardBadge from "./RewardBadge";
 import type { AchievementView } from "../services/achievementServices";
-import { LockKeyhole } from "lucide-react";
+import { LockKeyholeIcon, TrophyIcon } from "lucide-react";
 
 type AchievementItemProps = {
   achievement: AchievementView;
@@ -20,9 +20,9 @@ const AchievementItem = ({ achievement }: AchievementItemProps) => {
       <div className="flex gap-4">
         <div className="text-4xl">
           {achievement.unlocked ? (
-            achievement.icon
+            <TrophyIcon className="h-7 w-7 text-yellow-300" />
           ) : (
-            <LockKeyhole size={36} color="#62748e" />
+            <LockKeyholeIcon size={36} color="#62748e" />
           )}
         </div>
 
