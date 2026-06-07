@@ -26,7 +26,7 @@ const GameHeader = ({
       </div>
       <div className="rounded-full flex justify-center items-center bg-white/10 px-4 py-1 border border-white/20">
         <span className="text-[10px] md:text-sm font-bold tracking-widest text-white/70 uppercase">
-          Level {level}
+          {mode === "burst" ? "Progress" : "Level"} {level}
         </span>
       </div>
     </div>

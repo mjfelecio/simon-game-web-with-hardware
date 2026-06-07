@@ -99,7 +99,7 @@ export default function useSimonGame() {
         toastInfo(`Time taken: ${formattedTime}`);
 
       // level depends on burst
-      const level = config.isBurst ? inputs.length : core.level;
+      const level = config.hasGoal ? inputs.length : core.level;
 
       const hasGoal = config.mode === "burst" || config.mode === "timeattack";
       const goal = hasGoal ? config.goal : undefined;
@@ -153,7 +153,7 @@ export default function useSimonGame() {
         },
       });
     },
-    [config.mode, config.goal, core.level, user, config.isBurst],
+    [config.mode, config.goal, core.level, user, config.hasGoal],
   );
 
   const handleInput = useCallback(
@@ -217,7 +217,7 @@ export default function useSimonGame() {
         await submitScoreWithRetry(core.inputs, timeTaken);
 
         emitter.emit("game_completed", {
-          level: core.level,
+          level: config.hasGoal ? core.inputs.length : core.level,
           mode: config.mode,
           won: false,
           timeTakenMs: timeTaken,
