@@ -3,6 +3,8 @@ import BaseModal from "@/globals/components/layouts/BaseModal";
 import AchievementItem from "./AchievementItem";
 import { useAchievements } from "../hooks/useAchievements";
 import type { AchievementView } from "../services/achievementServices";
+import { useAuth } from "@/features/auth/components/AuthProvider";
+import Button from "@/globals/components/Button";
 
 type Props = {
   open: boolean;
@@ -11,6 +13,7 @@ type Props = {
 
 const AchievementListModal = ({ open, onClose }: Props) => {
   const { achievements } = useAchievements();
+  const { isAGuest } = useAuth();
 
   const grouped = achievements.reduce(
     (acc, achievement) => {
@@ -34,12 +37,18 @@ const AchievementListModal = ({ open, onClose }: Props) => {
       <div className="space-y-6 max-h-[70vh] overflow-y-auto">
         <div className="text-center">
           <h1 className="text-5xl text-center uppercase">Achievements</h1>
-          <p className="text-lg font-black text-center uppercase">
-            Progress:{" "}
-            <span className="text-cyan-400">
-              {unlockedCount} / {totalAchievements}
-            </span>
-          </p>
+          {isAGuest ? (
+            <p className="text-lg text-amber-500 font-black text-center">
+              Login to see your achievement progress
+            </p>
+          ) : (
+            <p className="text-lg font-black text-center uppercase">
+              Progress:{" "}
+              <span className="text-cyan-400">
+                {unlockedCount} / {totalAchievements}
+              </span>
+            </p>
+          )}
         </div>
 
         {Object.entries(grouped).map(([category, items]) => {
@@ -66,6 +75,8 @@ const AchievementListModal = ({ open, onClose }: Props) => {
           );
         })}
       </div>
+
+      <Button className="mt-12" text="Close" onClick={() => onClose()} />
     </BaseModal>
   );
 };

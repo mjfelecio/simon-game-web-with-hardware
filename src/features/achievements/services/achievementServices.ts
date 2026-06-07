@@ -20,11 +20,15 @@ export async function fetchAchievementsForUser(
   let unlockedMap: undefined | Map<AchievementKey, string>;
 
   if (userId !== null) {
-    const unlocked = await fetchUnlockedAchievements(userId);
+    try {
+      const unlocked = await fetchUnlockedAchievements(userId);
 
-    unlockedMap = new Map(
-      unlocked.map((a) => [a.achievement_key, a.unlocked_at]),
-    );
+      unlockedMap = new Map(
+        unlocked.map((a) => [a.achievement_key, a.unlocked_at]),
+      );
+    } catch {
+      console.warn("User must be logged in to see their progress")
+    }
   }
 
   const { data, error } = await supabase
@@ -47,7 +51,8 @@ export async function fetchAchievementsForUser(
     rewards: achievement.rewards as AchievementReward[],
     created_at: "",
     unlocked: unlockedMap?.has(achievement.key as AchievementKey) ?? false,
-    unlockedAt: unlockedMap?.get(achievement.key as AchievementKey) ?? undefined,
+    unlockedAt:
+      unlockedMap?.get(achievement.key as AchievementKey) ?? undefined,
   }));
 }
 
