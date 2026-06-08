@@ -19,6 +19,8 @@ import { SFX } from "@/features/audio/constants/sfx";
 import { formatDuration } from "@/globals/utils/formatter";
 import { musicPlayer } from "@/features/audio/utils/musicPlayer";
 import useEventEmitter from "@/features/events/hooks/useEventEmitter";
+import { updateCampaignProgress } from "@/features/campaign/services/campaignService";
+import useCampaign from "./useCampaign";
 
 export default function useSimonGame() {
   const emitter = useEventEmitter();
@@ -50,6 +52,18 @@ export default function useSimonGame() {
             reactionTimesRef.current.length,
         )
       : null;
+
+  const { isCampaignLoading, campaignProgressLevel } = useCampaign({
+    gameMode: config.mode,
+    isCampaign: config.isCampaign,
+    userId: user?.id,
+  });
+
+  useEffect(() => {
+    if (config.isCampaign && core.status === "not-started") {
+      core.setLevel(campaignProgressLevel + 1);
+    }
+  }, [core, config.isCampaign, campaignProgressLevel]);
 
   useEffect(() => {
     statusRef.current = core.status;
@@ -219,14 +233,23 @@ export default function useSimonGame() {
           return;
         }
 
-        await submitScoreWithRetry(core.inputs, timeTaken);
-
         emitter.emit("game_completed", {
-          level: config.hasGoal ? core.inputs.length : core.level,
+          level: config.hasGoal ? core.inputs.length : core.level - 1,
           mode: config.mode,
           won: false,
           timeTakenMs: timeTaken,
         });
+
+        if (config.isCampaign && user?.id) {
+          // TODO: Use the game_completed signal to handle this elsewhere
+          await updateCampaignProgress({
+            userId: user.id,
+            gameMode: config.mode,
+            level: core.level - 1,
+          });
+        } else {
+          await submitScoreWithRetry(core.inputs, timeTaken);
+        }
         return;
       }
 
@@ -251,7 +274,6 @@ export default function useSimonGame() {
           }
 
           setTimeTaken(timeTaken);
-          await submitScoreWithRetry(newInputs, timeTaken);
 
           emitter.emit("game_completed", {
             level: core.level,
@@ -259,6 +281,17 @@ export default function useSimonGame() {
             won: true,
             timeTakenMs: timeTaken,
           });
+
+          // TODO: Use the game_completed signal to handle this elsewhere
+          if (config.isCampaign && user?.id) {
+            await updateCampaignProgress({
+              userId: user.id,
+              gameMode: config.mode,
+              level: core.level,
+            });
+          } else {
+            await submitScoreWithRetry(newInputs, timeTaken);
+          }
         } else {
           core.setStatus("won");
 
@@ -294,12 +327,16 @@ export default function useSimonGame() {
       playSequence,
       submitScoreWithRetry,
       emitter,
+      user?.id,
     ],
   );
 
   const resetGame = () => {
     playMusic(MUSIC.BG);
     core.resetGame();
+    if (config.isCampaign) {
+      core.setLevel(campaignProgressLevel);
+    }
     hasStartedGameRef.current = false;
   };
 
@@ -327,6 +364,8 @@ export default function useSimonGame() {
   };
 
   const startGame = async () => {
+    if (config.isCampaign && isCampaignLoading) return;
+
     if (hasStartedGameRef.current) return;
 
     // lock this shit
@@ -340,10 +379,17 @@ export default function useSimonGame() {
 
     const startSeq = config.hasGoal
       ? core.generateSequence(config.goal)
-      : core.generateNextSequence([]);
+      : config.isCampaign
+        ? core.generateSequence(campaignProgressLevel + 1)
+        : core.generateNextSequence([]);
 
     core.setSequence(startSeq);
-    core.setLevel(1);
+
+    if (config.isCampaign) {
+      core.setLevel(campaignProgressLevel + 1);
+    } else {
+      core.setLevel(1);
+    }
 
     // Timer starts when the sequence is set
     setTimeTaken(null);
