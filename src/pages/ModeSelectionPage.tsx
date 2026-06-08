@@ -9,6 +9,11 @@ import { useTransition } from "@/globals/providers/TransitionProvider";
 import { SFX } from "@/features/audio/constants/sfx";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { useGamemodes } from "@/features/gamemode/components/GamemodeProvider";
+import {
+  CAMPAIGN_MODES,
+  type PlayType,
+} from "@/features/campaign/constants/campaign";
+import PlayTypeToggle from "@/features/mode/components/PlayTypeToggle";
 
 const ModeSelectionPage = () => {
   const navigate = useNavigate();
@@ -16,14 +21,16 @@ const ModeSelectionPage = () => {
   const { startTransition } = useTransition();
 
   const [selectedMode, setSelectedMode] = useState<ModeConfig | null>(null);
+  const [playType, setPlayType] = useState<PlayType>("quickplay");
 
   const handleModeClick = (mode: ModeConfig) => {
     const hasGoal = mode?.id === "burst" || mode?.id === "timeattack";
+    const isCampaign = playType === "campaign";
 
     if (hasGoal) {
       setSelectedMode(mode);
     } else {
-      navigateWithTransition(`/play?mode=${mode.id}`);
+      navigateWithTransition(`/play?mode=${mode.id}&campaign=${isCampaign}`);
     }
   };
 
@@ -59,19 +66,27 @@ const ModeSelectionPage = () => {
             <h2 className="text-xs font-black uppercase tracking-[0.5em] text-blue-400 mb-2">
               Select Operation Mode
             </h2>
-            <h1 className="text-5xl font-black italic uppercase text-white">
+            <h1 className="mb-4 text-5xl font-black italic uppercase text-white">
               Mission Profile
             </h1>
+
+            <PlayTypeToggle
+              selected={playType}
+              onPlayTypeChange={setPlayType}
+            />
           </header>
 
           <div className="grid gap-4">
             {MODES.map((mode) => {
-              const isAvailable = isUnlocked(mode.id);
+              const isModeUnlocked = isUnlocked(mode.id);
+
+              if (playType === "campaign" && !CAMPAIGN_MODES.has(mode.id))
+                return;
 
               return (
                 <button
                   key={mode.id}
-                  disabled={!isAvailable}
+                  disabled={!isModeUnlocked}
                   onClick={() => {
                     sfxPlayer.play(SFX.BTN_CLICK);
                     handleModeClick(mode);
@@ -80,7 +95,7 @@ const ModeSelectionPage = () => {
                   onTouchStart={() => sfxPlayer.play(SFX.LB_HOVER)}
                   className={cn(
                     "group relative flex items-center justify-between p-6 rounded-2xl border transition-all duration-300 w-full text-left",
-                    isAvailable
+                    isModeUnlocked
                       ? "border-white/10 bg-white/5 hover:border-emerald-500/50 hover:bg-emerald-500/5 cursor-pointer"
                       : "border-white/5 bg-white/2 opacity-60 grayscale cursor-not-allowed",
                   )}
@@ -89,7 +104,7 @@ const ModeSelectionPage = () => {
                     <div
                       className={cn(
                         "flex h-14 w-14 items-center justify-center rounded-xl border transition-colors",
-                        isAvailable
+                        isModeUnlocked
                           ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-emerald-950"
                           : "border-white/10 bg-white/5 text-slate-500",
                       )}
@@ -100,7 +115,7 @@ const ModeSelectionPage = () => {
                     <div>
                       <h3 className="text-lg font-black uppercase tracking-widest text-white flex items-center gap-2">
                         {mode.title}
-                        {!isAvailable && (
+                        {!isModeUnlocked && (
                           <Lock className="w-3 h-3 text-slate-600" />
                         )}
                       </h3>
@@ -108,7 +123,7 @@ const ModeSelectionPage = () => {
                         {mode.description}
                       </p>
 
-                      {!isAvailable && (
+                      {!isModeUnlocked && (
                         <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2">
                           <Lock className="h-3.5 w-3.5 text-cyan-400" />
 
@@ -120,7 +135,7 @@ const ModeSelectionPage = () => {
                     </div>
                   </div>
 
-                  {isAvailable ? (
+                  {isModeUnlocked ? (
                     <ArrowRight className="w-6 h-6 text-emerald-500 translate-x-0 group-hover:translate-x-2 transition-transform" />
                   ) : (
                     <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-cyan-300">
@@ -132,7 +147,7 @@ const ModeSelectionPage = () => {
                   <div
                     className={cn(
                       "absolute left-0 top-1/4 bottom-1/4 w-1 rounded-r-full transition-all",
-                      isAvailable
+                      isModeUnlocked
                         ? "bg-emerald-500 opacity-0 group-hover:opacity-100"
                         : "bg-transparent",
                     )}
