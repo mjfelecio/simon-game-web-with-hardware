@@ -28,7 +28,11 @@ type ToastAction = {
  * Shared options supported by all toast variants.
  */
 type ToastOptions = {
-   /**
+  /**
+   * Optional toast id. This replaces the id holder toast with this new toast.
+   */
+  id?: string;
+  /**
    * Additional supporting text shown below the title.
    */
   description?: string;
@@ -136,6 +140,7 @@ export function toastSuccess(title: string, options?: ToastOptions) {
       />
     ),
     {
+      id: options?.id,
       duration: options?.duration ?? 3000,
     },
   );
@@ -156,6 +161,7 @@ export function toastError(title: string, options?: ToastOptions) {
       />
     ),
     {
+      id: options?.id,
       duration: options?.duration ?? 4000,
     },
   );
@@ -176,6 +182,7 @@ export function toastInfo(title: string, options?: ToastOptions) {
       />
     ),
     {
+      id: options?.id,
       duration: options?.duration ?? 3000,
     },
   );
@@ -196,6 +203,7 @@ export function toastWarning(title: string, options?: ToastOptions) {
       />
     ),
     {
+      id: options?.id,
       duration: options?.duration ?? 4000,
     },
   );
@@ -206,7 +214,7 @@ export function toastWarning(title: string, options?: ToastOptions) {
  *
  * Defaults to an infinite duration until manually dismissed
  * or replaced by another toast.
- * 
+ *
  * Note: Use the toastId returned to dismiss or update this toast
  */
 export function toastLoading(title: string, options?: ToastOptions) {
@@ -221,6 +229,7 @@ export function toastLoading(title: string, options?: ToastOptions) {
       />
     ),
     {
+      id: options?.id,
       duration: options?.duration ?? Infinity,
     },
   );
@@ -297,7 +306,7 @@ export async function toastPromise<T>(
     <BaseToast
       t={t}
       title={messages.loading.title}
-			description={messages.loading.description}
+      description={messages.loading.description}
       variant="loading"
       action={messages.loading.action}
     />
@@ -315,13 +324,13 @@ export async function toastPromise<T>(
               ? messages.success.title(data)
               : messages.success.title
           }
-					description={
+          description={
             typeof messages.success.description === "function"
               ? messages.success.description(data)
               : messages.success.description
           }
           variant="success"
-					action={messages.success.action}
+          action={messages.success.action}
         />
       ),
       {
@@ -341,13 +350,13 @@ export async function toastPromise<T>(
               ? messages.error.title(err)
               : messages.error.title
           }
-					description={
+          description={
             typeof messages.error.description === "function"
               ? messages.error.description(err)
               : messages.error.description
           }
           variant="error"
-					action={messages.error.action}
+          action={messages.error.action}
         />
       ),
       {
