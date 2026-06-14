@@ -20,42 +20,50 @@ import { Provider as EventBusProvider } from "react-bus";
 import { AchievementProvider } from "./features/achievements/components/AchievementProvider";
 import { GamemodeProvider } from "./features/gamemode/components/GamemodeProvider";
 import GamemodeGuard from "./features/gamemode/components/GamemodeGuard";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <EventBusProvider>
-      <SettingsProvider>
-        <MusicProvider>
-          <TransitionProvider>
-            <AuthProvider>
-              <GamemodeProvider>
-                <AuthGuard>
-                  <AchievementProvider />
-                  <WelcomeModal />
-                  <Toaster />
-                  <BrowserRouter>
-                    <GamemodeGuard>
-                      <Routes>
-                        {/* Main Layout */}
-                        <Route element={<App />}>
-                          <Route index element={<TitlePage />} />
-                          <Route
-                            path="/leaderboard"
-                            element={<LeaderboardPage />}
-                          />
-                          <Route path="/mode" element={<ModeSelectionPage />} />
-                          <Route path="play" element={<PlayPage />} />
-                        </Route>
-                      </Routes>
-                    </GamemodeGuard>
-                  </BrowserRouter>
-                </AuthGuard>
-              </GamemodeProvider>
-            </AuthProvider>
-            <TransitionOverlay />
-          </TransitionProvider>
-        </MusicProvider>
-      </SettingsProvider>
-    </EventBusProvider>
+    <QueryClientProvider client={queryClient}>
+      <EventBusProvider>
+        <SettingsProvider>
+          <MusicProvider>
+            <TransitionProvider>
+              <AuthProvider>
+                <GamemodeProvider>
+                  <AuthGuard>
+                    <AchievementProvider />
+                    <WelcomeModal />
+                    <Toaster />
+                    <BrowserRouter>
+                      <GamemodeGuard>
+                        <Routes>
+                          {/* Main Layout */}
+                          <Route element={<App />}>
+                            <Route index element={<TitlePage />} />
+                            <Route
+                              path="/leaderboard"
+                              element={<LeaderboardPage />}
+                            />
+                            <Route
+                              path="/mode"
+                              element={<ModeSelectionPage />}
+                            />
+                            <Route path="play" element={<PlayPage />} />
+                          </Route>
+                        </Routes>
+                      </GamemodeGuard>
+                    </BrowserRouter>
+                  </AuthGuard>
+                </GamemodeProvider>
+              </AuthProvider>
+              <TransitionOverlay />
+            </TransitionProvider>
+          </MusicProvider>
+        </SettingsProvider>
+      </EventBusProvider>
+    </QueryClientProvider>
   </StrictMode>,
 );
