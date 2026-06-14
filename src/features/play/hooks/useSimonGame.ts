@@ -4,13 +4,7 @@ import useGameMode from "./useGameMode";
 import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { InputType, SimonButtonType } from "@/globals/types/simon";
-import { submitScore } from "@/globals/utils/scores";
-import {
-  toastError,
-  toastInfo,
-  toastPromise,
-  toastWarning,
-} from "@/globals/utils/toast";
+import { toastError, toastWarning } from "@/globals/utils/toast";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import { useAuth } from "@/features/auth/components/AuthProvider";
@@ -21,6 +15,7 @@ import { musicPlayer } from "@/features/audio/utils/musicPlayer";
 import useEventEmitter from "@/features/events/hooks/useEventEmitter";
 import { updateCampaignProgress } from "@/features/campaign/services/campaignService";
 import useCampaign from "./useCampaign";
+import useScoreSubmission from "./useScoreSubmission";
 
 export default function useSimonGame() {
   const emitter = useEventEmitter();
@@ -57,6 +52,11 @@ export default function useSimonGame() {
     gameMode: config.mode,
     isCampaign: config.isCampaign,
     userId: user?.id,
+  });
+
+  const { mutateAsync: submitGameScore } = useScoreSubmission({
+    userId: user?.id,
+    inputsUsed: inputsUsed,
   });
 
   useEffect(() => {
@@ -100,79 +100,6 @@ export default function useSimonGame() {
       lastPromptAtRef.current = performance.now();
     },
     [config.mode, audio, core],
-  );
-
-  const submitScoreWithRetry = useCallback(
-    async (inputs: SimonButtonType[], timeTaken: number) => {
-      if (!user) {
-        toastWarning("Score discarded", {
-          description: "Please login to submit your score.",
-        });
-
-        return;
-      }
-
-      const formattedTime = formatDuration(timeTaken);
-
-      if (config.mode === "timeattack")
-        toastInfo(`Time taken: ${formattedTime}`);
-
-      // level depends on burst
-      const level = config.hasGoal ? inputs.length : core.level;
-
-      const hasGoal = config.mode === "burst" || config.mode === "timeattack";
-      const goal = hasGoal ? config.goal : undefined;
-
-      // Stored as CSV in string form
-      const inputType = Array.from(inputsUsed.current).join(",");
-
-      let retryAttempts = 3;
-
-      const executeSubmission = async (): Promise<void> => {
-        try {
-          await submitScore({
-            user_id: user.id,
-            gamemode: config.mode,
-            input_type: inputType,
-            level: level,
-            goal: goal,
-            time_taken: timeTaken,
-          });
-        } catch (error) {
-          retryAttempts--;
-
-          if (retryAttempts <= 0) {
-            throw error;
-          }
-
-          return executeSubmission();
-        }
-      };
-
-      await toastPromise(executeSubmission(), {
-        loading: {
-          title: "Submitting score...",
-          description: "Syncing with leaderboard",
-        },
-
-        success: {
-          title: "Score submitted",
-          description: `Reached level ${core.level}`,
-        },
-
-        error: {
-          title: "Submission failed",
-          description: "Could not sync your score.",
-          action: {
-            label: "Retry",
-            onClick: () => {
-              submitScoreWithRetry(inputs, timeTaken);
-            },
-          },
-        },
-      });
-    },
-    [config.mode, config.goal, core.level, user, config.hasGoal],
   );
 
   const handleInput = useCallback(
@@ -248,7 +175,17 @@ export default function useSimonGame() {
             level: core.level - 1,
           });
         } else {
-          await submitScoreWithRetry(core.inputs, timeTaken);
+          await submitGameScore({
+            gameMode: config.mode,
+            completedLevel: config.hasGoal
+              ? core.inputs.length
+              // core.level represents the completedLevel
+              // because level is incremented at the start of the next round
+              : core.level,
+            goal: config.goal,
+            inputs: core.inputs,
+            timeTaken: timeTaken,
+          });
         }
         return;
       }
@@ -290,7 +227,15 @@ export default function useSimonGame() {
               level: core.level,
             });
           } else {
-            await submitScoreWithRetry(newInputs, timeTaken);
+            await submitGameScore({
+              gameMode: config.mode,
+              completedLevel: config.hasGoal
+                ? core.inputs.length
+                : core.level - 1,
+              goal: config.goal,
+              inputs: core.inputs,
+              timeTaken: timeTaken,
+            });
           }
         } else {
           core.setStatus("won");
@@ -325,7 +270,7 @@ export default function useSimonGame() {
       audio,
       stopMusic,
       playSequence,
-      submitScoreWithRetry,
+      submitGameScore,
       emitter,
       user?.id,
     ],
