@@ -15,7 +15,7 @@ export default function useGameMode() {
 
   const mode = (searchParams.get("mode") ?? "classic") as GameMode;
   const goal = Number(searchParams.get("goal")) || 0;
-  const isCampaign = Boolean(searchParams.get("campaign"));
+  const isCampaign = searchParams.get("campaign") === "true";
 
   const hasGoal = mode === "burst"  || mode === "timeattack"
   const isEndless = ENDLESS_MODES.has(mode);
