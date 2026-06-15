@@ -1,7 +1,6 @@
 import { fetchCampaignProgress } from "@/features/campaign/services/campaignService";
 import type { GameMode } from "@/globals/types/simon";
-import { toastError } from "@/globals/utils/toast";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 type Params = {
   isCampaign: boolean;
@@ -9,42 +8,18 @@ type Params = {
   userId: string | undefined;
 };
 
-const useCampaign = ({
-  isCampaign,
-  gameMode,
-  userId,
-}: Params) => {
-  const [campaignProgressLevel, setCampaignProgressLevel] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+const useCampaign = ({ isCampaign, gameMode, userId }: Params) => {
+  const { data: campaignProgress, isLoading } = useQuery({
+    queryKey: [gameMode, userId],
+    queryFn: () => fetchCampaignProgress({ gameMode, userId: userId! }),
+    enabled: isCampaign && userId !== undefined,
+  });
 
-  useEffect(() => {
-    if (!isCampaign) return;
-
-    const initializeCampaign = async () => {
-      setIsLoading(true);
-      try {
-				if (!userId) return;
-
-        const campaignProgress = await fetchCampaignProgress({
-          gameMode,
-          userId,
-        });
-
-        setCampaignProgressLevel(campaignProgress?.highest_level ?? 1);
-      } catch {
-        console.error("Failed to fetch campaign data");
-        toastError("Failed to fetch campaign data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeCampaign();
-  }, [isCampaign, gameMode, userId]);
+  const campaignProgressLevel = campaignProgress?.highest_level ?? 0;
 
   return {
     isCampaignLoading: isLoading,
-		campaignProgressLevel,
+    campaignProgressLevel,
   };
 };
 
