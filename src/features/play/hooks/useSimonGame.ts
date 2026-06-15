@@ -4,18 +4,18 @@ import useGameMode from "./useGameMode";
 import useSimonCore from "./useSimonCore";
 import useSimonAudio from "./useSimonAudio";
 import type { InputType, SimonButtonType } from "@/globals/types/simon";
-import { toastError, toastWarning } from "@/globals/utils/toast";
+import { toastError } from "@/globals/utils/toast";
 import { useMusic } from "@/features/audio/components/MusicProvider";
 import { MUSIC } from "@/features/audio/constants/music";
 import { useAuth } from "@/features/auth/components/AuthProvider";
 import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
-import { formatDuration } from "@/globals/utils/formatter";
 import { musicPlayer } from "@/features/audio/utils/musicPlayer";
 import useEventEmitter from "@/features/events/hooks/useEventEmitter";
 import { updateCampaignProgress } from "@/features/campaign/services/campaignService";
 import useCampaign from "./useCampaign";
 import useScoreSubmission from "./useScoreSubmission";
+import useGameAnalytics from "./useGameAnalytics";
 
 export default function useSimonGame() {
   const emitter = useEventEmitter();
@@ -24,6 +24,8 @@ export default function useSimonGame() {
   const { playMusic, stopMusic } = useMusic();
   const core = useSimonCore();
   const audio = useSimonAudio();
+  const analytics = useGameAnalytics();
+
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
@@ -31,22 +33,6 @@ export default function useSimonGame() {
 
   const statusRef = useRef(core.status);
   const hasStartedGameRef = useRef(false);
-  const inputsUsed = useRef<Set<InputType>>(new Set());
-
-  const [timeTaken, setTimeTaken] = useState<number | null>(null);
-  const startedAtRef = useRef<number | null>(null);
-
-  // Reaction time
-  const reactionTimesRef = useRef<number[]>([]);
-  const lastPromptAtRef = useRef<number | null>(null);
-
-  const avgReactionTime =
-    reactionTimesRef.current.length > 0
-      ? Math.round(
-          reactionTimesRef.current.reduce((a, b) => a + b, 0) /
-            reactionTimesRef.current.length,
-        )
-      : null;
 
   const { isCampaignLoading, campaignProgressLevel } = useCampaign({
     gameMode: config.mode,
@@ -56,7 +42,7 @@ export default function useSimonGame() {
 
   const { mutateAsync: submitGameScore } = useScoreSubmission({
     userId: user?.id,
-    inputsUsed: inputsUsed,
+    inputsUsed: analytics.inputsUsed,
   });
 
   useEffect(() => {
@@ -76,7 +62,7 @@ export default function useSimonGame() {
       if (config.mode === "timeattack") {
         core.setInputs([]);
         core.setStatus("playing");
-        lastPromptAtRef.current = performance.now();
+        analytics.startRound();
         return;
       }
 
@@ -97,29 +83,19 @@ export default function useSimonGame() {
 
       core.setInputs([]);
       core.setStatus("playing");
-      lastPromptAtRef.current = performance.now();
+      analytics.startRound();
     },
-    [config.mode, audio, core],
+    [analytics, config.mode, audio, core],
   );
 
   const handleInput = useCallback(
     async (type: InputType, input: SimonButtonType) => {
       if (statusRef.current !== "playing") return;
 
-      // Recording the input type
-      if (!inputsUsed.current.has(type)) {
-        inputsUsed.current.add(type);
-      }
+      analytics.recordInputType(type);
 
-      // Reaction time only on correct inputs
-      if (
-        lastPromptAtRef.current != null &&
-        input === core.sequence[core.inputs.length]
-      ) {
-        reactionTimesRef.current.push(
-          performance.now() - lastPromptAtRef.current,
-        );
-        lastPromptAtRef.current = performance.now();
+      if (input === core.sequence[core.inputs.length]) {
+        analytics.recordSuccessfulInput();
       }
 
       setActiveButton(input);
@@ -131,13 +107,13 @@ export default function useSimonGame() {
 
       const nextIndex = core.inputs.length;
 
-      const timeTaken =
-        startedAtRef.current != null
-          ? Math.round(performance.now() - startedAtRef.current)
-          : undefined;
-
       // Check for Loss
       if (input !== core.sequence[nextIndex]) {
+        analytics.recordFailure(nextIndex);
+        analytics.endGame();
+
+        const gameDuration = analytics.getGameDuration();
+
         core.setStatus("lose");
 
         // SFX for losing
@@ -145,26 +121,28 @@ export default function useSimonGame() {
         await audio.playLoseTone();
         musicPlayer.play(MUSIC.GAMEFINISHED);
 
-        if (!timeTaken) {
-          toastError("Error", { description: "Time taken was not recorded" });
-          return;
-        }
-
-        setTimeTaken(timeTaken);
-        const formattedTime = formatDuration(timeTaken);
-        if (config.mode === "timeattack") {
-          toastWarning("Score discarded", {
-            description: `Failing to reach goal in timeattack will not submit the score.
-              Time: ${formattedTime}`,
+        if (!gameDuration) {
+          toastError("Error", {
+            description: "Game duration was not recorded",
           });
           return;
         }
+
+        // TODO: Rethink when and where to show the toast warning
+        // const formattedTime = formatDuration(gameDuration);
+        // if (config.mode === "timeattack") {
+        //   toastWarning("Score discarded", {
+        //     description: `Failing to reach goal in timeattack will not submit the score.
+        //       Time: ${formattedTime}`,
+        //   });
+        //   return;
+        // }
 
         emitter.emit("game_completed", {
           level: config.hasGoal ? core.inputs.length : core.level - 1,
           mode: config.mode,
           won: false,
-          timeTakenMs: timeTaken,
+          timeTakenMs: gameDuration,
         });
 
         if (config.isCampaign && user?.id) {
@@ -179,12 +157,12 @@ export default function useSimonGame() {
             gameMode: config.mode,
             completedLevel: config.hasGoal
               ? core.inputs.length
-              // core.level represents the completedLevel
-              // because level is incremented at the start of the next round
-              : core.level,
+              : // core.level represents the completedLevel
+                // because level is incremented at the start of the next round
+                core.level,
             goal: config.goal,
             inputs: core.inputs,
-            timeTaken: timeTaken,
+            timeTaken: gameDuration,
           });
         }
         return;
@@ -195,7 +173,20 @@ export default function useSimonGame() {
 
       // Check for Round Win / Victory
       if (newInputs.length === core.sequence.length) {
+        analytics.completeRound();
+
         if (config.checkVictory(core.sequence.length)) {
+          analytics.endGame();
+
+          const gameDuration = analytics.getGameDuration();
+
+          if (!gameDuration) {
+            toastError("Error", {
+              description: "Game duration was not recorded",
+            });
+            return;
+          }
+
           // PLay victory music
 
           await stopMusic();
@@ -205,18 +196,11 @@ export default function useSimonGame() {
 
           core.setStatus("victory");
 
-          if (!timeTaken) {
-            toastError("Error", { description: "Time taken was not recorded" });
-            return;
-          }
-
-          setTimeTaken(timeTaken);
-
           emitter.emit("game_completed", {
             level: core.level,
             mode: config.mode,
             won: true,
-            timeTakenMs: timeTaken,
+            timeTakenMs: gameDuration,
           });
 
           // TODO: Use the game_completed signal to handle this elsewhere
@@ -234,7 +218,7 @@ export default function useSimonGame() {
                 : core.level - 1,
               goal: config.goal,
               inputs: core.inputs,
-              timeTaken: timeTaken,
+              timeTaken: gameDuration,
             });
           }
         } else {
@@ -259,7 +243,6 @@ export default function useSimonGame() {
           emitter.emit("game_advance", {
             level: nextLevel,
             mode: config.mode,
-            timeTakenMs: timeTaken,
           });
         }
       }
@@ -273,6 +256,7 @@ export default function useSimonGame() {
       submitGameScore,
       emitter,
       user?.id,
+      analytics,
     ],
   );
 
@@ -336,15 +320,8 @@ export default function useSimonGame() {
       core.setLevel(1);
     }
 
-    // Timer starts when the sequence is set
-    setTimeTaken(null);
-    startedAtRef.current = performance.now();
-
-    // Reset refs
-    reactionTimesRef.current = [];
-    lastPromptAtRef.current = null;
-    inputsUsed.current = new Set();
-
+    // Reset analytics data for the new game
+    analytics.startGame();
     playSequence(startSeq);
   };
 
@@ -361,8 +338,8 @@ export default function useSimonGame() {
     handleInput,
     reset: resetGame,
     mode: config.mode,
-    timeTaken,
-    avgReactionTime,
+    timeTaken: analytics.getGameDuration(),
+    avgReactionTime: analytics.getAverageInitialReactionTime(),
     showBegin,
   };
 }
