@@ -96,175 +96,208 @@ export default function useSimonGame() {
     [analytics, config.mode, audio, core],
   );
 
+  const handleLose = useCallback(async () => {
+    const failPosition = core.inputs.length;
+
+    analytics.recordFailure(failPosition);
+    analytics.endGame();
+
+    const gameDuration = analytics.getGameDuration();
+
+    core.setStatus("lose");
+
+    // SFX for losing
+    await stopMusic();
+    await audio.playLoseTone();
+    musicPlayer.play(MUSIC.GAMEFINISHED);
+
+    if (!gameDuration) {
+      toastError("Error", {
+        description: "Game duration was not recorded",
+      });
+      return;
+    }
+
+    // TODO: Rethink when and where to show the toast warning
+    // const formattedTime = formatDuration(gameDuration);
+    // if (config.mode === "timeattack") {
+    //   toastWarning("Score discarded", {
+    //     description: `Failing to reach goal in timeattack will not submit the score.
+    //       Time: ${formattedTime}`,
+    //   });
+    //   return;
+    // }
+
+    emitter.emit("game_completed", {
+      level: config.hasGoal ? core.inputs.length : core.level - 1,
+      mode: config.mode,
+      won: false,
+      timeTakenMs: gameDuration,
+    });
+
+    if (config.isCampaign && user?.id) {
+      // TODO: Use the game_completed signal to handle this elsewhere
+      await updateCampaignProgress({
+        userId: user.id,
+        gameMode: config.mode,
+        level: core.level - 1,
+      });
+    } else {
+      await submitGameScore({
+        gameMode: config.mode,
+        completedLevel: config.hasGoal
+          ? core.inputs.length
+          : // core.level represents the completedLevel
+            // because level is incremented at the start of the next round
+            core.level,
+        goal: config.goal,
+        inputs: core.inputs,
+        timeTaken: gameDuration,
+      });
+    }
+  }, [
+    analytics,
+    stopMusic,
+    audio,
+    config,
+    core,
+    emitter,
+    submitGameScore,
+    user?.id,
+  ]);
+
+  const handleVictory = useCallback(async () => {
+    analytics.endGame();
+
+    const gameDuration = analytics.getGameDuration();
+
+    if (!gameDuration) {
+      toastError("Error", {
+        description: "Game duration was not recorded",
+      });
+      return;
+    }
+
+    // PLay victory music
+    await stopMusic();
+    await audio.playVictoryTone();
+    sfxPlayer.play(SFX.AWESOME);
+    musicPlayer.play(MUSIC.GAMEFINISHED);
+
+    core.setStatus("victory");
+
+    emitter.emit("game_completed", {
+      level: core.level,
+      mode: config.mode,
+      won: true,
+      timeTakenMs: gameDuration,
+    });
+
+    // TODO: Use the game_completed signal to handle this elsewhere
+    if (config.isCampaign && user?.id) {
+      await updateCampaignProgress({
+        userId: user.id,
+        gameMode: config.mode,
+        level: core.level,
+      });
+    } else {
+      await submitGameScore({
+        gameMode: config.mode,
+        completedLevel: config.hasGoal ? core.inputs.length : core.level - 1,
+        goal: config.goal,
+        inputs: core.inputs,
+        timeTaken: gameDuration,
+      });
+    }
+  }, [
+    core,
+    analytics,
+    audio,
+    config,
+    emitter,
+    stopMusic,
+    submitGameScore,
+    user,
+  ]);
+
+  const proceedToNextLevel = useCallback(async () => {
+    core.setStatus("won");
+
+    // Play win melody
+    if (config.mode !== "timeattack") await delay(400);
+    audio.playWinMelody();
+    if (config.mode !== "timeattack") await delay(1000);
+
+    // Advance to next sequence and level
+    const nextSeq = core.generateNextSequence(core.sequence);
+    core.setSequence(nextSeq);
+    const nextLevel = core.level + 1;
+    core.setLevel(nextLevel);
+
+    // Shuffle buttons if in entropy mode
+    if (config.mode === "entropy") core.shuffleButtons();
+
+    playSequence(nextSeq);
+
+    emitter.emit("game_advance", {
+      level: nextLevel,
+      mode: config.mode,
+    });
+  }, [core, audio, config, emitter, playSequence]);
+
   const handleInput = useCallback(
     async (type: InputType, input: SimonButtonType) => {
       if (statusRef.current !== "playing") return;
 
+      // Update inputs
+      const newInputs = [...core.inputs, input];
+      core.setInputs(newInputs);
       analytics.recordInputType(type);
 
       if (input === core.sequence[core.inputs.length]) {
         analytics.recordSuccessfulInput();
       }
 
+      // Update active button and play color
       setActiveButton(input);
       audio.playColor(input, config.mode);
-      setTimeout(
-        () => setActiveButton(null),
-        config.mode === "blitz" ? 100 : 200,
-      );
+      await delay(config.mode === "blitz" ? 100 : 200);
+      setActiveButton(null);
 
-      const nextIndex = core.inputs.length;
+      const displayedButton = core.sequence[core.inputs.length];
+      // Check if the input matches the displayed button
+      const isLoss = input !== displayedButton;
 
-      // Check for Loss
-      if (input !== core.sequence[nextIndex]) {
-        analytics.recordFailure(nextIndex);
-        analytics.endGame();
-
-        const gameDuration = analytics.getGameDuration();
-
-        core.setStatus("lose");
-
-        // SFX for losing
-        await stopMusic();
-        await audio.playLoseTone();
-        musicPlayer.play(MUSIC.GAMEFINISHED);
-
-        if (!gameDuration) {
-          toastError("Error", {
-            description: "Game duration was not recorded",
-          });
-          return;
-        }
-
-        // TODO: Rethink when and where to show the toast warning
-        // const formattedTime = formatDuration(gameDuration);
-        // if (config.mode === "timeattack") {
-        //   toastWarning("Score discarded", {
-        //     description: `Failing to reach goal in timeattack will not submit the score.
-        //       Time: ${formattedTime}`,
-        //   });
-        //   return;
-        // }
-
-        emitter.emit("game_completed", {
-          level: config.hasGoal ? core.inputs.length : core.level - 1,
-          mode: config.mode,
-          won: false,
-          timeTakenMs: gameDuration,
-        });
-
-        if (config.isCampaign && user?.id) {
-          // TODO: Use the game_completed signal to handle this elsewhere
-          await updateCampaignProgress({
-            userId: user.id,
-            gameMode: config.mode,
-            level: core.level - 1,
-          });
-        } else {
-          await submitGameScore({
-            gameMode: config.mode,
-            completedLevel: config.hasGoal
-              ? core.inputs.length
-              : // core.level represents the completedLevel
-                // because level is incremented at the start of the next round
-                core.level,
-            goal: config.goal,
-            inputs: core.inputs,
-            timeTaken: gameDuration,
-          });
-        }
+      // Check for Loss and return early
+      if (isLoss) {
+        await handleLose();
         return;
       }
 
-      const newInputs = [...core.inputs, input];
-      core.setInputs(newInputs);
+      const isSequenceComplete = newInputs.length === core.sequence.length;
 
       // Check for Round Win / Victory
-      if (newInputs.length === core.sequence.length) {
+      if (isSequenceComplete) {
         analytics.completeRound();
 
+        // Handle victory and return early
         if (config.checkVictory(core.sequence.length)) {
-          analytics.endGame();
-
-          const gameDuration = analytics.getGameDuration();
-
-          if (!gameDuration) {
-            toastError("Error", {
-              description: "Game duration was not recorded",
-            });
-            return;
-          }
-
-          // PLay victory music
-
-          await stopMusic();
-          await audio.playVictoryTone();
-          await sfxPlayer.play(SFX.AWESOME);
-          musicPlayer.play(MUSIC.GAMEFINISHED);
-
-          core.setStatus("victory");
-
-          emitter.emit("game_completed", {
-            level: core.level,
-            mode: config.mode,
-            won: true,
-            timeTakenMs: gameDuration,
-          });
-
-          // TODO: Use the game_completed signal to handle this elsewhere
-          if (config.isCampaign && user?.id) {
-            await updateCampaignProgress({
-              userId: user.id,
-              gameMode: config.mode,
-              level: core.level,
-            });
-          } else {
-            await submitGameScore({
-              gameMode: config.mode,
-              completedLevel: config.hasGoal
-                ? core.inputs.length
-                : core.level - 1,
-              goal: config.goal,
-              inputs: core.inputs,
-              timeTaken: gameDuration,
-            });
-          }
-        } else {
-          core.setStatus("won");
-
-          // No delays when in timeattack mode
-          if (config.mode !== "timeattack") await delay(400);
-          audio.playWinMelody();
-          if (config.mode !== "timeattack") await delay(1000);
-
-          const nextSeq = core.generateNextSequence(core.sequence);
-          core.setSequence(nextSeq);
-          const nextLevel = core.level + 1;
-
-          core.setLevel(nextLevel);
-
-          // Shuffle buttons if in entropy mode
-          if (config.mode === "entropy") core.shuffleButtons();
-
-          playSequence(nextSeq);
-
-          emitter.emit("game_advance", {
-            level: nextLevel,
-            mode: config.mode,
-          });
+          await handleVictory();
+          return;
         }
+
+        // Proceed to next level
+        await proceedToNextLevel();
       }
     },
     [
       core,
       config,
       audio,
-      stopMusic,
-      playSequence,
-      submitGameScore,
-      emitter,
-      user?.id,
       analytics,
+      handleLose,
+      handleVictory,
+      proceedToNextLevel,
     ],
   );
 
