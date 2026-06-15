@@ -416,12 +416,12 @@ export class GameAnalytics {
    * Returns a snapshot of all computed metrics for the completed game.
    *
    * Prefer this over calling individual getters when you need multiple metrics
-   * at once (e.g. when building a `game_completed` event payload or a results
+   * at once (e.g. when building a `game_ended` event payload or a results
    * screen). All values are computed at call time from the recorded data.
    *
    * @example
    * analytics.endGame();
-   * emitter.emit("game_completed", {
+   * emitter.emit("game_ended", {
    *   level: core.level,
    *   mode: config.mode,
    *   won: true,

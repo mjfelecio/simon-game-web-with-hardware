@@ -17,19 +17,37 @@ export type AppEvents = {
 
   /**
    * Fired when a game session ends (win or loss).
-   * Used by achievements, leaderboard, analytics, and audio systems.
    */
-  game_completed: {
+  game_ended: {
     mode: GameMode;
+    /**
+     * Level completed when the game ended.
+     *
+     * @note
+     *  This does not include failed levels.
+     *  The caller of this event should make sure
+     *  that the example below is followed when
+     *  providing the level value.
+     * @example
+     *  - user won at level 5 -> level: 5
+     *  - user lost at level 5 -> level: 4
+     */
     level: number;
     timeTakenMs?: number;
     won: boolean;
+    isCampaign: boolean;
   };
 
-  game_advance: {
+  /**
+   * Fired when the game advances to the next round
+   */
+  game_advance_to_next_level: {
     mode: GameMode;
+    /**
+     * New level after advancing to the next round.
+     */
     level: number;
-    timeTakenMs?: number;
+    isCampaign: boolean;
   };
 
   /**

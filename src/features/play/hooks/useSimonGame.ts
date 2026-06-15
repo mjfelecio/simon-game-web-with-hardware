@@ -12,7 +12,6 @@ import { sfxPlayer } from "@/features/audio/utils/sfxPlayer";
 import { SFX } from "@/features/audio/constants/sfx";
 import { musicPlayer } from "@/features/audio/utils/musicPlayer";
 import useEventEmitter from "@/features/events/hooks/useEventEmitter";
-import { updateCampaignProgress } from "@/features/campaign/services/campaignService";
 import useCampaign from "./useCampaign";
 import useScoreSubmission from "./useScoreSubmission";
 import useGameAnalytics from "./useGameAnalytics";
@@ -128,21 +127,15 @@ export default function useSimonGame() {
     //   return;
     // }
 
-    emitter.emit("game_completed", {
+    emitter.emit("game_ended", {
       level: config.hasGoal ? core.inputs.length : core.level - 1,
       mode: config.mode,
       won: false,
       timeTakenMs: gameDuration,
+      isCampaign: config.isCampaign,
     });
 
-    if (config.isCampaign && user?.id) {
-      // TODO: Use the game_completed signal to handle this elsewhere
-      await updateCampaignProgress({
-        userId: user.id,
-        gameMode: config.mode,
-        level: core.level - 1,
-      });
-    } else {
+    if (!config.isCampaign) {
       await submitGameScore({
         gameMode: config.mode,
         completedLevel: config.hasGoal
@@ -155,16 +148,7 @@ export default function useSimonGame() {
         timeTaken: gameDuration,
       });
     }
-  }, [
-    analytics,
-    stopMusic,
-    audio,
-    config,
-    core,
-    emitter,
-    submitGameScore,
-    user?.id,
-  ]);
+  }, [analytics, stopMusic, audio, config, core, emitter, submitGameScore]);
 
   const handleVictory = useCallback(async () => {
     analytics.endGame();
@@ -186,21 +170,15 @@ export default function useSimonGame() {
 
     core.setStatus("victory");
 
-    emitter.emit("game_completed", {
+    emitter.emit("game_ended", {
       level: core.level,
       mode: config.mode,
       won: true,
       timeTakenMs: gameDuration,
+      isCampaign: config.isCampaign,
     });
 
-    // TODO: Use the game_completed signal to handle this elsewhere
-    if (config.isCampaign && user?.id) {
-      await updateCampaignProgress({
-        userId: user.id,
-        gameMode: config.mode,
-        level: core.level,
-      });
-    } else {
+    if (!config.isCampaign) {
       await submitGameScore({
         gameMode: config.mode,
         completedLevel: config.hasGoal ? core.inputs.length : core.level - 1,
@@ -209,16 +187,7 @@ export default function useSimonGame() {
         timeTaken: gameDuration,
       });
     }
-  }, [
-    core,
-    analytics,
-    audio,
-    config,
-    emitter,
-    stopMusic,
-    submitGameScore,
-    user,
-  ]);
+  }, [core, analytics, audio, config, emitter, stopMusic, submitGameScore]);
 
   const proceedToNextLevel = useCallback(async () => {
     core.setStatus("won");
@@ -239,9 +208,10 @@ export default function useSimonGame() {
 
     playSequence(nextSeq);
 
-    emitter.emit("game_advance", {
+    emitter.emit("game_advance_to_next_level", {
       level: nextLevel,
       mode: config.mode,
+      isCampaign: config.isCampaign,
     });
   }, [core, audio, config, emitter, playSequence]);
 

@@ -14,7 +14,7 @@ export function useAchievementUnlocker() {
   const { unlock } = useAchievements();
 
   const handleGameCompleted = useCallback(
-    async (payload: AppEvents["game_completed"]) => {
+    async (payload: AppEvents["game_ended"]) => {
       const { mode, level } = payload;
 
       // For level dependent unlocks
@@ -49,6 +49,6 @@ export function useAchievementUnlocker() {
     await unlock("first_register");
   }, [unlock]);
 
-  useEventListener("game_completed", handleGameCompleted);
+  useEventListener("game_ended", handleGameCompleted);
   useEventListener("registration", handleUserRegistration);
 }
