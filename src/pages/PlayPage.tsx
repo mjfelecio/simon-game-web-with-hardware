@@ -90,6 +90,7 @@ const PlayPage = () => {
             sequence={game.sequence}
             inputsLength={game.inputs.length}
             mode={game.mode}
+            isCampaign={game.isCampaign}
           />
         </div>
 
