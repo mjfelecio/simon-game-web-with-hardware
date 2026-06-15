@@ -16,6 +16,7 @@ import { updateCampaignProgress } from "@/features/campaign/services/campaignSer
 import useCampaign from "./useCampaign";
 import useScoreSubmission from "./useScoreSubmission";
 import useGameAnalytics from "./useGameAnalytics";
+import useGameIntro from "./useGameIntro";
 
 export default function useSimonGame() {
   const emitter = useEventEmitter();
@@ -29,10 +30,17 @@ export default function useSimonGame() {
   const [activeButton, setActiveButton] = useState<SimonButtonType | null>(
     null,
   );
-  const [showBegin, setShowBegin] = useState(false);
 
   const statusRef = useRef(core.status);
   const hasStartedGameRef = useRef(false);
+
+  const intro = useGameIntro({
+    simonButtons: core.currentButtons,
+    stopMusic,
+    playColor: audio.playColor,
+    gameMode: config.mode,
+    onActiveButtonChange: setActiveButton,
+  });
 
   const { isCampaignLoading, campaignProgressLevel } = useCampaign({
     gameMode: config.mode,
@@ -269,38 +277,12 @@ export default function useSimonGame() {
     hasStartedGameRef.current = false;
   };
 
-  const startingSequence = async () => {
-    document.documentElement.requestFullscreen();
-    await stopMusic();
-    await delay(500);
-
-    const buttons = [...core.currentButtons];
-    // Flash all buttons in a spiral
-    const sequence = [...buttons, ...[...buttons].reverse()];
-    for await (const b of sequence) {
-      setActiveButton(b);
-      audio.playColor(b, config.mode);
-
-      await delay(100);
-      setActiveButton(null);
-    }
-
-    sfxPlayer.play(SFX.BEGIN, { volume: 1 });
-    setShowBegin(true);
-    await delay(1000);
-
-    setShowBegin(false);
-  };
-
   const startGame = async () => {
     if (config.isCampaign && isCampaignLoading) return;
-
     if (hasStartedGameRef.current) return;
-
-    // lock this shit
     hasStartedGameRef.current = true;
 
-    await startingSequence();
+    await intro.play();
 
     if (config.mode !== "echo") {
       playMusic(MUSIC.GAMEPLAY);
@@ -340,6 +322,6 @@ export default function useSimonGame() {
     mode: config.mode,
     timeTaken: analytics.getGameDuration(),
     avgReactionTime: analytics.getAverageInitialReactionTime(),
-    showBegin,
+    showBegin: intro.showBegin,
   };
 }
