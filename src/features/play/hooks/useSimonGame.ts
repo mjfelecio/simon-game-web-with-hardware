@@ -100,7 +100,7 @@ export default function useSimonGame() {
     if (gameEndedRef.current) return;
     gameEndedRef.current = true;
 
-    const failPosition = core.inputs.length;
+    const failPosition = core.inputsRef.current.length;
 
     analytics.recordFailure(failPosition);
     analytics.endGame();
@@ -132,7 +132,7 @@ export default function useSimonGame() {
     // }
 
     emitter.emit("game_ended", {
-      level: config.hasGoal ? core.inputs.length : core.level - 1,
+      level: config.hasGoal ? core.inputsRef.current.length : core.levelRef.current - 1,
       mode: config.mode,
       won: false,
       timeTakenMs: gameDuration,
@@ -143,12 +143,12 @@ export default function useSimonGame() {
       await submitGameScore({
         gameMode: config.mode,
         completedLevel: config.hasGoal
-          ? core.inputs.length
-          : // core.level represents the completedLevel
+          ? core.inputsRef.current.length
+          : // core.levelRef.current represents the completedLevel
             // because level is incremented at the start of the next round
-            core.level,
+            core.levelRef.current,
         goal: config.goal,
-        inputs: core.inputs,
+        inputs: core.inputsRef.current,
         timeTaken: gameDuration,
       });
     }
@@ -178,7 +178,7 @@ export default function useSimonGame() {
     core.setStatus("victory");
 
     emitter.emit("game_ended", {
-      level: core.level,
+      level: core.levelRef.current,
       mode: config.mode,
       won: true,
       timeTakenMs: gameDuration,
@@ -188,9 +188,11 @@ export default function useSimonGame() {
     if (!config.isCampaign) {
       await submitGameScore({
         gameMode: config.mode,
-        completedLevel: config.hasGoal ? core.inputs.length : core.level - 1,
+        completedLevel: config.hasGoal
+          ? core.inputsRef.current.length
+          : core.levelRef.current - 1,
         goal: config.goal,
-        inputs: core.inputs,
+        inputs: core.inputsRef.current,
         timeTaken: gameDuration,
       });
     }
@@ -205,9 +207,9 @@ export default function useSimonGame() {
     if (config.mode !== "timeattack") await delay(1000);
 
     // Advance to next sequence and level
-    const nextSeq = core.generateNextSequence(core.sequence);
+    const nextSeq = core.generateNextSequence(core.sequenceRef.current);
     core.setSequence(nextSeq);
-    const nextLevel = core.level + 1;
+    const nextLevel = core.levelRef.current + 1;
     core.setLevel(nextLevel);
 
     // Shuffle buttons if in entropy mode
@@ -226,12 +228,17 @@ export default function useSimonGame() {
     async (type: InputType, input: SimonButtonType) => {
       if (statusRef.current !== "playing") return;
 
-      // Update inputs
-      const newInputs = [...core.inputs, input];
+      // Read from the synchronous mirrors so concurrent fast inputs each see
+      // the authoritative state (React state closures go stale mid-race).
+      const currentInputs = core.inputsRef.current;
+      const currentSequence = core.sequenceRef.current;
+      const position = currentInputs.length;
+
+      const newInputs = [...currentInputs, input];
       core.setInputs(newInputs);
       analytics.recordInputType(type);
 
-      if (input === core.sequence[core.inputs.length]) {
+      if (input === currentSequence[position]) {
         analytics.recordSuccessfulInput();
       }
 
@@ -241,7 +248,7 @@ export default function useSimonGame() {
       await delay(config.mode === "blitz" ? 100 : 200);
       setActiveButton(null);
 
-      const displayedButton = core.sequence[core.inputs.length];
+      const displayedButton = currentSequence[position];
       // Check if the input matches the displayed button
       const isLoss = input !== displayedButton;
 
@@ -251,14 +258,14 @@ export default function useSimonGame() {
         return;
       }
 
-      const isSequenceComplete = newInputs.length === core.sequence.length;
+      const isSequenceComplete = newInputs.length === currentSequence.length;
 
       // Check for Round Win / Victory
       if (isSequenceComplete) {
         analytics.completeRound();
 
         // Handle victory and return early
-        if (config.checkVictory(core.sequence.length)) {
+        if (config.checkVictory(currentSequence.length)) {
           await handleVictory();
           return;
         }
