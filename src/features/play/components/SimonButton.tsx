@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { InputType, SimonButtonType } from "@/globals/types/simon";
 import { cn } from "@/globals/libs/styleUtils";
 import { BUTTON_COLOR, GLOW_COLOR } from "@/features/play/constants";
@@ -17,12 +18,28 @@ const SimonButton = ({
   isGhosted,
   onClick,
 }: Props) => {
+  // A touch/pen press fires `pointerdown` and the browser also synthesizes a
+  // subsequent `click`. Track when a non-mouse pointer just fired so we can
+  // swallow that redundant synthetic click and avoid double inputs.
+  const lastPointerPress = useRef(0);
+
   return (
     <button
       type="button"
       disabled={isDisabled}
-      onTouchStart={() => !isDisabled && onClick("touch", type)}
-      onClick={() => !isDisabled && onClick("mouse", type)}
+      onPointerDown={(e) => {
+        if (isDisabled) return;
+        if (e.pointerType === "touch" || e.pointerType === "pen") {
+          lastPointerPress.current = Date.now();
+          onClick("touch", type);
+        }
+      }}
+      onClick={() => {
+        if (isDisabled) return;
+        // Synthetic click fired right after a touch/pen pointerdown — skip it.
+        if (Date.now() - lastPointerPress.current < 500) return;
+        onClick("mouse", type);
+      }}
       style={{
         width: "clamp(120px, 25vw, 180px)",
       }}
