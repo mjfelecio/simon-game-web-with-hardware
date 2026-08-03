@@ -32,6 +32,7 @@ export default function useSimonGame() {
 
   const statusRef = useRef(core.status);
   const hasStartedGameRef = useRef(false);
+  const gameEndedRef = useRef(false);
 
   const intro = useGameIntro({
     simonButtons: core.currentButtons,
@@ -96,6 +97,9 @@ export default function useSimonGame() {
   );
 
   const handleLose = useCallback(async () => {
+    if (gameEndedRef.current) return;
+    gameEndedRef.current = true;
+
     const failPosition = core.inputs.length;
 
     analytics.recordFailure(failPosition);
@@ -151,6 +155,9 @@ export default function useSimonGame() {
   }, [analytics, stopMusic, audio, config, core, emitter, submitGameScore]);
 
   const handleVictory = useCallback(async () => {
+    if (gameEndedRef.current) return;
+    gameEndedRef.current = true;
+
     analytics.endGame();
 
     const gameDuration = analytics.getGameDuration();
@@ -278,12 +285,14 @@ export default function useSimonGame() {
       core.setLevel(campaignProgressLevel);
     }
     hasStartedGameRef.current = false;
+    gameEndedRef.current = false;
   };
 
   const startGame = async () => {
     if (config.isCampaign && isCampaignLoading) return;
     if (hasStartedGameRef.current) return;
     hasStartedGameRef.current = true;
+    gameEndedRef.current = false;
 
     await intro.play();
 
