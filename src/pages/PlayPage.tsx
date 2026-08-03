@@ -21,6 +21,7 @@ import GameResultOverlay from "@/features/play/components/GameResultOverlay";
 import useArduinoInput from "@/features/controllers/hooks/useArduinoInput";
 import useKeyboardInput from "@/features/controllers/hooks/useKeyboardInput";
 import AchievementListModal from "@/features/achievements/components/AchievementListModal";
+import ManualModal from "@/features/title/components/ManualModal";
 
 const PlayPage = () => {
   const game = useSimonGame();
@@ -33,6 +34,7 @@ const PlayPage = () => {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [isManualOpen, setIsManualOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<
     "menu" | "hardware" | "achievements" | null
   >(null);
@@ -76,6 +78,10 @@ const PlayPage = () => {
         isConnected={isConnected}
         onOpenMenu={openMenu}
         onOpenHardware={() => setActiveModal("hardware")}
+        onOpenManual={() => {
+          sfxPlayer.play(SFX.SHOW_MODAL);
+          setIsManualOpen(true);
+        }}
       />
 
       <div className="relative w-full max-w-md mt-12 flex flex-col items-center gap-10">
@@ -157,6 +163,11 @@ const PlayPage = () => {
       <AchievementListModal
         open={achievementsOpen}
         onClose={() => setAchievementsOpen(false)}
+      />
+
+      <ManualModal
+        isOpen={isManualOpen}
+        onClose={() => setIsManualOpen(false)}
       />
 
       {(game.status === "victory" || game.status === "lose") &&
