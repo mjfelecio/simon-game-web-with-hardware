@@ -158,8 +158,13 @@ const ModeSelectionPage = () => {
           </div>
 
           <button
-            onClick={() => navigate("/")}
-            className="mt-12 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white transition-colors flex items-center gap-2 mx-auto cursor-pointer"
+            onClick={() => {
+              sfxPlayer.play(SFX.BTN_CLICK);
+              navigate("/");
+            }}
+            onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
+            onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
+            className="mt-12 mx-auto flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-3 text-xs font-black uppercase tracking-[0.3em] text-white/80 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/15 hover:text-white cursor-pointer"
           >
             <span>←</span> Back to Mainframe
           </button>
