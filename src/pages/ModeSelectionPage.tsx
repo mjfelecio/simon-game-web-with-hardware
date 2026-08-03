@@ -14,6 +14,7 @@ import {
   type PlayType,
 } from "@/features/campaign/constants/campaign";
 import PlayTypeToggle from "@/features/mode/components/PlayTypeToggle";
+import { FEATURE_FLAGS } from "@/globals/constants/featureFlags";
 
 const ModeSelectionPage = () => {
   const navigate = useNavigate();
@@ -70,10 +71,12 @@ const ModeSelectionPage = () => {
               Mission Profile
             </h1>
 
-            <PlayTypeToggle
-              selected={playType}
-              onPlayTypeChange={setPlayType}
-            />
+            {FEATURE_FLAGS.campaignEnabled && (
+              <PlayTypeToggle
+                selected={playType}
+                onPlayTypeChange={setPlayType}
+              />
+            )}
           </header>
 
           <div className="grid gap-4">

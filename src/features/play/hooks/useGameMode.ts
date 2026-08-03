@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router";
 import type { GameMode } from "@/globals/types/simon";
+import { FEATURE_FLAGS } from "@/globals/constants/featureFlags";
 
 export const ENDLESS_MODES = new Set<GameMode>([
   "classic",
@@ -15,7 +16,8 @@ export default function useGameMode() {
 
   const mode = (searchParams.get("mode") ?? "classic") as GameMode;
   const goal = Number(searchParams.get("goal")) || 0;
-  const isCampaign = searchParams.get("campaign") === "true";
+  const isCampaign =
+    FEATURE_FLAGS.campaignEnabled && searchParams.get("campaign") === "true";
 
   const hasGoal = mode === "burst"  || mode === "timeattack"
   const isEndless = ENDLESS_MODES.has(mode);
