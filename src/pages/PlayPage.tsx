@@ -22,6 +22,7 @@ import useArduinoInput from "@/features/controllers/hooks/useArduinoInput";
 import useKeyboardInput from "@/features/controllers/hooks/useKeyboardInput";
 import AchievementListModal from "@/features/achievements/components/AchievementListModal";
 import ManualModal from "@/features/title/components/ManualModal";
+import { FEATURE_FLAGS } from "@/globals/constants/featureFlags";
 
 const PlayPage = () => {
   const game = useSimonGame();
@@ -150,6 +151,7 @@ const PlayPage = () => {
           setIsSettingsOpen(true);
         }}
         onAchievementsOpen={() => {
+          if (!FEATURE_FLAGS.achievementsEnabled) return;
           sfxPlayer.play(SFX.SHOW_MODAL);
           setAchievementsOpen(true);
         }}

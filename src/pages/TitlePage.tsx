@@ -10,6 +10,7 @@ import { SFX } from "@/features/audio/constants/sfx";
 import SettingsModal from "@/features/play/components/SettingsModal";
 import { TrophyIcon, Settings2Icon, BookTextIcon } from "lucide-react";
 import AchievementListModal from "@/features/achievements/components/AchievementListModal";
+import { FEATURE_FLAGS } from "@/globals/constants/featureFlags";
 
 const TitlePage = () => {
   const navigate = useNavigate();
@@ -156,19 +157,32 @@ const TitlePage = () => {
             >
               <BookTextIcon className="inline-block" />
             </button>
-            <button
-              title="Achievements"
-              onClick={() => {
-                sfxPlayer.play(SFX.BTN_CLICK);
-                sfxPlayer.play(SFX.SHOW_MODAL);
-                setActiveModal("achievements");
-              }}
-              onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
-              onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
-              className="text-[8px] w-fit md:text-[10px] flex-1 items-center justify-center border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
-            >
-              <TrophyIcon className="inline-block" />
-            </button>
+            {FEATURE_FLAGS.achievementsEnabled ? (
+              <button
+                title="Achievements"
+                onClick={() => {
+                  sfxPlayer.play(SFX.BTN_CLICK);
+                  sfxPlayer.play(SFX.SHOW_MODAL);
+                  setActiveModal("achievements");
+                }}
+                onMouseEnter={() => sfxPlayer.play(SFX.BTN_HOVER)}
+                onTouchStart={() => sfxPlayer.play(SFX.BTN_HOVER)}
+                className="text-[8px] w-fit md:text-[10px] flex-1 items-center justify-center border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-400 hover:bg-white/10 hover:text-white transition-all text-center cursor-pointer"
+              >
+                <TrophyIcon className="inline-block" />
+              </button>
+            ) : (
+              <button
+                title="Achievements - Coming Soon"
+                disabled
+                className="text-[8px] w-fit md:text-[10px] flex-1 flex-col items-center justify-center border border-white/10 bg-white/5 py-3 md:py-4 font-black uppercase tracking-[0.3em] text-slate-600 opacity-60 cursor-not-allowed text-center"
+              >
+                <TrophyIcon className="inline-block" />
+                <span className="mt-0.5 text-[6px] md:text-[7px] tracking-widest">
+                  Soon
+                </span>
+              </button>
+            )}
           </div>
         </nav>
       </footer>
@@ -185,10 +199,12 @@ const TitlePage = () => {
         onClose={() => setActiveModal(null)}
       />
 
-      <AchievementListModal
-        open={activeModal === "achievements"}
-        onClose={() => setActiveModal(null)}
-      />
+      {FEATURE_FLAGS.achievementsEnabled && (
+        <AchievementListModal
+          open={activeModal === "achievements"}
+          onClose={() => setActiveModal(null)}
+        />
+      )}
     </PageWrapper>
   );
 };

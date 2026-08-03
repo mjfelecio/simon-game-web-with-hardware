@@ -21,6 +21,7 @@ import { AchievementProvider } from "./features/achievements/components/Achievem
 import { GamemodeProvider } from "./features/gamemode/components/GamemodeProvider";
 import GamemodeGuard from "./features/gamemode/components/GamemodeGuard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { FEATURE_FLAGS } from "@/globals/constants/featureFlags";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +35,7 @@ createRoot(document.getElementById("root")!).render(
               <AuthProvider>
                 <GamemodeProvider>
                   <AuthGuard>
-                    <AchievementProvider />
+                    {FEATURE_FLAGS.achievementsEnabled && <AchievementProvider />}
                     <WelcomeModal />
                     <Toaster />
                     <BrowserRouter>
