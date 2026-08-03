@@ -205,13 +205,18 @@ export const submitScore = async (
 }> => {
   const leaderboardType = getLeaderboardType(score.gamemode);
 
+  // Match the leaderboard's ranking semantics: the user's best for this
+  // gamemode across ALL input types (the leaderboard defaults to "All Inputs").
+  // Order by the mode's scoring metric so `.limit(1)` returns the true best.
   const { data: bestScore } = await supabase
     .from("scores")
     .select("*")
     .eq("user_id", score.user_id)
     .eq("gamemode", score.gamemode)
-    .eq("input_type", score.input_type)
-    .eq("goal", score.goal ?? 0)
+    .order(
+      leaderboardType === "speed" ? "time_taken" : "level",
+      { ascending: leaderboardType === "speed" },
+    )
     .limit(1)
     .maybeSingle();
 
